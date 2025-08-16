@@ -19,6 +19,7 @@ import type { HomeContent } from '@/lib/types';
 
 export default function HomePageManagement() {
   const { toast } = useToast();
+  const [initialContent, setInitialContent] = useState<Partial<HomeContent>>({});
   const [content, setContent] = useState<Partial<HomeContent>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,7 +38,9 @@ export default function HomePageManagement() {
       const docRef = doc(db, "siteContent", "home");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setContent(docSnap.data() as HomeContent);
+        const data = docSnap.data() as HomeContent;
+        setContent(data);
+        setInitialContent(data);
       }
       setIsLoading(false);
     };
@@ -87,6 +90,16 @@ export default function HomePageManagement() {
         activityDetails.push("Updated About Image");
       }
 
+      const textContentChanged = 
+        content.heroHeadline !== initialContent.heroHeadline ||
+        content.heroSubheadline !== initialContent.heroSubheadline ||
+        content.aboutTitle !== initialContent.aboutTitle ||
+        content.aboutText !== initialContent.aboutText;
+      
+      if (textContentChanged) {
+        activityDetails.push("Updated home page text content.");
+      }
+
       const updatedContent: HomeContent = {
         heroHeadline: content.heroHeadline || "",
         heroSubheadline: content.heroSubheadline || "",
@@ -101,9 +114,11 @@ export default function HomePageManagement() {
 
       await setDoc(doc(db, "siteContent", "home"), updatedContent);
       setContent(updatedContent);
+      setInitialContent(updatedContent);
       
-      if(activityDetails.length === 0) activityDetails.push("Updated home page text content.");
-      await logActivity("Updated Home Page", activityDetails.join(" & "));
+      if(activityDetails.length > 0) {
+        await logActivity("Updated Home Page", activityDetails.join(" & "));
+      }
 
       toast({
         title: "Changes Saved!",
@@ -228,3 +243,5 @@ export default function HomePageManagement() {
     </div>
   );
 }
+
+    
