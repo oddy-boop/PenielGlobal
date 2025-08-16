@@ -1,58 +1,86 @@
 
+"use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Heart, Gift } from "lucide-react";
+import { DollarSign, Heart, Gift, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+
+interface DonationTier {
+  id: string;
+  title: string;
+  description: string;
+  suggestedAmount: string;
+  link: string;
+  icon?: React.ElementType;
+}
+
+interface DonationsContent {
+  headline: string;
+  intro: string;
+  tiers: DonationTier[];
+}
 
 export default function DonationsPage() {
-  // In a real app, this data would be fetched from Firestore
-  const pageContent = {
-    headline: "Support Our Ministry",
-    intro: "Your generous giving enables us to continue our mission of spreading faith, hope, and love. Every contribution makes a difference. Thank you for your partnership in the gospel."
-  };
+  const [content, setContent] = useState<DonationsContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const donationTiers = [
-    {
-      title: "General Fund",
-      description: "Support the day-to-day operations and ministries of our church.",
-      icon: DollarSign,
-      suggestedAmount: "50.00",
-      link: "#"
-    },
-    {
-      title: "Missions & Outreach",
-      description: "Help us spread the message of hope and serve communities locally and globally.",
-      icon: Heart,
-      suggestedAmount: "100.00",
-      link: "#"
-    },
-    {
-      title: "Building Fund",
-      description: "Contribute to the maintenance and improvement of our church facilities.",
-      icon: Gift,
-      suggestedAmount: "250.00",
-      link: "#"
-    },
-  ];
+  useEffect(() => {
+    const fetchDonationsContent = async () => {
+      setIsLoading(true);
+      const docRef = doc(db, "siteContent", "donations");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data() as DonationsContent;
+        // Assign icons based on tier index for variety
+        const tiersWithIcons = data.tiers.map((tier, index) => {
+            const icons = [DollarSign, Heart, Gift];
+            return {...tier, icon: icons[index % icons.length]};
+        });
+        setContent({...data, tiers: tiersWithIcons});
+      }
+      setIsLoading(false);
+    };
+    fetchDonationsContent();
+  }, []);
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center min-h-[50vh]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary"/>
+        </div>
+    )
+  }
+
+  if (!content) {
+    return (
+        <div className="text-center py-16">
+          <h2 className="text-2xl font-semibold text-primary">Donation Information Not Available</h2>
+          <p className="text-muted-foreground mt-2">Please check back soon.</p>
+        </div>
+      )
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{pageContent.headline}</h1>
+        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{content.headline}</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-          {pageContent.intro}
+          {content.intro}
         </p>
       </div>
 
-      {donationTiers.length > 0 ? (
+      {content.tiers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {donationTiers.map((tier) => (
-            <Card key={tier.title} className="flex flex-col shadow-lg">
+          {content.tiers.map((tier) => (
+            <Card key={tier.id} className="flex flex-col shadow-lg">
               <CardHeader className="items-center text-center">
                 <div className="p-4 bg-accent/20 rounded-full mb-4">
-                    <tier.icon className="h-10 w-10 text-accent" />
+                    {tier.icon && <tier.icon className="h-10 w-10 text-accent" />}
                 </div>
                 <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
@@ -62,14 +90,14 @@ export default function DonationsPage() {
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input 
                           type="number" 
-                          placeholder={tier.suggestedAmount}
+                          placeholder={Number(tier.suggestedAmount).toFixed(2)}
                           className="pl-10 text-xl font-semibold text-center" 
                       />
                   </div>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full" size="lg">
-                  <Link href={tier.link || '#'}>Donate Now</Link>
+                  <Link href={tier.link || '#'} target="_blank" rel="noopener noreferrer">Donate Now</Link>
                 </Button>
               </CardFooter>
             </Card>
