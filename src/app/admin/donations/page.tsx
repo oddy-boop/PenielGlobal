@@ -1,11 +1,23 @@
 
+"use client";
+
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DonationsPageManagement() {
+  const { toast } = useToast();
+
+  const handleSaveChanges = () => {
+    toast({
+        title: "Changes Saved!",
+        description: "Your donations page details have been updated.",
+    });
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold tracking-tight mb-6">Donations Page Management</h1>
@@ -83,7 +95,7 @@ export default function DonationsPageManagement() {
             </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-            <Button>Save All Changes</Button>
+            <Button onClick={handleSaveChanges}>Save All Changes</Button>
         </CardFooter>
       </Card>
     </div>

@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, Trash2 } from "lucide-react";
+import { useToast } from '@/hooks/use-toast';
 
 export default function ContactPageManagement() {
+  const { toast } = useToast();
   const [socialLinks, setSocialLinks] = useState([
     { platform: "Facebook", url: "https://facebook.com/your-church" },
     { platform: "Twitter", url: "https://twitter.com/your-church" },
@@ -30,6 +32,13 @@ export default function ContactPageManagement() {
     newLinks[index][field] = value;
     setSocialLinks(newLinks);
   };
+
+  const handleSaveChanges = () => {
+    toast({
+        title: "Changes Saved!",
+        description: "Your contact page details have been updated.",
+    });
+  }
 
   return (
     <div>
@@ -113,7 +122,7 @@ export default function ContactPageManagement() {
       </Card>
       
       <div className="mt-8">
-        <Button>Save All Changes</Button>
+        <Button onClick={handleSaveChanges}>Save All Changes</Button>
       </div>
     </div>
   );

@@ -8,17 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { Upload, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LogoManagementPage() {
+  const { toast } = useToast();
   const [logoPreview, setLogoPreview] = useState<string | null>("/placeholder-logo.svg");
   const [headerBgPreview, setHeaderBgPreview] = useState<string | null>("https://placehold.co/1200x200.png");
-  
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [headerBgFile, setHeaderBgFile] = useState<File | null>(null);
+
   const logoInputRef = useRef<HTMLInputElement>(null);
   const headerBgInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string | null>>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string | null>>, fileSetter: React.Dispatch<React.SetStateAction<File | null>>) => {
     const file = e.target.files?.[0];
     if (file) {
+      fileSetter(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setter(reader.result as string);
@@ -27,9 +32,12 @@ export default function LogoManagementPage() {
     }
   };
 
-  const clearFile = (setter: React.Dispatch<React.SetStateAction<string | null>>, initialSrc: string) => {
-    setter(initialSrc);
-  };
+  const handleSaveChanges = () => {
+    toast({
+        title: "Changes Saved!",
+        description: "Your logo and branding details have been updated.",
+    });
+  }
 
   return (
     <div>
@@ -48,9 +56,11 @@ export default function LogoManagementPage() {
                     {logoPreview && (
                         <>
                             <Image src={logoPreview} alt="Current Logo" width={100} height={40} data-ai-hint="church logo" />
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => clearFile(setLogoPreview, "/placeholder-logo.svg")}>
-                                <X className="h-4 w-4" />
-                            </Button>
+                            {logoFile &&
+                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setLogoFile(null); setLogoPreview("/placeholder-logo.svg")}}>
+                                  <X className="h-4 w-4" />
+                              </Button>
+                            }
                         </>
                     )}
                 </div>
@@ -63,7 +73,7 @@ export default function LogoManagementPage() {
                       type="file" 
                       ref={logoInputRef}
                       className="flex-1"
-                      onChange={(e) => handleFileChange(e, setLogoPreview)}
+                      onChange={(e) => handleFileChange(e, setLogoPreview, setLogoFile)}
                       accept="image/png, image/jpeg, image/svg+xml"
                     />
                     <Button onClick={() => logoInputRef.current?.click()}>
@@ -92,9 +102,11 @@ export default function LogoManagementPage() {
                     {headerBgPreview && (
                         <>
                             <Image src={headerBgPreview} alt="Header background" width={300} height={50} objectFit="cover" data-ai-hint="church interior abstract" />
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => clearFile(setHeaderBgPreview, "https://placehold.co/1200x200.png")}>
-                                <X className="h-4 w-4" />
-                            </Button>
+                             {headerBgFile &&
+                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setHeaderBgFile(null); setHeaderBgPreview("https://placehold.co/1200x200.png")}}>
+                                  <X className="h-4 w-4" />
+                              </Button>
+                            }
                         </>
                     )}
                 </div>
@@ -107,7 +119,7 @@ export default function LogoManagementPage() {
                       type="file"
                       ref={headerBgInputRef}
                       className="flex-1"
-                      onChange={(e) => handleFileChange(e, setHeaderBgPreview)}
+                      onChange={(e) => handleFileChange(e, setHeaderBgPreview, setHeaderBgFile)}
                       accept="image/png, image/jpeg"
                     />
                     <Button onClick={() => headerBgInputRef.current?.click()}>
@@ -123,7 +135,7 @@ export default function LogoManagementPage() {
       </Card>
 
       <div className="mt-8">
-        <Button>Save All Changes</Button>
+        <Button onClick={handleSaveChanges}>Save All Changes</Button>
       </div>
 
     </div>

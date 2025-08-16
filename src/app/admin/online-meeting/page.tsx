@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +8,18 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { Upload } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OnlineMeetingManagementPage() {
+  const { toast } = useToast();
+
+  const handleSaveChanges = () => {
+    toast({
+        title: "Changes Saved!",
+        description: "Your online meeting details have been updated.",
+    });
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold tracking-tight mb-6">Online Meeting Management</h1>
@@ -49,7 +61,7 @@ export default function OnlineMeetingManagementPage() {
             </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-          <Button>Save Changes</Button>
+          <Button onClick={handleSaveChanges}>Save Changes</Button>
         </CardFooter>
       </Card>
     </div>
