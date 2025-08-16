@@ -10,13 +10,13 @@ import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Sermon } from "@/lib/types";
 
 // This is a placeholder for sermon data, which would typically come from a database.
-const initialSermons = [
-    { id: "1", title: "The Power of Unwavering Faith", speaker: "Pastor John Doe", date: "2024-07-21", topic: "Faith" },
-    { id: "2", title: "Grace in Action", speaker: "Pastor Jane Smith", date: "2024-07-14", topic: "Grace" },
-    { id: "3", title: "Living a Life of Purpose", speaker: "Pastor John Doe", date: "2024-07-07", topic: "Purpose" },
+const initialSermons: Sermon[] = [
+    { id: "1", title: "The Power of Unwavering Faith", speaker: "Pastor John Doe", date: "2024-07-21", topic: "Faith", description: "A sermon on faith.", thumbnailUrl: "https://placehold.co/400x225.png", videoUrl: "#", audioUrl: "#" },
+    { id: "2", title: "Grace in Action", speaker: "Pastor Jane Smith", date: "2024-07-14", topic: "Grace", description: "A sermon on grace.", thumbnailUrl: "https://placehold.co/400x225.png", videoUrl: "#" },
+    { id: "3", title: "Living a Life of Purpose", speaker: "Pastor John Doe", date: "2024-07-07", topic: "Purpose", description: "A sermon on purpose.", thumbnailUrl: "https://placehold.co/400x225.png", audioUrl: "#" },
 ];
 
 export default function SermonsManagementPage() {
@@ -24,7 +24,7 @@ export default function SermonsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAddSermon = (data: SermonFormData) => {
-    const newSermon = {
+    const newSermon: Sermon = {
       id: (sermons.length + 1).toString(),
       ...data,
     };

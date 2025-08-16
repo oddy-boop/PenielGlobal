@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 const sermonFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -20,6 +21,8 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  thumbnailUrl: z.string().url("Please enter a valid image URL."),
+  description: z.string().min(1, "Description is required"),
 });
 
 export type SermonFormData = z.infer<typeof sermonFormSchema>;
@@ -121,6 +124,32 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
                   />
                 </PopoverContent>
               </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="A short description of the sermon..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="thumbnailUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Thumbnail URL</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. https://placehold.co/400x225.png" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
