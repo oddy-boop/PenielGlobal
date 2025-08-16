@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -8,11 +9,11 @@ import Link from "next/link";
 export default function Home() {
   // In a real app, this data would be fetched from Firestore
   const homeContent = {
-    heroHeadline: "Welcome to Peniel Church Global",
+    heroHeadline: "Welcome to Peniel Global Ministry",
     heroSubheadline: "A place of faith, hope, and community. Join us to worship and grow together.",
     heroImage: "https://placehold.co/1920x1080.png",
     aboutTitle: "Our Community of Faith",
-    aboutText: "Peniel Church Global is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond.",
+    aboutText: "Peniel Global Ministry is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond.",
     aboutImage: "https://placehold.co/600x400.png",
     latestSermonTitle: "The Power of Unwavering Faith",
     latestSermonSpeaker: "Pastor John Doe",

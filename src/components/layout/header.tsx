@@ -76,8 +76,8 @@ export function Header() {
         />
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-          <Image src={logoUrl} alt="Peniel Church Logo" width={32} height={32} />
-          <span className="font-headline text-xl">Peniel Church</span>
+          <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={32} height={32} />
+          <span className="font-headline text-xl">Peniel Global Ministry</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm md:flex">
@@ -104,8 +104,8 @@ export function Header() {
                 <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
                     <div className="p-6 flex items-center justify-between">
                         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Image src={logoUrl} alt="Peniel Church Logo" width={32} height={32} />
-                          <span className="font-headline text-xl">Peniel Church</span>
+                          <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={32} height={32} />
+                          <span className="font-headline text-xl">Peniel Global Ministry</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
                             <X className="h-6 w-6" />

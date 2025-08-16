@@ -38,7 +38,7 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="hero-title">Headline</Label>
-            <Input id="hero-title" placeholder="e.g. Welcome to Peniel Church Global" />
+            <Input id="hero-title" placeholder="e.g. Welcome to Peniel Global Ministry" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="hero-subtitle">Sub-headline</Label>
@@ -73,7 +73,7 @@ export default function HomePageManagement() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="about-text">Content</Label>
-                <Textarea id="about-text" rows={5} placeholder="e.g. Peniel Church Global is more than just a building..." />
+                <Textarea id="about-text" rows={5} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
             </div>
              <div>
                 <Label>Section Image</Label>

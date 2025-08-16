@@ -21,7 +21,7 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center gap-2 font-bold text-lg text-primary">
               <Church className="h-6 w-6 text-accent" />
-              <span className="font-headline text-xl">Peniel Church Global</span>
+              <span className="font-headline text-xl">Peniel Global Ministry</span>
             </Link>
             <p className="mt-2 text-muted-foreground">
               Faith. Hope. Community.
@@ -49,7 +49,7 @@ export function Footer() {
         </div>
         <Separator className="my-6" />
         <div className="text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Peniel Church Global. All Rights Reserved.
+          © {new Date().getFullYear()} Peniel Global Ministry. All Rights Reserved.
         </div>
       </div>
     </footer>

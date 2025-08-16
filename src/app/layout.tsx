@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
-  title: 'Peniel Church Global',
-  description: 'A serene and inviting website for PENIEL CHURCH to inform and connect with its community.',
+  title: 'Peniel Global Ministry',
+  description: 'A serene and inviting website for Peniel Global Ministry to inform and connect with its community.',
 };
 
 export default function RootLayout({
