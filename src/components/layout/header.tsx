@@ -24,8 +24,8 @@ export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Do not render header on admin routes
-  if (pathname.startsWith("/admin")) {
+  // Do not render header on admin or login routes
+  if (pathname.startsWith("/admin") || pathname.startsWith("/login")) {
     return null;
   }
 
@@ -69,9 +69,9 @@ export function Header() {
 
         <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex">
-                <Link href="/admin">
+                <Link href="/login">
                     <Shield className="h-5 w-5" />
-                    <span className="sr-only">Admin</span>
+                    <span className="sr-only">Admin Login</span>
                 </Link>
             </Button>
             <div className="md:hidden">
@@ -97,9 +97,9 @@ export function Header() {
                     {navLinks.map((link) => (
                       <NavLink key={link.href} {...link} className="py-2" />
                     ))}
-                    <Link href="/admin" className="text-muted-foreground hover:text-primary transition-colors py-2 flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors py-2 flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                         <Shield className="h-5 w-5" />
-                        Admin
+                        Admin Login
                     </Link>
                   </nav>
                 </SheetContent>

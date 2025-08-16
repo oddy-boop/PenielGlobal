@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -16,10 +16,11 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop, Home, MessageSquare, Phone, DollarSign } from 'lucide-react';
+import { Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop, Home, MessageSquare, Phone, DollarSign, Shield } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -35,7 +36,16 @@ const adminNavLinks = [
 
 function AdminSidebar() {
   const pathname = usePathname();
-  const { state } = useSidebar();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignOut = () => {
+    toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+    });
+    router.push('/login');
+  }
 
   return (
     <Sidebar>
@@ -69,12 +79,10 @@ function AdminSidebar() {
       <SidebarFooter>
         <SidebarMenu>
             <SidebarMenuItem>
-                <Link href="/">
-                    <SidebarMenuButton tooltip="Sign Out">
-                        <LogOut className="h-5 w-5" />
-                        <span>Sign Out</span>
-                    </SidebarMenuButton>
-                </Link>
+                <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">
+                    <LogOut className="h-5 w-5" />
+                    <span>Sign Out</span>
+                </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
@@ -89,8 +97,8 @@ function TopLeftContent() {
         <div className={cn("flex items-center", isMobile ? "w-full justify-between" : "")}>
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <div className="md:hidden font-headline text-xl text-primary">
-                  Admin
+              <div className="md:hidden font-headline text-xl text-primary flex items-center gap-2">
+                  <Shield className="w-5 h-5" /> Admin
               </div>
             </div>
             <div/>

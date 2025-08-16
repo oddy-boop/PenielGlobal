@@ -1,9 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: 'Peniel Church Global',
@@ -30,6 +32,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
