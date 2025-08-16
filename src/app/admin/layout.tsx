@@ -33,14 +33,16 @@ function AdminSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 p-2 pr-0">
-          <Button asChild variant="ghost" className='w-full justify-start'>
+        <div className="flex items-center justify-between gap-2 p-2 pr-3">
+          <Button asChild variant="ghost" className='w-full justify-start p-1 h-auto'>
               <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
                   <Church className="h-6 w-6 text-accent" />
-                  <span className="font-headline text-xl">Peniel Church</span>
+                  <span className="font-headline text-xl group-data-[collapsible=icon]:hidden">Peniel Church</span>
               </Link>
           </Button>
-          <SidebarTrigger />
+          <div className="group-data-[collapsible=icon]:hidden">
+            <SidebarTrigger />
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -73,15 +75,24 @@ function AdminSidebar() {
   )
 }
 
-function FloatingSidebarTrigger() {
-    const { toggleSidebar, state } = useSidebar();
-    if (state === 'expanded') return null;
+function TopLeftContent() {
+    const { state, isMobile } = useSidebar();
+    
+    // Only show trigger if sidebar is collapsed on desktop, or on mobile.
+    if (state === 'expanded' && !isMobile) return null;
 
     return (
-        <div className="fixed bottom-4 left-4 z-50 md:hidden">
-             <Button size="icon" onClick={toggleSidebar}>
-                <LayoutDashboard />
-            </Button>
+        <div className={cn("flex items-center", isMobile ? "w-full justify-between" : "")}>
+            <div className="md:hidden">
+                <SidebarTrigger />
+            </div>
+            <div className="hidden md:block">
+                <SidebarTrigger/>
+            </div>
+            <div className="md:hidden font-headline text-xl text-primary">
+                Admin
+            </div>
+            <div/>
         </div>
     )
 }
@@ -98,13 +109,12 @@ export default function AdminLayout({
       <AdminSidebar />
       <SidebarInset>
         <div className="p-4 sm:p-6 lg:p-8">
-            <div className="md:hidden mb-4">
-                <SidebarTrigger />
+            <div className="mb-4">
+                <TopLeftContent />
             </div>
             {children}
         </div>
       </SidebarInset>
-      <FloatingSidebarTrigger />
     </SidebarProvider>
   );
 }
