@@ -60,7 +60,7 @@ function AdminSidebar() {
           <Button asChild variant="ghost" className='w-full justify-start p-1 h-auto'>
               <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
                   <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={32} height={32} />
-                  <span className="font-headline text-xl group-data-[collapsible=icon]:hidden">Peniel Global Ministry</span>
+                  <span className="font-headline text-xl group-data-[collapsible=icon]:hidden">PGM</span>
               </Link>
           </Button>
           <div className="group-data-[collapsible=icon]:hidden">
