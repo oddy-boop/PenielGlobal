@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { db, storage } from "@/lib/firebase";
 import { collection, addDoc, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { logActivity } from "@/lib/activity-logger";
 
 export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -22,14 +23,15 @@ export default function EventsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    const querySnapshot = await getDocs(collection(db, "events"));
+    const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+    setEvents(eventsData);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "events"));
-      const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
-      setEvents(eventsData);
-      setIsLoading(false);
-    };
     fetchEvents();
   }, []);
 
@@ -48,6 +50,8 @@ export default function EventsManagementPage() {
 
       const docRef = await addDoc(collection(db, "events"), newEventData);
       
+      await logActivity("Created Event", `Event Title: ${data.title}`);
+      
       setEvents(prev => [...prev, { id: docRef.id, ...newEventData, date: data.date.toISOString() }]);
       setIsDialogOpen(false);
       toast({
@@ -64,10 +68,11 @@ export default function EventsManagementPage() {
     }
   }
   
-  const handleRemoveEvent = async (idToRemove: string) => {
+  const handleRemoveEvent = async (eventToDelete: Event) => {
     try {
-        await deleteDoc(doc(db, "events", idToRemove));
-        setEvents(prev => prev.filter(event => event.id !== idToRemove));
+        await deleteDoc(doc(db, "events", eventToDelete.id));
+        await logActivity("Deleted Event", `Event Title: ${eventToDelete.title}`);
+        setEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
         toast({
             title: "Event Removed",
             description: "The event has been deleted.",
@@ -172,7 +177,7 @@ export default function EventsManagementPage() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleRemoveEvent(event.id)}>Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleRemoveEvent(event)}>Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>

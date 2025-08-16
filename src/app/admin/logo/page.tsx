@@ -14,6 +14,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import type { Branding } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { logActivity } from "@/lib/activity-logger";
 
 
 export default function LogoManagementPage() {
@@ -68,12 +69,14 @@ export default function LogoManagementPage() {
     try {
       let logoUrl = currentLogoUrl;
       let headerBgUrl = currentHeaderBgUrl;
+      let activityDetails = [];
 
       if (logoFile) {
         logoUrl = await uploadFile(logoFile, `branding/logo-${Date.now()}`);
         setCurrentLogoUrl(logoUrl);
         setLogoFile(null);
         setLogoPreview(null);
+        activityDetails.push("Updated Logo");
       }
 
       if (headerBgFile) {
@@ -81,10 +84,15 @@ export default function LogoManagementPage() {
         setCurrentHeaderBgUrl(headerBgUrl);
         setHeaderBgFile(null);
         setHeaderBgPreview(null);
+        activityDetails.push("Updated Header Background");
       }
 
       const brandingData: Branding = { logoUrl, headerBgUrl };
       await setDoc(doc(db, "siteContent", "branding"), brandingData, { merge: true });
+
+      if (activityDetails.length > 0) {
+        await logActivity("Updated Branding", activityDetails.join(" & "));
+      }
 
       toast({
         title: "Success!",

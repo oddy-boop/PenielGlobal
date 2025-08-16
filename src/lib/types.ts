@@ -14,7 +14,7 @@ export interface Sermon {
 export interface Event {
   id:string;
   title: string;
-  date: string;
+  date: string; // ISO 8601 date string
   time: string;
   location: string;
   description: string;
@@ -24,4 +24,11 @@ export interface Event {
 export interface Branding {
   logoUrl?: string;
   headerBgUrl?: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  action: string;
+  details: string;
+  timestamp: string; // ISO 8601 date string
 }

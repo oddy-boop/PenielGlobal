@@ -13,6 +13,7 @@ import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
 import type { Sermon } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { logActivity } from "@/lib/activity-logger";
 
 
 export default function SermonsManagementPage() {
@@ -20,7 +21,7 @@ export default function SermonsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleAddSermon = (data: SermonFormData) => {
+  const handleAddSermon = async (data: SermonFormData) => {
     // This is where you would add the sermon to your database.
     // For now, we'll just add it to the local state.
     const newSermon: Sermon = {
@@ -28,6 +29,7 @@ export default function SermonsManagementPage() {
       ...data,
       date: data.date.toString(),
     };
+    await logActivity("Created Sermon", `Sermon Title: ${data.title}`);
     setSermons(prev => [...prev, newSermon]);
     setIsDialogOpen(false);
     toast({
@@ -36,10 +38,11 @@ export default function SermonsManagementPage() {
     })
   };
 
-  const handleRemoveSermon = (idToRemove: string) => {
+  const handleRemoveSermon = async (sermonToRemove: Sermon) => {
     // This is where you would delete the sermon from your database.
     // For now, we'll just remove it from the local state.
-    setSermons(prev => prev.filter(sermon => sermon.id !== idToRemove));
+    await logActivity("Deleted Sermon", `Sermon Title: ${sermonToRemove.title}`);
+    setSermons(prev => prev.filter(sermon => sermon.id !== sermonToRemove.id));
     toast({
         title: "Sermon Removed",
         description: "The sermon has been deleted.",
@@ -132,7 +135,7 @@ export default function SermonsManagementPage() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleRemoveSermon(sermon.id)}>Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleRemoveSermon(sermon)}>Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>

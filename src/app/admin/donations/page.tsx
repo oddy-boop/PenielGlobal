@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
+import { logActivity } from "@/lib/activity-logger";
 
 interface DonationTier {
   id: string;
@@ -49,6 +50,7 @@ export default function DonationsPageManagement() {
     try {
       const donationsData = { headline, intro, tiers };
       await setDoc(doc(db, "siteContent", "donations"), donationsData);
+      await logActivity("Updated Donations Page", `New headline: ${headline}`);
       toast({
         title: "Changes Saved!",
         description: "Your donations page details have been updated.",
