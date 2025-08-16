@@ -1,50 +1,85 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EventForm, EventFormData } from "@/components/admin/event-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleAddEvent = (data: EventFormData) => {
-    // This is where you would add the event to your database.
-    // For now, we'll just add it to the local state.
-    const newEvent: Event = {
-        id: (events.length + 1).toString(),
-        ...data,
-        description: data.description || "New Event Description",
-        time: data.time || "N/A",
-        date: data.date.toString(),
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      const querySnapshot = await getDocs(collection(db, "events"));
+      const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+      setEvents(eventsData);
+      setIsLoading(false);
     };
-    setEvents(prev => [...prev, newEvent]);
-    setIsDialogOpen(false);
-    toast({
-        title: "Event Added",
-        description: "The new event has been successfully created.",
-    })
+    fetchEvents();
+  }, []);
+
+  const handleAddEvent = async (data: EventFormData) => {
+    try {
+      const imageFile = data.imageUrl[0];
+      const storageRef = ref(storage, `events/${Date.now()}_${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      const imageUrl = await getDownloadURL(storageRef);
+      
+      const newEventData = {
+        ...data,
+        imageUrl,
+        date: Timestamp.fromDate(data.date), // Convert JS Date to Firestore Timestamp
+      };
+
+      const docRef = await addDoc(collection(db, "events"), newEventData);
+      
+      setEvents(prev => [...prev, { id: docRef.id, ...newEventData, date: data.date.toISOString() }]);
+      setIsDialogOpen(false);
+      toast({
+          title: "Event Added",
+          description: "The new event has been successfully created.",
+      })
+    } catch (error) {
+       console.error("Error adding event: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to add event. Please try again.",
+        });
+    }
   }
   
-  const handleRemoveEvent = (idToRemove: string) => {
-    // This is where you would delete the event from your database.
-    // For now, we'll just remove it from the local state.
-    setEvents(prev => prev.filter(event => event.id !== idToRemove));
-    toast({
-        title: "Event Removed",
-        description: "The event has been deleted.",
-    });
+  const handleRemoveEvent = async (idToRemove: string) => {
+    try {
+        await deleteDoc(doc(db, "events", idToRemove));
+        setEvents(prev => prev.filter(event => event.id !== idToRemove));
+        toast({
+            title: "Event Removed",
+            description: "The event has been deleted.",
+        });
+    } catch (error) {
+        console.error("Error removing event: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to remove event. Please try again.",
+        });
+    }
   }
 
   return (
@@ -92,7 +127,13 @@ export default function EventsManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.length === 0 ? (
+              {isLoading ? (
+                 <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+              ) : events.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     No events found.
@@ -116,7 +157,7 @@ export default function EventsManagementPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem disabled>Edit</DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                             </AlertDialogTrigger>

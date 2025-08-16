@@ -20,7 +20,7 @@ const eventFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   time: z.string().min(1, "Time is required"),
   description: z.string().min(1, "Description is required"),
-  imageUrl: z.any().refine((files) => files?.length == 1, "Image is required."),
+  imageUrl: z.any().refine((files) => files?.length >= 1, "Image is required."),
 });
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
@@ -34,24 +34,17 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
-      title: '',
-      location: '',
-      time: '',
-      description: '',
-      ...defaultValues,
-      date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
+      title: defaultValues?.title || '',
+      location: defaultValues?.location || '',
+      time: defaultValues?.time || '',
+      description: defaultValues?.description || '',
+      date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     }
   });
 
-  const handleSubmit = (data: EventFormData) => {
-    // For now, we'll use a local URL. A real backend would handle the upload.
-    const imageUrl = URL.createObjectURL(data.imageUrl[0]);
-    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd'), imageUrl });
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -108,9 +101,6 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date("1900-01-01")
-                    }
                     initialFocus
                   />
                 </PopoverContent>
@@ -150,7 +140,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
             name="imageUrl"
             render={({ field: { value, onChange, ...fieldProps } }) => (
                 <FormItem>
-                <FormLabel>Thumbnail</FormLabel>
+                <FormLabel>Event Image</FormLabel>
                 <FormControl>
                     <div className="flex items-center gap-4">
                         <Input
