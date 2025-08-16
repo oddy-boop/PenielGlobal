@@ -12,12 +12,15 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 const eventFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
   date: z.date({ required_error: "A date is required." }),
   time: z.string().min(1, "Time is required"),
+  description: z.string().min(1, "Description is required"),
+  imageUrl: z.any().refine((files) => files?.length == 1, "Image is required."),
 });
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
@@ -37,7 +40,9 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
   });
 
   const handleSubmit = (data: EventFormData) => {
-    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd') });
+    // For now, we'll use a local URL. A real backend would handle the upload.
+    const imageUrl = URL.createObjectURL(data.imageUrl[0]);
+    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd'), imageUrl });
   };
 
   return (
@@ -122,6 +127,42 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
               <FormMessage />
             </FormItem>
           )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="A short description of the event..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                <FormLabel>Thumbnail</FormLabel>
+                <FormControl>
+                    <div className="flex items-center gap-4">
+                        <Input
+                            {...fieldProps}
+                            type="file"
+                            accept="image/png, image/jpeg, image/gif"
+                            onChange={(event) => {
+                                onChange(event.target.files && event.target.files);
+                            }}
+                            className="flex-1"
+                        />
+                    </div>
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
         />
         <Button type="submit" className="w-full">Save Event</Button>
       </form>

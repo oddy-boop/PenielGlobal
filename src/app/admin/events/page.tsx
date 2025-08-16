@@ -12,9 +12,9 @@ import { EventForm, EventFormData } from "@/components/admin/event-form";
 
 // This is placeholder data for events.
 const initialEvents = [
-    { id: "1", title: "Annual Summer Picnic", location: "Hope Park, Pavilion 3", date: "2024-08-10", time: "11:00 AM" },
-    { id: "2", title: "Youth Group Movie Night", location: "Church Hall", date: "2024-08-16", time: "7:00 PM" },
-    { id: "3", title: "Community Outreach Day", location: "Meet at the Church", date: "2024-08-24", time: "9:00 AM" },
+    { id: "1", title: "Annual Summer Picnic", location: "Hope Park, Pavilion 3", date: "2024-08-10", time: "11:00 AM", description: "A fun day!", imageUrl: "https://placehold.co/600x400.png" },
+    { id: "2", title: "Youth Group Movie Night", location: "Church Hall", date: "2024-08-16", time: "7:00 PM", description: "A fun night!", imageUrl: "https://placehold.co/600x400.png" },
+    { id: "3", title: "Community Outreach Day", location: "Meet at the Church", date: "2024-08-24", time: "9:00 AM", description: "Let's serve!", imageUrl: "https://placehold.co/600x400.png" },
 ];
 
 export default function EventsManagementPage() {
@@ -25,6 +25,7 @@ export default function EventsManagementPage() {
     const newEvent = {
         id: (events.length + 1).toString(),
         ...data,
+        description: "New Event Description", // Placeholder
     };
     setEvents(prev => [...prev, newEvent]);
     setIsDialogOpen(false);
