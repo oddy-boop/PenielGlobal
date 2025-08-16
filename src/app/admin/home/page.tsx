@@ -17,6 +17,8 @@ export default function HomePageManagement() {
   const aboutImageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveChanges = () => {
+    // Here you would typically gather all the data from the form fields
+    // and save it to your Firestore database.
     toast({
         title: "Changes Saved!",
         description: "Your home page details have been updated.",

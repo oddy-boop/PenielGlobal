@@ -30,6 +30,8 @@ export default function ContactPageManagement() {
   };
 
   const handleSaveChanges = () => {
+    // Here you would typically gather all the data from the form fields
+    // and save it to your Firestore database.
     toast({
         title: "Changes Saved!",
         description: "Your contact page details have been updated.",
