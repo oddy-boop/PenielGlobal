@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Church, Menu, X, Shield, DollarSign } from "lucide-react";
+import { Menu, X, Shield } from "lucide-react";
 import Image from "next/image";
 
 const navLinks = [
@@ -29,7 +29,7 @@ export function Header() {
     return null;
   }
 
-  const NavLink = ({ href, label, className }: { href: string; label: string, className?: string }) => {
+  const NavLink = ({ href, label, className }: { href: string; label:string, className?: string }) => {
     const isActive = pathname === href;
     return (
       <Link
@@ -57,7 +57,7 @@ export function Header() {
         />
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-          <Church className="h-6 w-6 text-accent" />
+          <Image src="/placeholder-logo.svg" alt="Peniel Church Logo" width={32} height={32} />
           <span className="font-headline text-xl">Peniel Church</span>
         </Link>
 
@@ -84,8 +84,8 @@ export function Header() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
                     <div className="p-6 flex items-center justify-between">
-                        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-                          <Church className="h-6 w-6 text-accent" />
+                        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Image src="/placeholder-logo.svg" alt="Peniel Church Logo" width={32} height={32} />
                           <span className="font-headline text-xl">Peniel Church</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
