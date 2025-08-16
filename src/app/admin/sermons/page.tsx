@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
@@ -14,39 +14,84 @@ import type { Sermon } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { logActivity } from "@/lib/activity-logger";
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc, getDocs, doc, deleteDoc, Timestamp, query, orderBy } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 
 export default function SermonsManagementPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  const fetchSermons = async () => {
+    setIsLoading(true);
+    const q = query(collection(db, "sermons"), orderBy("date", "desc"));
+    const querySnapshot = await getDocs(q);
+    const sermonsData = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        date: (doc.data().date as Timestamp).toDate().toISOString(),
+    } as Sermon));
+    setSermons(sermonsData);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchSermons();
+  }, []);
+
   const handleAddSermon = async (data: SermonFormData) => {
-    // This is where you would add the sermon to your database.
-    // For now, we'll just add it to the local state.
-    const newSermon: Sermon = {
-      id: (sermons.length + 1).toString(),
-      ...data,
-      date: data.date.toString(),
-    };
-    await logActivity("Created Sermon", `Sermon Title: ${data.title}`);
-    setSermons(prev => [...prev, newSermon]);
-    setIsDialogOpen(false);
-    toast({
-        title: "Sermon Added",
-        description: "The new sermon has been successfully created.",
-    })
+    try {
+      const imageFile = data.thumbnailUrl[0];
+      const storageRef = ref(storage, `sermons/${Date.now()}_${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      const thumbnailUrl = await getDownloadURL(storageRef);
+      
+      const newSermonData = {
+        ...data,
+        thumbnailUrl,
+        date: Timestamp.fromDate(data.date),
+      };
+
+      const docRef = await addDoc(collection(db, "sermons"), newSermonData);
+      
+      await logActivity("Created Sermon", `Sermon Title: ${data.title}`);
+      
+      setSermons(prev => [{ id: docRef.id, ...newSermonData, date: data.date.toISOString() }, ...prev]);
+      setIsDialogOpen(false);
+      toast({
+          title: "Sermon Added",
+          description: "The new sermon has been successfully created.",
+      })
+    } catch (error) {
+       console.error("Error adding sermon: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to add sermon. Please try again.",
+        });
+    }
   };
 
   const handleRemoveSermon = async (sermonToRemove: Sermon) => {
-    // This is where you would delete the sermon from your database.
-    // For now, we'll just remove it from the local state.
-    await logActivity("Deleted Sermon", `Sermon Title: ${sermonToRemove.title}`);
-    setSermons(prev => prev.filter(sermon => sermon.id !== sermonToRemove.id));
-    toast({
-        title: "Sermon Removed",
-        description: "The sermon has been deleted.",
-    });
+    try {
+        await deleteDoc(doc(db, "sermons", sermonToRemove.id));
+        await logActivity("Deleted Sermon", `Sermon Title: ${sermonToRemove.title}`);
+        setSermons(prev => prev.filter(sermon => sermon.id !== sermonToRemove.id));
+        toast({
+            title: "Sermon Removed",
+            description: "The sermon has been deleted.",
+        });
+    } catch (error) {
+        console.error("Error removing sermon: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to remove sermon. Please try again.",
+        });
+    }
   }
 
   return (
@@ -94,7 +139,13 @@ export default function SermonsManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sermons.length === 0 ? (
+              {isLoading ? (
+                 <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+              ) : sermons.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     No sermons found.
@@ -120,7 +171,7 @@ export default function SermonsManagementPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem disabled>Edit</DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                               <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                             </AlertDialogTrigger>
@@ -150,3 +201,5 @@ export default function SermonsManagementPage() {
     </div>
   );
 }
+
+    

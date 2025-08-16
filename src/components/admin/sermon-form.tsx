@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Upload } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +21,7 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  thumbnailUrl: z.any().refine((files) => files?.length == 1, "Image is required."),
+  thumbnailUrl: z.any().refine((files) => files?.length >= 1, "Image is required."),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -36,26 +36,19 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
   const form = useForm<SermonFormData>({
     resolver: zodResolver(sermonFormSchema),
     defaultValues: {
-      title: '',
-      speaker: '',
-      topic: '',
-      videoUrl: '',
-      audioUrl: '',
-      description: '',
-      ...defaultValues,
-      date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
+      title: defaultValues?.title || '',
+      speaker: defaultValues?.speaker || '',
+      topic: defaultValues?.topic || '',
+      videoUrl: defaultValues?.videoUrl || '',
+      audioUrl: defaultValues?.audioUrl || '',
+      description: defaultValues?.description || '',
+      date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     },
   });
 
-  const handleSubmit = (data: SermonFormData) => {
-    // For now, we'll use a local URL. A real backend would handle the upload.
-    const thumbnailUrl = URL.createObjectURL(data.thumbnailUrl[0]);
-    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd'), thumbnailUrl });
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -125,9 +118,6 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date("1900-01-01")
-                    }
                     initialFocus
                   />
                 </PopoverContent>
@@ -203,3 +193,5 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
     </Form>
   );
 }
+
+    

@@ -4,7 +4,7 @@ export interface Sermon {
   id: string;
   title: string;
   speaker: string;
-  date: string;
+  date: string; // ISO 8601 date string
   topic: string;
   videoUrl?: string;
   audioUrl?: string;
@@ -45,3 +45,15 @@ export interface HomeContent {
   latestSermonSpeaker: string;
   latestSermonImage: string;
 }
+
+export interface OnlineMeetingContent {
+    title: string;
+    intro: string;
+    meetingTitle: string;
+    meetingTime: string;
+    description: string;
+    meetingLink: string;
+    imageUrl: string;
+}
+
+    
