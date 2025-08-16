@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,28 +19,50 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // In a real application, you would add your Firebase authentication logic here.
-    // For this prototype, we'll simulate a successful login and redirect.
-    setTimeout(() => {
-      if (email && password) {
+    if (!email || !password) {
         toast({
-          title: "Login Successful",
-          description: "Redirecting to the admin dashboard...",
-        });
-        router.push('/admin');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: "Please enter your email and password.",
+            variant: "destructive",
+            title: "Login Failed",
+            description: "Please enter your email and password.",
         });
         setIsLoading(false);
-      }
-    }, 1000);
+        return;
+    }
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to the admin dashboard...",
+        });
+        router.push('/admin');
+    } catch (error: any) {
+        let description = "An unknown error occurred.";
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+            case 'auth/invalid-credential':
+                description = "Invalid email or password. Please try again.";
+                break;
+            case 'auth/too-many-requests':
+                description = "Too many login attempts. Please try again later.";
+                break;
+            default:
+                console.error("Firebase Auth Error:", error);
+                break;
+        }
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: description,
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -83,7 +107,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter>
             <p className="text-xs text-muted-foreground text-center w-full">
-                This is a simulated login. You will be able to connect to a database in a future step.
+                Enter your admin credentials to sign in.
             </p>
         </CardFooter>
       </Card>
