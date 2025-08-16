@@ -1,19 +1,36 @@
 
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
 
 // This is a placeholder for sermon data, which would typically come from a database.
-const sermons = [
+const initialSermons = [
     { id: "1", title: "The Power of Unwavering Faith", speaker: "Pastor John Doe", date: "2024-07-21", topic: "Faith" },
     { id: "2", title: "Grace in Action", speaker: "Pastor Jane Smith", date: "2024-07-14", topic: "Grace" },
     { id: "3", title: "Living a Life of Purpose", speaker: "Pastor John Doe", date: "2024-07-07", topic: "Purpose" },
 ];
 
 export default function SermonsManagementPage() {
+  const [sermons, setSermons] = useState(initialSermons);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleAddSermon = (data: SermonFormData) => {
+    const newSermon = {
+      id: (sermons.length + 1).toString(),
+      ...data,
+    };
+    setSermons(prev => [...prev, newSermon]);
+    setIsDialogOpen(false);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -21,10 +38,23 @@ export default function SermonsManagementPage() {
             <h1 className="text-3xl font-bold tracking-tight">Sermon Management</h1>
             <p className="text-muted-foreground">Add, edit, or remove sermons.</p>
         </div>
-        <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Sermon
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Sermon
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Sermon</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details below to create a new sermon entry.
+                    </DialogDescription>
+                </DialogHeader>
+                <SermonForm onSubmit={handleAddSermon} />
+            </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
