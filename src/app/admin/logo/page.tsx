@@ -9,8 +9,8 @@ import { Upload } from "lucide-react";
 export default function LogoManagementPage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight mb-6">Church Logo Management</h1>
-      <Card>
+      <h1 className="text-3xl font-bold tracking-tight mb-6">Church Logo & Branding Management</h1>
+      <Card className="mb-8">
         <CardHeader>
           <CardTitle>Update Church Logo</CardTitle>
           <CardDescription>
@@ -38,10 +38,42 @@ export default function LogoManagementPage() {
                 </p>
             </div>
         </CardContent>
-        <CardFooter className="border-t pt-6">
-          <Button>Save Changes</Button>
-        </CardFooter>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Header Background</CardTitle>
+          <CardDescription>
+            Upload a background image for the website header.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div>
+                <Label>Current Header Background</Label>
+                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48">
+                    <Image src="https://placehold.co/1200x200.png" alt="Header background" width={300} height={50} objectFit="cover" data-ai-hint="church interior abstract" />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="header-bg-upload">Upload New Header Background</Label>
+                <div className="flex items-center gap-4">
+                    <Input id="header-bg-upload" type="file" className="flex-1"/>
+                    <Button>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload
+                    </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    Recommended aspect ratio: wide, like 1200x200px.
+                </p>
+            </div>
+        </CardContent>
+      </Card>
+
+      <div className="mt-8">
+        <Button>Save All Changes</Button>
+      </div>
+
     </div>
   );
 }

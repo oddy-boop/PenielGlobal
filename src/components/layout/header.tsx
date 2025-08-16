@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Church, Menu, X, Shield, DollarSign } from "lucide-react";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -34,7 +35,7 @@ export function Header() {
       <Link
         href={href}
         className={cn(
-          "transition-colors hover:text-primary",
+          "transition-colors hover:text-primary z-10",
           isActive ? "text-primary font-semibold" : "text-muted-foreground",
           className
         )}
@@ -47,7 +48,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+       <Image 
+          src="https://placehold.co/1200x200.png" 
+          alt="Header background"
+          fill
+          className="object-cover opacity-20 z-0"
+          data-ai-hint="church interior abstract"
+        />
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
           <Church className="h-6 w-6 text-accent" />
           <span className="font-headline text-xl">Peniel Church</span>
