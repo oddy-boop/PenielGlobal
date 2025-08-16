@@ -5,13 +5,33 @@ import type { Sermon } from "@/lib/types";
 import { SermonCard } from "@/components/sermon-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function SermonsPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
-  // In a real app, you'd fetch this data from your database.
-  // For now, this is just an empty array.
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSermons = async () => {
+      setIsLoading(true);
+      const q = query(collection(db, "sermons"), orderBy("date", "desc"));
+      const querySnapshot = await getDocs(q);
+      const sermonsData = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: (data.date as Timestamp).toDate().toISOString(),
+        } as Sermon;
+      });
+      setSermons(sermonsData);
+      setIsLoading(false);
+    };
+    fetchSermons();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -47,7 +67,12 @@ export default function SermonsPage() {
         </div>
       </div>
 
-      {sermons.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-16">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="text-muted-foreground mt-4">Loading sermons...</p>
+        </div>
+      ) : sermons.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {sermons.map((sermon) => (
             <SermonCard key={sermon.id} sermon={sermon} />

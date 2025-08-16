@@ -1,5 +1,4 @@
 
-
 export interface Sermon {
   id: string;
   title: string;
@@ -55,5 +54,3 @@ export interface OnlineMeetingContent {
     meetingLink: string;
     imageUrl: string;
 }
-
-    
