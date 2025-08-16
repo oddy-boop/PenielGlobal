@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function HomePageManagement() {
   const { toast } = useToast();
+  const heroImageInputRef = useRef<HTMLInputElement>(null);
+  const aboutImageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveChanges = () => {
     toast({
@@ -42,11 +45,11 @@ export default function HomePageManagement() {
           <div>
             <Label>Background Image</Label>
             <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40">
-                <Image src="https://placehold.co/1920x1080.png" alt="Hero background" width={300} height={150} objectFit="cover" data-ai-hint="church congregation" />
+                <Image src="https://placehold.co/1920x1080.png" alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
             </div>
             <div className="flex items-center gap-4 mt-4">
-                <Input id="hero-image-upload" type="file" className="flex-1"/>
-                <Button>
+                <Input id="hero-image-upload" type="file" className="flex-1" ref={heroImageInputRef} />
+                <Button onClick={() => heroImageInputRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" />
                     Upload New Image
                 </Button>
@@ -73,11 +76,11 @@ export default function HomePageManagement() {
              <div>
                 <Label>Section Image</Label>
                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40">
-                    <Image src="https://placehold.co/600x400.png" alt="About us" width={200} height={150} objectFit="cover" data-ai-hint="church interior" />
+                    <Image src="https://placehold.co/600x400.png" alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
                 </div>
                 <div className="flex items-center gap-4 mt-4">
-                    <Input id="about-image-upload" type="file" className="flex-1"/>
-                    <Button>
+                    <Input id="about-image-upload" type="file" className="flex-1" ref={aboutImageInputRef} />
+                    <Button onClick={() => aboutImageInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
                         Upload New Image
                     </Button>

@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
 import type { Sermon } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // This is a placeholder for sermon data, which would typically come from a database.
 const initialSermons: Sermon[] = [
@@ -22,15 +24,29 @@ const initialSermons: Sermon[] = [
 export default function SermonsManagementPage() {
   const [sermons, setSermons] = useState(initialSermons);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleAddSermon = (data: SermonFormData) => {
     const newSermon: Sermon = {
       id: (sermons.length + 1).toString(),
       ...data,
+      date: data.date.toString(),
     };
     setSermons(prev => [...prev, newSermon]);
     setIsDialogOpen(false);
+    toast({
+        title: "Sermon Added",
+        description: "The new sermon has been successfully created.",
+    })
   };
+
+  const handleRemoveSermon = (idToRemove: string) => {
+    setSermons(prev => prev.filter(sermon => sermon.id !== idToRemove));
+    toast({
+        title: "Sermon Removed",
+        description: "The sermon has been deleted.",
+    });
+  }
 
   return (
     <div>
@@ -84,21 +100,37 @@ export default function SermonsManagementPage() {
                   <TableCell>
                     <Badge variant="secondary">{sermon.topic}</Badge>
                   </TableCell>
-                  <TableCell>{sermon.date}</TableCell>
+                  <TableCell>{new Date(sermon.date).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <AlertDialog>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <AlertDialogTrigger asChild>
+                             <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                          </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete this sermon.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleRemoveSermon(sermon.id)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash2, PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 export default function DailyInspirationManagement() {
@@ -33,6 +34,14 @@ export default function DailyInspirationManagement() {
       });
     }
   };
+  
+  const handleRemovePrompt = (indexToRemove: number) => {
+    setInspirations(prev => prev.filter((_, index) => index !== indexToRemove));
+    toast({
+        title: "Prompt Removed",
+        description: "The inspirational prompt has been deleted.",
+    });
+  }
 
   const handleSaveChanges = () => {
     toast({
@@ -89,10 +98,26 @@ export default function DailyInspirationManagement() {
           {inspirations.map((prompt, index) => (
             <div key={index} className="flex items-center gap-4 p-2 border rounded-lg">
               <Textarea defaultValue={prompt} className="flex-1" rows={2}/>
-              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Delete</span>
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete this prompt.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleRemovePrompt(index)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))}
         </CardContent>

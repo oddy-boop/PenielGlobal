@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function OnlineMeetingManagementPage() {
   const { toast } = useToast();
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveChanges = () => {
     toast({
@@ -52,8 +54,8 @@ export default function OnlineMeetingManagementPage() {
             <div className="space-y-2">
                 <Label htmlFor="image-upload">Upload New Image</Label>
                 <div className="flex items-center gap-4">
-                    <Input id="image-upload" type="file" className="flex-1"/>
-                    <Button>
+                    <Input id="image-upload" type="file" className="flex-1" ref={imageInputRef}/>
+                    <Button onClick={() => imageInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
                         Upload
                     </Button>

@@ -57,7 +57,7 @@ export default function LogoManagementPage() {
                         <>
                             <Image src={logoPreview} alt="Current Logo" width={100} height={40} data-ai-hint="church logo" />
                             {logoFile &&
-                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setLogoFile(null); setLogoPreview("/placeholder-logo.svg")}}>
+                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setLogoFile(null); setLogoPreview("/placeholder-logo.svg"); if(logoInputRef.current) logoInputRef.current.value = ""}}>
                                   <X className="h-4 w-4" />
                               </Button>
                             }
@@ -72,13 +72,13 @@ export default function LogoManagementPage() {
                       id="logo-upload" 
                       type="file" 
                       ref={logoInputRef}
-                      className="flex-1"
+                      className="hidden"
                       onChange={(e) => handleFileChange(e, setLogoPreview, setLogoFile)}
                       accept="image/png, image/jpeg, image/svg+xml"
                     />
-                    <Button onClick={() => logoInputRef.current?.click()}>
+                    <Button className="flex-1" variant="outline" onClick={() => logoInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
-                        Upload
+                        {logoFile ? 'Change Logo' : 'Select Logo'}
                     </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -101,9 +101,9 @@ export default function LogoManagementPage() {
                  <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative">
                     {headerBgPreview && (
                         <>
-                            <Image src={headerBgPreview} alt="Header background" width={300} height={50} objectFit="cover" data-ai-hint="church interior abstract" />
+                            <Image src={headerBgPreview} alt="Header background" width={300} height={50} style={{objectFit: "cover"}} data-ai-hint="church interior abstract" />
                              {headerBgFile &&
-                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setHeaderBgFile(null); setHeaderBgPreview("https://placehold.co/1200x200.png")}}>
+                              <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setHeaderBgFile(null); setHeaderBgPreview("https://placehold.co/1200x200.png"); if(headerBgInputRef.current) headerBgInputRef.current.value = ""}}>
                                   <X className="h-4 w-4" />
                               </Button>
                             }
@@ -118,13 +118,13 @@ export default function LogoManagementPage() {
                       id="header-bg-upload" 
                       type="file"
                       ref={headerBgInputRef}
-                      className="flex-1"
+                      className="hidden"
                       onChange={(e) => handleFileChange(e, setHeaderBgPreview, setHeaderBgFile)}
                       accept="image/png, image/jpeg"
                     />
-                    <Button onClick={() => headerBgInputRef.current?.click()}>
+                    <Button className="flex-1" variant="outline" onClick={() => headerBgInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
-                        Upload
+                         {headerBgFile ? 'Change Background' : 'Select Background'}
                     </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
