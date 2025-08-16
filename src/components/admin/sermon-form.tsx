@@ -18,6 +18,8 @@ const sermonFormSchema = z.object({
   speaker: z.string().min(1, "Speaker is required"),
   topic: z.string().min(1, "Topic is required"),
   date: z.date({ required_error: "A date is required." }),
+  videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
 });
 
 export type SermonFormData = z.infer<typeof sermonFormSchema>;
@@ -119,6 +121,32 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
                   />
                 </PopoverContent>
               </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="videoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Video URL (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. https://youtube.com/watch?v=..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="audioUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Audio URL (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. https://spotify.com/episode/..." {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
