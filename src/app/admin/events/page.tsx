@@ -14,19 +14,14 @@ import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 
-// This is placeholder data for events.
-const initialEvents: Event[] = [
-    { id: "1", title: "Annual Summer Picnic", location: "Hope Park, Pavilion 3", date: "2024-08-10", time: "11:00 AM", description: "A fun day!", imageUrl: "https://placehold.co/600x400.png" },
-    { id: "2", title: "Youth Group Movie Night", location: "Church Hall", date: "2024-08-16", time: "7:00 PM", description: "A fun night!", imageUrl: "https://placehold.co/600x400.png" },
-    { id: "3", title: "Community Outreach Day", location: "Meet at the Church", date: "2024-08-24", time: "9:00 AM", description: "Let's serve!", imageUrl: "https://placehold.co/600x400.png" },
-];
-
 export default function EventsManagementPage() {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleAddEvent = (data: EventFormData) => {
+    // This is where you would add the event to your database.
+    // For now, we'll just add it to the local state.
     const newEvent: Event = {
         id: (events.length + 1).toString(),
         ...data,
@@ -43,6 +38,8 @@ export default function EventsManagementPage() {
   }
   
   const handleRemoveEvent = (idToRemove: string) => {
+    // This is where you would delete the event from your database.
+    // For now, we'll just remove it from the local state.
     setEvents(prev => prev.filter(event => event.id !== idToRemove));
     toast({
         title: "Event Removed",
@@ -95,45 +92,53 @@ export default function EventsManagementPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event) => (
-                <TableRow key={event.id}>
-                  <TableCell className="font-medium">{event.title}</TableCell>
-                  <TableCell>{event.location}</TableCell>
-                  <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{event.time}</TableCell>
-                  <TableCell>
-                    <AlertDialog>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                           <AlertDialogTrigger asChild>
-                              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                           </AlertDialogTrigger>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <AlertDialogContent>
-                          <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this event.
-                              </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleRemoveEvent(event.id)}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+              {events.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No events found.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                events.map((event) => (
+                  <TableRow key={event.id}>
+                    <TableCell className="font-medium">{event.title}</TableCell>
+                    <TableCell>{event.location}</TableCell>
+                    <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{event.time}</TableCell>
+                    <TableCell>
+                      <AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this event.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleRemoveEvent(event.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

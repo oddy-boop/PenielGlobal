@@ -1,75 +1,18 @@
+
+"use client";
+
 import type { Sermon } from "@/lib/types";
 import { SermonCard } from "@/components/sermon-card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
-
-const sermons: Sermon[] = [
-  {
-    id: "1",
-    title: "The Power of Unwavering Faith",
-    speaker: "Pastor John Doe",
-    date: "2024-07-21",
-    topic: "Faith",
-    videoUrl: "#",
-    audioUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Discover the strength that comes from a faith that never falters, even in the most trying times."
-  },
-  {
-    id: "2",
-    title: "Grace in Action",
-    speaker: "Pastor Jane Smith",
-    date: "2024-07-14",
-    topic: "Grace",
-    videoUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Learn how to extend grace to others as a reflection of the grace we receive from God."
-  },
-  {
-    id: "3",
-    title: "Living a Life of Purpose",
-    speaker: "Pastor John Doe",
-    date: "2024-07-07",
-    topic: "Purpose",
-    audioUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Explore what it means to live a life aligned with God's purpose for you."
-  },
-  {
-    id: "4",
-    title: "The Heart of a Servant",
-    speaker: "Guest Speaker Michael Chen",
-    date: "2024-06-30",
-    topic: "Service",
-    videoUrl: "#",
-    audioUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Understand the importance of servanthood and humility in the Christian faith."
-  },
-  {
-    id: "5",
-    title: "Navigating Life's Storms",
-    speaker: "Pastor Jane Smith",
-    date: "2024-06-23",
-    topic: "Hope",
-    videoUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Find hope and resilience in God's promises during life's most challenging seasons."
-  },
-    {
-    id: "6",
-    title: "The Joy of Community",
-    speaker: "Pastor John Doe",
-    date: "2024-06-16",
-    topic: "Community",
-    audioUrl: "#",
-    thumbnailUrl: "https://placehold.co/400x225.png",
-    description: "Celebrate the blessing of fellowship and the strength we find in one another."
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function SermonsPage() {
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  // In a real app, you'd fetch this data from your database.
+  // For now, this is just an empty array.
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -90,12 +33,7 @@ export default function SermonsPage() {
                 <SelectValue placeholder="Filter by Topic" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="faith">Faith</SelectItem>
-                <SelectItem value="grace">Grace</SelectItem>
-                <SelectItem value="purpose">Purpose</SelectItem>
-                <SelectItem value="service">Service</SelectItem>
-                <SelectItem value="hope">Hope</SelectItem>
-                <SelectItem value="community">Community</SelectItem>
+                {/* Topics would be populated from your data */}
             </SelectContent>
             </Select>
             <Select>
@@ -103,19 +41,24 @@ export default function SermonsPage() {
                 <SelectValue placeholder="Filter by Speaker" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="john-doe">Pastor John Doe</SelectItem>
-                <SelectItem value="jane-smith">Pastor Jane Smith</SelectItem>
-                <SelectItem value="michael-chen">Guest Speaker Michael Chen</SelectItem>
+                 {/* Speakers would be populated from your data */}
             </SelectContent>
             </Select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {sermons.map((sermon) => (
-          <SermonCard key={sermon.id} sermon={sermon} />
-        ))}
-      </div>
+      {sermons.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {sermons.map((sermon) => (
+            <SermonCard key={sermon.id} sermon={sermon} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16">
+          <h2 className="text-2xl font-semibold text-primary">No Sermons Yet</h2>
+          <p className="text-muted-foreground mt-2">Check back later for new messages.</p>
+        </div>
+      )}
     </div>
   );
 }

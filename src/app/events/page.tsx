@@ -1,46 +1,15 @@
+
+"use client";
+
 import type { Event } from "@/lib/types";
 import { EventCard } from "@/components/event-card";
-
-const events: Event[] = [
-  {
-    id: "1",
-    title: "Annual Summer Picnic",
-    date: "2024-08-10",
-    time: "11:00 AM - 3:00 PM",
-    location: "Hope Park, Pavilion 3",
-    description: "Join us for a day of fun, food, and fellowship at our annual church picnic. All are welcome!",
-    imageUrl: "https://placehold.co/600x400.png"
-  },
-  {
-    id: "2",
-    title: "Youth Group Movie Night",
-    date: "2024-08-16",
-    time: "7:00 PM",
-    location: "Church Hall",
-    description: "A fun and relaxing evening for our youth with a movie, popcorn, and games.",
-    imageUrl: "https://placehold.co/600x400.png"
-  },
-  {
-    id: "3",
-    title: "Community Outreach Day",
-    date: "2024-08-24",
-    time: "9:00 AM - 1:00 PM",
-    location: "Meet at the Church",
-    description: "Let's serve our community together. We'll be helping at the local food bank.",
-    imageUrl: "https://placehold.co/600x400.png"
-  },
-  {
-    id: "4",
-    title: "Women's Ministry Breakfast",
-    date: "2024-09-07",
-    time: "9:30 AM",
-    location: "Fellowship Cafe",
-    description: "A time for the women of our church to connect, share, and be encouraged.",
-    imageUrl: "https://placehold.co/600x400.png"
-  },
-];
+import { useState } from "react";
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  // In a real app, you'd fetch this data from your database.
+  // For now, this is just an empty array.
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -50,11 +19,18 @@ export default function EventsPage() {
         </p>
       </div>
 
-      <div className="space-y-8 max-w-4xl mx-auto">
-        {events.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </div>
+      {events.length > 0 ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16">
+          <h2 className="text-2xl font-semibold text-primary">No Upcoming Events</h2>
+          <p className="text-muted-foreground mt-2">Please check back soon for our schedule.</p>
+        </div>
+      )}
     </div>
   );
 }
