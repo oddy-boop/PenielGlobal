@@ -34,6 +34,10 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
+      title: '',
+      location: '',
+      time: '',
+      description: '',
       ...defaultValues,
       date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
     }

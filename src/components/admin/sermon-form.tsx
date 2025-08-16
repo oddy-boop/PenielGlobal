@@ -36,6 +36,12 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
   const form = useForm<SermonFormData>({
     resolver: zodResolver(sermonFormSchema),
     defaultValues: {
+      title: '',
+      speaker: '',
+      topic: '',
+      videoUrl: '',
+      audioUrl: '',
+      description: '',
       ...defaultValues,
       date: defaultValues?.date ? new Date(defaultValues.date) : undefined,
     },
