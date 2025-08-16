@@ -2,7 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Share2 } from "lucide-react";
+import { Facebook, Twitter, Youtube } from "lucide-react";
+import Link from "next/link";
 
 export default function ContactPage() {
   return (
@@ -48,6 +50,18 @@ export default function ContactPage() {
             <CardContent>
               <p>General Inquiries: contact@penielchurch.org</p>
               <p>Prayer Requests: prayer@penielchurch.org</p>
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader className="flex-row items-center gap-4">
+              <Share2 className="h-8 w-8 text-accent" />
+              <CardTitle className="font-headline">Follow Us</CardTitle>
+            </CardHeader>
+            <CardContent className="flex gap-4">
+               <Link href="https://facebook.com" className="text-muted-foreground hover:text-primary"><Facebook size={24} /></Link>
+               <Link href="https://twitter.com" className="text-muted-foreground hover:text-primary"><Twitter size={24} /></Link>
+               <Link href="https://youtube.com" className="text-muted-foreground hover:text-primary"><Youtube size={24} /></Link>
             </CardContent>
           </Card>
         </div>

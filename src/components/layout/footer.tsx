@@ -39,9 +39,9 @@ export function Footer() {
           <div>
             <h3 className="font-headline text-lg font-semibold text-primary">Connect With Us</h3>
             <div className="flex justify-center md:justify-start gap-4 mt-2">
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook /></Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter /></Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary"><Youtube /></Link>
+              <Link href="https://facebook.com" className="text-muted-foreground hover:text-primary"><Facebook /></Link>
+              <Link href="https://twitter.com" className="text-muted-foreground hover:text-primary"><Twitter /></Link>
+              <Link href="https://youtube.com" className="text-muted-foreground hover:text-primary"><Youtube /></Link>
             </div>
             <p className="mt-4 text-muted-foreground">123 Faith Avenue, Hope City, 12345</p>
             <p className="text-muted-foreground">contact@penielchurch.org</p>

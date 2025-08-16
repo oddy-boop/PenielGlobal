@@ -10,7 +10,7 @@ export default function ContactPageManagement() {
     <div>
       <h1 className="text-3xl font-bold tracking-tight mb-6">Contact Page Management</h1>
       
-      <Card>
+      <Card className="mb-8">
         <CardHeader>
           <CardTitle>Contact Information</CardTitle>
           <CardDescription>Update the contact details displayed on the public contact page.</CardDescription>
@@ -41,10 +41,32 @@ export default function ContactPageManagement() {
             <Textarea id="page-intro" defaultValue="We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out." />
           </div>
         </CardContent>
-        <CardFooter className="border-t pt-6">
-            <Button>Save Changes</Button>
-        </CardFooter>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Social Media Links</CardTitle>
+          <CardDescription>Update the links to your social media profiles.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="facebook-url">Facebook URL</Label>
+            <Input id="facebook-url" placeholder="https://facebook.com/your-church" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="twitter-url">Twitter URL</Label>
+            <Input id="twitter-url" placeholder="https://twitter.com/your-church" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="youtube-url">YouTube URL</Label>
+            <Input id="youtube-url" placeholder="https://youtube.com/your-church" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="mt-8">
+        <Button>Save All Changes</Button>
+      </div>
     </div>
   );
 }
