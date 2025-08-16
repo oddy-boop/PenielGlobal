@@ -44,7 +44,7 @@ export default function EventsManagementPage() {
                     Add Event
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Add New Event</DialogTitle>
                     <DialogDescription>

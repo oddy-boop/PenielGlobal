@@ -10,6 +10,7 @@ import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // This is a placeholder for sermon data, which would typically come from a database.
 const initialSermons = [
@@ -45,7 +46,7 @@ export default function SermonsManagementPage() {
                     Add Sermon
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Add New Sermon</DialogTitle>
                     <DialogDescription>
