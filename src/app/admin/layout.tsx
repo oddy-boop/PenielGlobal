@@ -16,16 +16,20 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Church, Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop } from 'lucide-react';
+import { Church, Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop, Home, MessageSquare, Phone, DollarSign } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/home', label: 'Home Page', icon: Home },
   { href: '/admin/logo', label: 'Church Logo', icon: ImageIcon },
   { href: '/admin/sermons', label: 'Sermons', icon: Video },
   { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/daily-inspiration', label: 'Inspirations', icon: MessageSquare },
   { href: '/admin/online-meeting', label: 'Online Meeting', icon: Laptop },
+  { href: '/admin/donations', label: 'Donations', icon: DollarSign },
+  { href: '/admin/contact', label: 'Contact Page', icon: Phone },
 ];
 
 function AdminSidebar() {

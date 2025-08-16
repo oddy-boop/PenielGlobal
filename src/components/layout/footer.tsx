@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Church, Facebook, Twitter, Youtube } from "lucide-react";
@@ -31,6 +32,7 @@ export function Footer() {
             <ul className="mt-2 space-y-1">
               <li><Link href="/sermons" className="text-muted-foreground hover:text-primary">Sermons</Link></li>
               <li><Link href="/events" className="text-muted-foreground hover:text-primary">Events</Link></li>
+              <li><Link href="/donations" className="text-muted-foreground hover:text-primary">Donations</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
             </ul>
           </div>

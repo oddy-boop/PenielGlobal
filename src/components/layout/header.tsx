@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -6,7 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Church, Menu, X, Shield } from "lucide-react";
+import { Church, Menu, X, Shield, DollarSign } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,6 +15,7 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/daily-inspiration", label: "Daily Inspiration" },
   { href: "/online-meeting", label: "Online Meeting" },
+  { href: "/donations", label: "Donations" },
   { href: "/contact", label: "Contact" },
 ];
 
