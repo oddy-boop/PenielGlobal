@@ -1,11 +1,36 @@
 
+"use client";
+
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PlusCircle, Trash2 } from "lucide-react";
 
 export default function ContactPageManagement() {
+  const [socialLinks, setSocialLinks] = useState([
+    { platform: "Facebook", url: "https://facebook.com/your-church" },
+    { platform: "Twitter", url: "https://twitter.com/your-church" },
+    { platform: "YouTube", url: "https://youtube.com/your-church" },
+  ]);
+
+  const handleAddSocialLink = () => {
+    setSocialLinks([...socialLinks, { platform: "", url: "" }]);
+  };
+
+  const handleRemoveSocialLink = (index: number) => {
+    const newLinks = socialLinks.filter((_, i) => i !== index);
+    setSocialLinks(newLinks);
+  };
+
+  const handleSocialLinkChange = (index: number, field: 'platform' | 'url', value: string) => {
+    const newLinks = [...socialLinks];
+    newLinks[index][field] = value;
+    setSocialLinks(newLinks);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold tracking-tight mb-6">Contact Page Management</h1>
@@ -46,21 +71,44 @@ export default function ContactPageManagement() {
       <Card>
         <CardHeader>
           <CardTitle>Social Media Links</CardTitle>
-          <CardDescription>Update the links to your social media profiles.</CardDescription>
+          <CardDescription>Update the links to your social media profiles. You can add or remove platforms as needed.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="facebook-url">Facebook URL</Label>
-            <Input id="facebook-url" placeholder="https://facebook.com/your-church" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="twitter-url">Twitter URL</Label>
-            <Input id="twitter-url" placeholder="https://twitter.com/your-church" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="youtube-url">YouTube URL</Label>
-            <Input id="youtube-url" placeholder="https://youtube.com/your-church" />
-          </div>
+        <CardContent className="space-y-4">
+          {socialLinks.map((link, index) => (
+            <div key={index} className="flex items-end gap-4 p-4 border rounded-lg">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor={`platform-${index}`}>Platform</Label>
+                <Input
+                  id={`platform-${index}`}
+                  placeholder="e.g. Instagram"
+                  value={link.platform}
+                  onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor={`url-${index}`}>URL</Label>
+                <Input
+                  id={`url-${index}`}
+                  placeholder="https://instagram.com/your-church"
+                  value={link.url}
+                  onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => handleRemoveSocialLink(index)}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+              </Button>
+            </div>
+          ))}
+          <Button variant="outline" onClick={handleAddSocialLink}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Social Media Link
+          </Button>
         </CardContent>
       </Card>
       
