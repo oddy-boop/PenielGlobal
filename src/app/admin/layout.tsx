@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Church, Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
