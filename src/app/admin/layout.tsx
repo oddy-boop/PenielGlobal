@@ -21,23 +21,29 @@ import { useSidebar } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Branding } from "@/lib/types";
 
-const adminNavLinks = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/home', label: 'Home Page', icon: Home },
-  { href: '/admin/logo', label: 'Church Logo', icon: ImageIcon },
-  { href: '/admin/sermons', label: 'Sermons', icon: Video },
-  { href: '/admin/events', label: 'Events', icon: Calendar },
-  { href: '/admin/daily-inspiration', label: 'Inspirations', icon: MessageSquare },
-  { href: '/admin/online-meeting', label: 'Online Meeting', icon: Laptop },
-  { href: '/admin/donations', label: 'Donations', icon: DollarSign },
-  { href: '/admin/contact', label: 'Contact Page', icon: Phone },
-];
 
 function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const [logoUrl, setLogoUrl] = useState("/placeholder-logo.svg");
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      const docRef = doc(db, "siteContent", "branding");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data() as Branding;
+        if(data.logoUrl) setLogoUrl(data.logoUrl);
+      }
+    };
+    fetchLogo();
+  }, []);
 
   const handleSignOut = () => {
     toast({
@@ -53,7 +59,7 @@ function AdminSidebar() {
         <div className="flex items-center justify-between gap-2 p-2 pr-3">
           <Button asChild variant="ghost" className='w-full justify-start p-1 h-auto'>
               <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-                  <Image src="/placeholder-logo.svg" alt="Peniel Church Logo" width={32} height={32} />
+                  <Image src={logoUrl} alt="Peniel Church Logo" width={32} height={32} />
                   <span className="font-headline text-xl group-data-[collapsible=icon]:hidden">Peniel Church</span>
               </Link>
           </Button>
@@ -105,6 +111,18 @@ function TopLeftContent() {
         </div>
     )
 }
+
+const adminNavLinks = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/home', label: 'Home Page', icon: Home },
+  { href: '/admin/logo', label: 'Church Logo', icon: ImageIcon },
+  { href: '/admin/sermons', label: 'Sermons', icon: Video },
+  { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/daily-inspiration', label: 'Inspirations', icon: MessageSquare },
+  { href: '/admin/online-meeting', label: 'Online Meeting', icon: Laptop },
+  { href: '/admin/donations', label: 'Donations', icon: DollarSign },
+  { href: '/admin/contact', label: 'Contact Page', icon: Phone },
+];
 
 
 export default function AdminLayout({

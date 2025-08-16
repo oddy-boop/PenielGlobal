@@ -1,3 +1,4 @@
+
 export interface Sermon {
   id: string;
   title: string;
@@ -18,4 +19,9 @@ export interface Event {
   location: string;
   description: string;
   imageUrl: string;
+}
+
+export interface Branding {
+  logoUrl?: string;
+  headerBgUrl?: string;
 }

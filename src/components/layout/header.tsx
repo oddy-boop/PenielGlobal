@@ -3,12 +3,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Menu, X, Shield } from "lucide-react";
 import Image from "next/image";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import type { Branding } from "@/lib/types";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -23,6 +26,18 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [branding, setBranding] = useState<Branding>({});
+  
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const docRef = doc(db, "siteContent", "branding");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setBranding(docSnap.data() as Branding);
+      }
+    };
+    fetchBranding();
+  }, []);
 
   // Do not render header on admin or login routes
   if (pathname.startsWith("/admin") || pathname.startsWith("/login")) {
@@ -46,10 +61,14 @@ export function Header() {
     );
   };
 
+  const logoUrl = branding.logoUrl || "/placeholder-logo.svg";
+  const headerBgUrl = branding.headerBgUrl || "https://placehold.co/1200x200.png";
+
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-md">
        <Image 
-          src="https://placehold.co/1200x200.png" 
+          src={headerBgUrl}
           alt="Header background"
           fill
           className="object-cover opacity-20 z-0"
@@ -57,7 +76,7 @@ export function Header() {
         />
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-          <Image src="/placeholder-logo.svg" alt="Peniel Church Logo" width={32} height={32} />
+          <Image src={logoUrl} alt="Peniel Church Logo" width={32} height={32} />
           <span className="font-headline text-xl">Peniel Church</span>
         </Link>
 
@@ -85,7 +104,7 @@ export function Header() {
                 <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
                     <div className="p-6 flex items-center justify-between">
                         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Image src="/placeholder-logo.svg" alt="Peniel Church Logo" width={32} height={32} />
+                          <Image src={logoUrl} alt="Peniel Church Logo" width={32} height={32} />
                           <span className="font-headline text-xl">Peniel Church</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
