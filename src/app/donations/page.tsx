@@ -1,27 +1,29 @@
 
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Heart, Gift } from "lucide-react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 const donationTiers = [
   {
     title: "General Fund",
     description: "Support the day-to-day operations and ministries of our church.",
     icon: DollarSign,
-    suggestedAmount: 50,
+    placeholder: "50.00",
   },
   {
     title: "Missions & Outreach",
     description: "Help us spread the message of hope and serve communities locally and globally.",
     icon: Heart,
-    suggestedAmount: 100,
+    placeholder: "100.00",
   },
   {
     title: "Building Fund",
     description: "Contribute to the maintenance and improvement of our church facilities.",
     icon: Gift,
-    suggestedAmount: 250,
+    placeholder: "250.00",
   },
 ];
 
@@ -45,8 +47,15 @@ export default function DonationsPage() {
               <CardTitle className="font-headline text-2xl">{tier.title}</CardTitle>
               <CardDescription>{tier.description}</CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow justify-center items-center flex">
-              <p className="text-4xl font-bold text-primary">${tier.suggestedAmount}</p>
+            <CardContent className="flex-grow justify-center items-center flex p-6">
+                <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        type="number" 
+                        placeholder={tier.placeholder}
+                        className="pl-10 text-xl font-semibold text-center" 
+                    />
+                </div>
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full" size="lg">
