@@ -1,44 +1,120 @@
 
+"use client";
+
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Church, Clock, Calendar, ArrowRight, Video, Rss } from "lucide-react";
+import { Church, Clock, Calendar, ArrowRight, Video, Rss, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import type { HomeContent } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  // In a real app, this data would be fetched from Firestore
-  const homeContent = {
-    heroHeadline: "Welcome to Peniel Global Ministry",
-    heroSubheadline: "A place of faith, hope, and community. Join us to worship and grow together.",
-    heroImage: "https://placehold.co/1920x1080.png",
-    aboutTitle: "Our Community of Faith",
-    aboutText: "Peniel Global Ministry is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond.",
-    aboutImage: "https://placehold.co/600x400.png",
-    latestSermonTitle: "The Power of Unwavering Faith",
-    latestSermonSpeaker: "Pastor John Doe",
-    latestSermonImage: "https://placehold.co/800x450.png"
-  };
+  const [content, setContent] = useState<HomeContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const docRef = doc(db, 'siteContent', 'home');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setContent(docSnap.data() as HomeContent);
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col">
+        {/* Hero Skeleton */}
+        <section className="relative h-[60vh] min-h-[400px] w-full bg-muted flex items-center justify-center text-center">
+            <div className="z-10 p-4 max-w-4xl space-y-4">
+                <Skeleton className="h-16 w-96 mx-auto" />
+                <Skeleton className="h-6 w-80 mx-auto" />
+                <div className="flex justify-center gap-4 mt-4">
+                    <Skeleton className="h-12 w-40" />
+                    <Skeleton className="h-12 w-28" />
+                </div>
+            </div>
+        </section>
+
+        {/* Service Times Skeleton */}
+         <section id="service-times" className="py-16 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 text-center">
+                <Skeleton className="h-10 w-72 mx-auto" />
+                <Skeleton className="h-6 w-96 mx-auto mt-4" />
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <Skeleton className="h-40 w-full" />
+                    <Skeleton className="h-40 w-full" />
+                    <Skeleton className="h-40 w-full" />
+                </div>
+            </div>
+        </section>
+        
+        <Separator />
+        
+        {/* About Us Skeleton */}
+        <section id="about" className="py-16 lg:py-24 bg-card">
+            <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                <div className="md:w-1/2"><Skeleton className="w-full h-64" /></div>
+                <div className="md:w-1/2 space-y-4">
+                    <Skeleton className="h-10 w-64" />
+                    <Skeleton className="h-24 w-full" />
+                    <Skeleton className="h-8 w-40" />
+                </div>
+            </div>
+        </section>
+
+        {/* Featured Sermon Skeleton */}
+        <section className="py-16 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 text-center">
+                <Skeleton className="h-10 w-72 mx-auto" />
+                <Skeleton className="h-6 w-96 mx-auto mt-4" />
+                <div className="mt-12 max-w-2xl mx-auto">
+                    <Skeleton className="w-full h-96" />
+                </div>
+            </div>
+        </section>
+
+      </div>
+    );
+  }
+  
+  if (!content) {
+     return (
+        <div className="flex justify-center items-center min-h-[50vh] flex-col gap-4">
+            <h2 className="text-2xl font-semibold text-primary">Welcome!</h2>
+            <p className="text-muted-foreground">Content is being configured. Please check back soon.</p>
+        </div>
+    )
+  }
 
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] w-full bg-cover bg-center flex items-center justify-center text-center text-white">
         <Image
-          src={homeContent.heroImage}
+          src={content.heroImage}
           alt="Church congregation"
           layout="fill"
           objectFit="cover"
           className="z-0 brightness-50"
           data-ai-hint="church congregation"
+          priority
         />
         <div className="z-10 p-4 max-w-4xl">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
-            {homeContent.heroHeadline}
+            {content.heroHeadline}
           </h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
-            {homeContent.heroSubheadline}
+            {content.heroSubheadline}
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -113,7 +189,7 @@ export default function Home() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/2">
             <Image
-              src={homeContent.aboutImage}
+              src={content.aboutImage}
               alt="Church interior"
               width={600}
               height={400}
@@ -123,10 +199,10 @@ export default function Home() {
           </div>
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
-              {homeContent.aboutTitle}
+              {content.aboutTitle}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              {homeContent.aboutText}
+              {content.aboutText}
             </p>
             <Button asChild className="mt-6" variant="link" size="lg">
               <Link href="/contact">Learn More About Us <ArrowRight className="ml-2 h-5 w-5" /></Link>
@@ -145,7 +221,7 @@ export default function Home() {
               <div className="mt-12 max-w-2xl mx-auto">
                   <Card className="shadow-lg overflow-hidden">
                       <div className="relative">
-                          <Image src={homeContent.latestSermonImage} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                          <Image src={content.latestSermonImage} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                               <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
                                 <Video className="h-12 w-12"/>
@@ -154,8 +230,8 @@ export default function Home() {
                           </div>
                       </div>
                       <CardContent className="p-6 text-left">
-                          <CardTitle className="font-headline text-2xl">{homeContent.latestSermonTitle}</CardTitle>
-                          <p className="text-muted-foreground mt-2">Speaker: {homeContent.latestSermonSpeaker}</p>
+                          <CardTitle className="font-headline text-2xl">{content.latestSermonTitle}</CardTitle>
+                          <p className="text-muted-foreground mt-2">Speaker: {content.latestSermonSpeaker}</p>
                           <Button asChild className="mt-4">
                               <Link href="/sermons">
                                   Watch Now <ArrowRight className="ml-2 h-4 w-4" />
