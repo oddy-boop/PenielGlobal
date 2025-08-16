@@ -30,11 +30,11 @@ export default function DonationsPageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="donations-title">Headline</Label>
-            <Input id="donations-title" defaultValue="Support Our Ministry" />
+            <Input id="donations-title" placeholder="e.g. Support Our Ministry" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="donations-intro">Introductory Paragraph</Label>
-            <Textarea id="donations-intro" rows={4} defaultValue="Your generous giving enables us to continue our mission of spreading faith, hope, and love. Every contribution makes a difference. Thank you for your partnership in the gospel." />
+            <Textarea id="donations-intro" rows={4} placeholder="e.g. Your generous giving enables us..." />
           </div>
         </CardContent>
       </Card>
@@ -50,11 +50,11 @@ export default function DonationsPageManagement() {
                  <h3 className="font-semibold text-lg">Tier 1: General Fund</h3>
                  <div className="space-y-2">
                     <Label>Description</Label>
-                    <Input defaultValue="Support the day-to-day operations and ministries of our church." />
+                    <Input placeholder="e.g. Support the day-to-day operations..." />
                  </div>
                  <div className="space-y-2">
                     <Label>Suggested Amount</Label>
-                    <Input type="number" defaultValue="50" />
+                    <Input type="number" placeholder="50" />
                  </div>
                  <div className="space-y-2">
                     <Label>Donation Link</Label>
@@ -66,11 +66,11 @@ export default function DonationsPageManagement() {
                  <h3 className="font-semibold text-lg">Tier 2: Missions & Outreach</h3>
                  <div className="space-y-2">
                     <Label>Description</Label>
-                    <Input defaultValue="Help us spread the message of hope and serve communities locally and globally." />
+                    <Input placeholder="e.g. Help us spread the message of hope..." />
                  </div>
                  <div className="space-y-2">
                     <Label>Suggested Amount</Label>
-                    <Input type="number" defaultValue="100" />
+                    <Input type="number" placeholder="100" />
                  </div>
                  <div className="space-y-2">
                     <Label>Donation Link</Label>
@@ -82,11 +82,11 @@ export default function DonationsPageManagement() {
                  <h3 className="font-semibold text-lg">Tier 3: Building Fund</h3>
                  <div className="space-y-2">
                     <Label>Description</Label>
-                    <Input defaultValue="Contribute to the maintenance and improvement of our church facilities." />
+                    <Input placeholder="Contribute to the maintenance..." />
                  </div>
                  <div className="space-y-2">
                     <Label>Suggested Amount</Label>
-                    <Input type="number" defaultValue="250" />
+                    <Input type="number" placeholder="250" />
                  </div>
                  <div className="space-y-2">
                     <Label>Donation Link</Label>

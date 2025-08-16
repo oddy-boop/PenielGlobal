@@ -12,11 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ContactPageManagement() {
   const { toast } = useToast();
-  const [socialLinks, setSocialLinks] = useState([
-    { platform: "Facebook", url: "https://facebook.com/your-church" },
-    { platform: "Twitter", url: "https://twitter.com/your-church" },
-    { platform: "YouTube", url: "https://youtube.com/your-church" },
-  ]);
+  const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
 
   const handleAddSocialLink = () => {
     setSocialLinks([...socialLinks, { platform: "", url: "" }]);
@@ -52,27 +48,27 @@ export default function ContactPageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="address-line1">Address Line 1</Label>
-            <Input id="address-line1" defaultValue="123 Faith Avenue" />
+            <Input id="address-line1" placeholder="e.g. 123 Faith Avenue" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="address-line2">Address Line 2</Label>
-            <Input id="address-line2" defaultValue="Hope City, HC 12345" />
+            <Input id="address-line2" placeholder="e.g. Hope City, HC 12345" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" defaultValue="(123) 456-7890" />
+            <Input id="phone" placeholder="e.g. (123) 456-7890" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="email-general">General Inquiries Email</Label>
-            <Input id="email-general" type="email" defaultValue="contact@penielchurch.org" />
+            <Input id="email-general" type="email" placeholder="e.g. contact@penielchurch.org" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="email-prayer">Prayer Requests Email</Label>
-            <Input id="email-prayer" type="email" defaultValue="prayer@penielchurch.org" />
+            <Input id="email-prayer" type="email" placeholder="e.g. prayer@penielchurch.org" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="page-intro">Introductory Text</Label>
-            <Textarea id="page-intro" defaultValue="We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out." />
+            <Textarea id="page-intro" placeholder="e.g. We would love to hear from you..." />
           </div>
         </CardContent>
       </Card>

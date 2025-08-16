@@ -6,12 +6,26 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  // In a real app, this data would be fetched from Firestore
+  const homeContent = {
+    heroHeadline: "Welcome to Peniel Church Global",
+    heroSubheadline: "A place of faith, hope, and community. Join us to worship and grow together.",
+    heroImage: "https://placehold.co/1920x1080.png",
+    aboutTitle: "Our Community of Faith",
+    aboutText: "Peniel Church Global is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond.",
+    aboutImage: "https://placehold.co/600x400.png",
+    latestSermonTitle: "The Power of Unwavering Faith",
+    latestSermonSpeaker: "Pastor John Doe",
+    latestSermonImage: "https://placehold.co/800x450.png"
+  };
+
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] w-full bg-cover bg-center flex items-center justify-center text-center text-white">
         <Image
-          src="https://placehold.co/1920x1080.png"
+          src={homeContent.heroImage}
           alt="Church congregation"
           layout="fill"
           objectFit="cover"
@@ -20,10 +34,10 @@ export default function Home() {
         />
         <div className="z-10 p-4 max-w-4xl">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
-            Welcome to Peniel Church Global
+            {homeContent.heroHeadline}
           </h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
-            A place of faith, hope, and community. Join us to worship and grow together.
+            {homeContent.heroSubheadline}
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -98,7 +112,7 @@ export default function Home() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/2">
             <Image
-              src="https://placehold.co/600x400.png"
+              src={homeContent.aboutImage}
               alt="Church interior"
               width={600}
               height={400}
@@ -108,10 +122,10 @@ export default function Home() {
           </div>
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
-              Our Community of Faith
+              {homeContent.aboutTitle}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Peniel Church Global is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond.
+              {homeContent.aboutText}
             </p>
             <Button asChild className="mt-6" variant="link" size="lg">
               <Link href="/contact">Learn More About Us <ArrowRight className="ml-2 h-5 w-5" /></Link>
@@ -130,7 +144,7 @@ export default function Home() {
               <div className="mt-12 max-w-2xl mx-auto">
                   <Card className="shadow-lg overflow-hidden">
                       <div className="relative">
-                          <Image src="https://placehold.co/800x450.png" alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                          <Image src={homeContent.latestSermonImage} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                               <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
                                 <Video className="h-12 w-12"/>
@@ -139,8 +153,8 @@ export default function Home() {
                           </div>
                       </div>
                       <CardContent className="p-6 text-left">
-                          <CardTitle className="font-headline text-2xl">The Power of Unwavering Faith</CardTitle>
-                          <p className="text-muted-foreground mt-2">Speaker: Pastor John Doe</p>
+                          <CardTitle className="font-headline text-2xl">{homeContent.latestSermonTitle}</CardTitle>
+                          <p className="text-muted-foreground mt-2">Speaker: {homeContent.latestSermonSpeaker}</p>
                           <Button asChild className="mt-4">
                               <Link href="/sermons">
                                   Watch Now <ArrowRight className="ml-2 h-4 w-4" />

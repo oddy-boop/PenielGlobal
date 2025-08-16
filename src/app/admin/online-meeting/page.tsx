@@ -35,11 +35,11 @@ export default function OnlineMeetingManagementPage() {
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="meeting-title">Title</Label>
-                <Input id="meeting-title" defaultValue="Midweek Bible Study" />
+                <Input id="meeting-title" placeholder="e.g. Midweek Bible Study" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="meeting-description">Description</Label>
-                <Textarea id="meeting-description" defaultValue="Dive deeper into the scriptures with us in our interactive online Bible study. It's a time of learning, discussion, and fellowship." />
+                <Textarea id="meeting-description" placeholder="e.g. Dive deeper into the scriptures..." />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="meeting-link">Meeting Link</Label>
@@ -54,7 +54,7 @@ export default function OnlineMeetingManagementPage() {
             <div className="space-y-2">
                 <Label htmlFor="image-upload">Upload New Image</Label>
                 <div className="flex items-center gap-4">
-                    <Input id="image-upload" type="file" className="flex-1" ref={imageInputRef}/>
+                    <Input id="image-upload" type="file" className="hidden" ref={imageInputRef}/>
                     <Button onClick={() => imageInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
                         Upload

@@ -36,11 +36,11 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="hero-title">Headline</Label>
-            <Input id="hero-title" defaultValue="Welcome to Peniel Church Global" />
+            <Input id="hero-title" placeholder="e.g. Welcome to Peniel Church Global" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="hero-subtitle">Sub-headline</Label>
-            <Textarea id="hero-subtitle" defaultValue="A place of faith, hope, and community. Join us to worship and grow together." />
+            <Textarea id="hero-subtitle" placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
             <Label>Background Image</Label>
@@ -48,7 +48,7 @@ export default function HomePageManagement() {
                 <Image src="https://placehold.co/1920x1080.png" alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
             </div>
             <div className="flex items-center gap-4 mt-4">
-                <Input id="hero-image-upload" type="file" className="flex-1" ref={heroImageInputRef} />
+                <Input id="hero-image-upload" type="file" className="hidden" ref={heroImageInputRef} />
                 <Button onClick={() => heroImageInputRef.current?.click()}>
                     <Upload className="mr-2 h-4 w-4" />
                     Upload New Image
@@ -67,11 +67,11 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="about-title">Section Title</Label>
-                <Input id="about-title" defaultValue="Our Community of Faith" />
+                <Input id="about-title" placeholder="e.g. Our Community of Faith" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="about-text">Content</Label>
-                <Textarea id="about-text" rows={5} defaultValue="Peniel Church Global is more than just a building; we are a family. Our mission is to spread love, compassion, and the teachings of the gospel. We are committed to making a positive impact in our community and beyond." />
+                <Textarea id="about-text" rows={5} placeholder="e.g. Peniel Church Global is more than just a building..." />
             </div>
              <div>
                 <Label>Section Image</Label>
@@ -79,7 +79,7 @@ export default function HomePageManagement() {
                     <Image src="https://placehold.co/600x400.png" alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
                 </div>
                 <div className="flex items-center gap-4 mt-4">
-                    <Input id="about-image-upload" type="file" className="flex-1" ref={aboutImageInputRef} />
+                    <Input id="about-image-upload" type="file" className="hidden" ref={aboutImageInputRef} />
                     <Button onClick={() => aboutImageInputRef.current?.click()}>
                         <Upload className="mr-2 h-4 w-4" />
                         Upload New Image

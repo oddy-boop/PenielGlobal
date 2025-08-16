@@ -7,12 +7,27 @@ import { Facebook, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 
 export default function ContactPage() {
+  // In a real app, you would fetch this data from Firestore
+  const contactInfo = {
+    intro: "We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out.",
+    addressLine1: "123 Faith Avenue",
+    addressLine2: "Hope City, HC 12345",
+    phone: "(123) 456-7890",
+    generalEmail: "contact@penielchurch.org",
+    prayerEmail: "prayer@penielchurch.org",
+    socials: [
+        { platform: "Facebook", url: "https://facebook.com", icon: Facebook },
+        { platform: "Twitter", url: "https://twitter.com", icon: Twitter },
+        { platform: "Youtube", url: "https://youtube.com", icon: Youtube },
+    ]
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out.
+          {contactInfo.intro}
         </p>
       </div>
 
@@ -24,8 +39,8 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Our Location</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>123 Faith Avenue</p>
-              <p>Hope City, HC 12345</p>
+              <p>{contactInfo.addressLine1}</p>
+              <p>{contactInfo.addressLine2}</p>
               <div className="mt-4 h-64 bg-muted rounded-lg flex items-center justify-center">
                 <p className="text-muted-foreground">Map Placeholder</p>
               </div>
@@ -38,7 +53,7 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Call Us</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Main Office: (123) 456-7890</p>
+              <p>Main Office: {contactInfo.phone}</p>
             </CardContent>
           </Card>
 
@@ -48,8 +63,8 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Email Us</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>General Inquiries: contact@penielchurch.org</p>
-              <p>Prayer Requests: prayer@penielchurch.org</p>
+              <p>General Inquiries: {contactInfo.generalEmail}</p>
+              <p>Prayer Requests: {contactInfo.prayerEmail}</p>
             </CardContent>
           </Card>
 
@@ -59,9 +74,9 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Follow Us</CardTitle>
             </CardHeader>
             <CardContent className="flex gap-4">
-               <Link href="https://facebook.com" className="text-muted-foreground hover:text-primary"><Facebook size={24} /></Link>
-               <Link href="https://twitter.com" className="text-muted-foreground hover:text-primary"><Twitter size={24} /></Link>
-               <Link href="https://youtube.com" className="text-muted-foreground hover:text-primary"><Youtube size={24} /></Link>
+               {contactInfo.socials.map(social => (
+                 <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><social.icon size={24} /></Link>
+               ))}
             </CardContent>
           </Card>
         </div>
