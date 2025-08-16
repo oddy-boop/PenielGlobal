@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Upload } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +21,7 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  thumbnailUrl: z.string().url("Please enter a valid image URL."),
+  thumbnailUrl: z.any().refine((files) => files?.length == 1, "Image is required."),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -42,7 +42,9 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
   });
 
   const handleSubmit = (data: SermonFormData) => {
-    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd') });
+    // For now, we'll use a local URL. A real backend would handle the upload.
+    const thumbnailUrl = URL.createObjectURL(data.thumbnailUrl[0]);
+    onSubmit({ ...data, date: format(data.date, 'yyyy-MM-dd'), thumbnailUrl });
   };
 
   return (
@@ -142,17 +144,27 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
           )}
         />
         <FormField
-          control={form.control}
-          name="thumbnailUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Thumbnail URL</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. https://placehold.co/400x225.png" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+            control={form.control}
+            name="thumbnailUrl"
+            render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                <FormLabel>Thumbnail</FormLabel>
+                <FormControl>
+                    <div className="flex items-center gap-4">
+                        <Input
+                            {...fieldProps}
+                            type="file"
+                            accept="image/png, image/jpeg, image/gif"
+                            onChange={(event) => {
+                                onChange(event.target.files && event.target.files);
+                            }}
+                            className="flex-1"
+                        />
+                    </div>
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
         />
         <FormField
           control={form.control}
