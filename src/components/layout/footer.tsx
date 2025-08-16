@@ -1,8 +1,18 @@
+"use client";
+
 import { Church, Facebook, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Do not render footer on admin routes
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-card border-t">
       <div className="container mx-auto px-4 py-8">

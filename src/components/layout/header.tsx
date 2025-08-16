@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Church, Menu, X } from "lucide-react";
+import { Church, Menu, X, Shield } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,6 +20,11 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Do not render header on admin routes
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const NavLink = ({ href, label, className }: { href: string; label: string, className?: string }) => {
     const isActive = pathname === href;
@@ -52,32 +57,44 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="md:hidden">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
-                <div className="p-6 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
-                      <Church className="h-6 w-6 text-accent" />
-                      <span className="font-headline text-xl">Peniel Church</span>
+        <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex">
+                <Link href="/admin">
+                    <Shield className="h-5 w-5" />
+                    <span className="sr-only">Admin</span>
+                </Link>
+            </Button>
+            <div className="md:hidden">
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
+                    <div className="p-6 flex items-center justify-between">
+                        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary">
+                          <Church className="h-6 w-6 text-accent" />
+                          <span className="font-headline text-xl">Peniel Church</span>
+                        </Link>
+                        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                            <X className="h-6 w-6" />
+                            <span className="sr-only">Close menu</span>
+                        </Button>
+                    </div>
+                  <nav className="flex flex-col space-y-4 p-6 text-lg">
+                    {navLinks.map((link) => (
+                      <NavLink key={link.href} {...link} className="py-2" />
+                    ))}
+                    <Link href="/admin" className="text-muted-foreground hover:text-primary transition-colors py-2 flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Shield className="h-5 w-5" />
+                        Admin
                     </Link>
-                    <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                        <X className="h-6 w-6" />
-                        <span className="sr-only">Close menu</span>
-                    </Button>
-                </div>
-              <nav className="flex flex-col space-y-4 p-6 text-lg">
-                {navLinks.map((link) => (
-                  <NavLink key={link.href} {...link} className="py-2" />
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
         </div>
       </div>
     </header>
