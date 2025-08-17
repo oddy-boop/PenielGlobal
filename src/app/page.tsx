@@ -207,7 +207,7 @@ export default function Home() {
                   Upcoming Events
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10 hover:text-white w-full sm:w-auto">
+              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
                 <Link href="/contact">
                   Visit Us
                 </Link>
