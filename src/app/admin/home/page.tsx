@@ -64,22 +64,22 @@ export default function HomePageManagement() {
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      let finalContent = { ...content };
+      let updatedContent = { ...content };
 
       if (heroImageFiles.length > 0) {
         const uploadPromises = heroImageFiles.map(file => uploadFileAndGetUrl(file, 'content'));
         const newImageUrls = await Promise.all(uploadPromises);
-        finalContent.heroImages = [...(finalContent.heroImages || []), ...newImageUrls];
+        updatedContent.heroImages = [...(updatedContent.heroImages || []), ...newImageUrls];
       }
 
       if (aboutImageFile) {
         const aboutImageUrl = await uploadFileAndGetUrl(aboutImageFile, 'content');
-        finalContent.aboutImage = aboutImageUrl;
+        updatedContent.aboutImage = aboutImageUrl;
       }
       
       const { error } = await supabase
         .from('site_content')
-        .update({ content: finalContent as any })
+        .update({ content: updatedContent as any })
         .eq('key', 'home');
 
       if (error) throw error;
@@ -91,6 +91,9 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
+      // Update state to reflect changes immediately
+      setContent(updatedContent);
+
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -101,6 +104,11 @@ export default function HomePageManagement() {
       setIsSaving(false);
       setHeroImageFiles([]);
       setAboutImageFile(null);
+      // Clear the file input visually
+      const heroInput = document.getElementById('hero-image-file') as HTMLInputElement;
+      if (heroInput) heroInput.value = '';
+      const aboutInput = document.getElementById('about-image-file') as HTMLInputElement;
+      if(aboutInput) aboutInput.value = '';
     }
   };
 
@@ -198,7 +206,7 @@ export default function HomePageManagement() {
              <div>
                 <Label>Section Image</Label>
                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
-                    <Image src={aboutPreview || "https://placehold.co/600x400.png"} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
+                    {aboutPreview && <Image src={aboutPreview} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />}
                 </div>
                 <Input id="about-image-file" type="file" className="mt-4" onChange={(e) => setAboutImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
                 <p className="text-sm text-muted-foreground mt-2">
