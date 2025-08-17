@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,9 +35,10 @@ interface SermonFormProps {
   onSubmit: (data: SermonFormData) => void;
   defaultValues?: Partial<Omit<SermonFormData, 'thumbnail'>>;
   isEditing?: boolean;
+  isSaving?: boolean;
 }
 
-export function SermonForm({ onSubmit, defaultValues, isEditing = false }: SermonFormProps) {
+export function SermonForm({ onSubmit, defaultValues, isEditing = false, isSaving = false }: SermonFormProps) {
   const form = useForm<SermonFormData>({
     resolver: zodResolver(isEditing ? sermonFormSchema : createSermonSchema),
     defaultValues: {
@@ -63,7 +64,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. The Power of Unwavering Faith" {...field} />
+                <Input placeholder="e.g. The Power of Unwavering Faith" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,7 +77,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Speaker</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Pastor John Doe" {...field} />
+                <Input placeholder="e.g. Pastor John Doe" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,7 +90,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Topic</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Faith" {...field} />
+                <Input placeholder="e.g. Faith" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -110,6 +111,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isSaving}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -140,7 +142,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="A short description of the sermon..." {...field} />
+                <Textarea placeholder="A short description of the sermon..." {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,7 +155,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Thumbnail Image</FormLabel>
               <FormControl>
-                <Input type="file" accept="image/*" {...thumbnailRef} />
+                <Input type="file" accept="image/*" {...thumbnailRef} disabled={isSaving} />
               </FormControl>
                <FormDescription>
                 {isEditing ? "Upload a new image to replace the existing one. Leave blank to keep the current thumbnail." : "Select a thumbnail for the sermon."}
@@ -169,7 +171,7 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Video URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                <Input placeholder="https://youtube.com/watch?v=..." {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -182,13 +184,16 @@ export function SermonForm({ onSubmit, defaultValues, isEditing = false }: Sermo
             <FormItem>
               <FormLabel>Audio URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="https://spotify.com/episode/..." {...field} />
+                <Input placeholder="https://spotify.com/episode/..." {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">{isEditing ? 'Save Changes' : 'Add Sermon'}</Button>
+        <Button type="submit" className="w-full" disabled={isSaving}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isEditing ? 'Save Changes' : 'Add Sermon'}
+        </Button>
       </form>
     </Form>
   );

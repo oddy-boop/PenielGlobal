@@ -20,6 +20,8 @@ export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchEvents = useCallback(async () => {
@@ -43,6 +45,7 @@ export default function EventsManagementPage() {
   }, [fetchEvents]);
 
   const handleAddEvent = async (data: EventFormData) => {
+    setIsSaving(true);
     try {
       let imageUrl = '';
       if (data.image && data.image[0]) {
@@ -53,6 +56,7 @@ export default function EventsManagementPage() {
             title: "Image required",
             description: "Please select an image for the event.",
         });
+        setIsSaving(false);
         return;
       }
 
@@ -83,10 +87,13 @@ export default function EventsManagementPage() {
             title: "Error adding event",
             description: error.message,
         });
+    } finally {
+        setIsSaving(false);
     }
   }
   
   const handleRemoveEvent = async (eventToDelete: Event) => {
+    setIsDeleting(eventToDelete.id);
     try {
         const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
         if (error) throw error;
@@ -103,6 +110,8 @@ export default function EventsManagementPage() {
             title: "Error removing event",
             description: error.message,
         });
+    } finally {
+        setIsDeleting(null);
     }
   }
 
@@ -127,7 +136,7 @@ export default function EventsManagementPage() {
                         Fill in the details below to create a new event.
                     </DialogDescription>
                 </DialogHeader>
-                <EventForm onSubmit={handleAddEvent} />
+                <EventForm onSubmit={handleAddEvent} isSaving={isSaving} />
             </DialogContent>
         </Dialog>
       </div>
@@ -174,8 +183,8 @@ export default function EventsManagementPage() {
                       <AlertDialog>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
+                            <Button aria-haspopup="true" size="icon" variant="ghost" disabled={isDeleting === event.id}>
+                               {isDeleting === event.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                               <span className="sr-only">Toggle menu</span>
                             </Button>
                           </DropdownMenuTrigger>

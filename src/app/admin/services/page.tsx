@@ -28,6 +28,8 @@ export default function ServicesManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchServices = useCallback(async () => {
@@ -61,11 +63,13 @@ export default function ServicesManagementPage() {
   }
 
   const handleSubmit = async (data: ServiceFormData) => {
+    setIsSaving(true);
     if (editingService) {
       await handleEditService(data);
     } else {
       await handleAddService(data);
     }
+    setIsSaving(false);
   }
 
   const handleAddService = async (data: ServiceFormData) => {
@@ -115,6 +119,7 @@ export default function ServicesManagementPage() {
   }
 
   const handleRemoveService = async (serviceToRemove: Service) => {
+    setIsDeleting(serviceToRemove.id);
     try {
         const { error } = await supabase.from('services').delete().eq('id', serviceToRemove.id);
         if (error) throw error;
@@ -131,6 +136,8 @@ export default function ServicesManagementPage() {
             title: "Error",
             description: "Failed to remove service. Please try again.",
         });
+    } finally {
+        setIsDeleting(null);
     }
   }
 
@@ -159,6 +166,7 @@ export default function ServicesManagementPage() {
                 key={editingService ? editingService.id : 'new'}
                 onSubmit={handleSubmit}
                 defaultValues={editingService || undefined}
+                isSaving={isSaving}
               />
           </DialogContent>
       </Dialog>
@@ -208,8 +216,8 @@ export default function ServicesManagementPage() {
                       <AlertDialog>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
+                            <Button aria-haspopup="true" size="icon" variant="ghost" disabled={isDeleting === service.id}>
+                              {isDeleting === service.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
                               <span className="sr-only">Toggle menu</span>
                             </Button>
                           </DropdownMenuTrigger>

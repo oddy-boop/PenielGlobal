@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SermonForm, SermonFormData } from "@/components/admin/sermon-form";
 import type { Sermon } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,8 @@ export default function SermonsManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchSermons = useCallback(async () => {
@@ -40,7 +42,7 @@ export default function SermonsManagementPage() {
         videoUrl: s.video_url,
         audioUrl: s.audio_url,
         thumbnailUrl: s.thumbnail_url,
-      }))
+      }));
       setSermons(mappedData as Sermon[]);
     }
     setIsLoading(false);
@@ -61,11 +63,13 @@ export default function SermonsManagementPage() {
   }
 
   const handleSubmit = async (data: SermonFormData) => {
+    setIsSaving(true);
     if (editingSermon) {
       await handleEditSermon(data);
     } else {
       await handleAddSermon(data);
     }
+    setIsSaving(false);
   }
 
   const handleAddSermon = async (data: SermonFormData) => {
@@ -155,6 +159,7 @@ export default function SermonsManagementPage() {
   }
 
   const handleRemoveSermon = async (sermonToRemove: Sermon) => {
+    setIsDeleting(sermonToRemove.id);
     try {
         const { error } = await supabase.from('sermons').delete().eq('id', sermonToRemove.id);
         if (error) throw error;
@@ -171,6 +176,8 @@ export default function SermonsManagementPage() {
             title: "Error",
             description: "Failed to remove sermon. Please try again.",
         });
+    } finally {
+        setIsDeleting(null);
     }
   }
 
@@ -200,6 +207,7 @@ export default function SermonsManagementPage() {
                 onSubmit={handleSubmit}
                 defaultValues={editingSermon || undefined}
                 isEditing={!!editingSermon}
+                isSaving={isSaving}
               />
           </DialogContent>
       </Dialog>
@@ -249,8 +257,8 @@ export default function SermonsManagementPage() {
                       <AlertDialog>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                              <MoreHorizontal className="h-4 w-4" />
+                            <Button aria-haspopup="true" size="icon" variant="ghost" disabled={isDeleting === sermon.id}>
+                              {isDeleting === sermon.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                               <span className="sr-only">Toggle menu</span>
                             </Button>
                           </DropdownMenuTrigger>

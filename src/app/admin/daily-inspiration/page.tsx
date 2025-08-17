@@ -23,6 +23,9 @@ export default function DailyInspirationManagement() {
   const [inspirations, setInspirations] = useState<Inspiration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+
   const [newInspirationType, setNewInspirationType] = useState<'text' | 'image'>('text');
   const [newPrompt, setNewPrompt] = useState("");
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
@@ -43,17 +46,20 @@ export default function DailyInspirationManagement() {
   }, [fetchInspirations]);
 
   const handleAddInspiration = async () => {
+    setIsSaving(true);
     let inspirationData: Partial<Inspiration> = { type: newInspirationType };
 
     if (newInspirationType === 'text') {
         if (!newPrompt.trim()) {
             toast({ variant: "destructive", title: "Error", description: "Prompt cannot be empty." });
+            setIsSaving(false);
             return;
         }
         inspirationData.prompt = newPrompt;
     } else { // type is 'image'
         if (!newImageFile) {
             toast({ variant: "destructive", title: "Error", description: "Image file is required." });
+            setIsSaving(false);
             return;
         }
         try {
@@ -61,6 +67,7 @@ export default function DailyInspirationManagement() {
             inspirationData.image_url = imageUrl;
         } catch(e: any) {
             toast({ variant: "destructive", title: "Upload Error", description: "Failed to upload image: " + e.message });
+            setIsSaving(false);
             return;
         }
     }
@@ -76,10 +83,13 @@ export default function DailyInspirationManagement() {
         fetchInspirations();
     } catch(e: any) {
         toast({ variant: "destructive", title: "Error", description: "Failed to add inspiration: " + e.message });
+    } finally {
+        setIsSaving(false);
     }
   };
 
   const handleDeleteInspiration = async (id: number) => {
+    setIsDeleting(id);
     try {
         const { error } = await supabase.from('inspirations').delete().eq('id', id);
         if (error) throw error;
@@ -88,6 +98,8 @@ export default function DailyInspirationManagement() {
         fetchInspirations();
     } catch(e: any) {
         toast({ variant: "destructive", title: "Error", description: "Failed to delete inspiration: " + e.message });
+    } finally {
+        setIsDeleting(null);
     }
   };
 
@@ -144,8 +156,11 @@ export default function DailyInspirationManagement() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddInspiration}>Add Inspiration</Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>Cancel</Button>
+              <Button onClick={handleAddInspiration} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add Inspiration
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -173,8 +188,8 @@ export default function DailyInspirationManagement() {
                         )}
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
-                                    <Trash2 className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={isDeleting === p.id}>
+                                    {isDeleting === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,9 +28,10 @@ export type EventFormData = z.infer<typeof eventFormSchema>;
 interface EventFormProps {
   onSubmit: (data: EventFormData) => void;
   defaultValues?: Partial<Omit<EventFormData, 'image'>>;
+  isSaving: boolean;
 }
 
-export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
+export function EventForm({ onSubmit, defaultValues, isSaving }: EventFormProps) {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -54,7 +55,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Annual Summer Picnic" {...field} />
+                <Input placeholder="e.g. Annual Summer Picnic" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -67,7 +68,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Hope Park, Pavilion 3" {...field} />
+                <Input placeholder="e.g. Hope Park, Pavilion 3" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,6 +89,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isSaving}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -118,7 +120,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
             <FormItem>
               <FormLabel>Time</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. 11:00 AM" {...field} />
+                <Input placeholder="e.g. 11:00 AM" {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -131,7 +133,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="A short description of the event..." {...field} />
+                <Textarea placeholder="A short description of the event..." {...field} disabled={isSaving} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,13 +146,16 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
                 <FormItem>
                   <FormLabel>Event Image</FormLabel>
                   <FormControl>
-                    <Input type="file" accept="image/*" {...imageRef} />
+                    <Input type="file" accept="image/*" {...imageRef} disabled={isSaving} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
             )}
         />
-        <Button type="submit" className="w-full">Save Event</Button>
+        <Button type="submit" className="w-full" disabled={isSaving}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Event
+        </Button>
       </form>
     </Form>
   );
