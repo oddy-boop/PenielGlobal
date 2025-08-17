@@ -28,8 +28,21 @@ export default function Home() {
         .eq('key', 'home')
         .single();
       
-      if (data?.content) {
+      if (data?.content && Object.keys(data.content).length > 0) {
         setContent(data.content as HomeContent);
+      } else {
+        // You can set default content here if the DB is empty
+        setContent({
+            heroHeadline: "Welcome",
+            heroSubheadline: "Faith, Hope, Community",
+            heroImages: ["https://placehold.co/1920x1080.png"],
+            aboutTitle: "About Us",
+            aboutText: "Learn more about our community.",
+            aboutImage: "https://placehold.co/600x400.png",
+            latestSermonTitle: "Latest Sermon",
+            latestSermonSpeaker: "Pastor",
+            latestSermonImage: "https://placehold.co/800x450.png"
+        });
       }
       setIsLoading(false);
     };
@@ -121,7 +134,7 @@ export default function Home() {
                                 src={src}
                                 alt={`Hero background ${index + 1}`}
                                 fill
-                                objectFit="cover"
+                                style={{objectFit:"cover"}}
                                 className="z-0 brightness-50"
                                 priority={index === 0}
                                 data-ai-hint="church congregation"
@@ -135,7 +148,7 @@ export default function Home() {
                 src={"https://placehold.co/1920x1080.png"}
                 alt="Church congregation"
                 fill
-                objectFit="cover"
+                style={{objectFit:"cover"}}
                 className="z-0 brightness-50"
                 data-ai-hint="church congregation"
                 priority
