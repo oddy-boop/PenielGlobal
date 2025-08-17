@@ -60,9 +60,8 @@ export default function HomePageManagement() {
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
+    let updatedContent = { ...content };
     try {
-      let updatedContent = { ...content };
-
       if (heroImageFiles.length > 0) {
         const uploadPromises = heroImageFiles.map(file => uploadFileAndGetUrl(file, 'content'));
         const newImageUrls = await Promise.all(uploadPromises);
@@ -211,13 +210,14 @@ export default function HomePageManagement() {
                 </p>
             </div>
         </CardContent>
-        <CardFooter className="border-t pt-6">
-            <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSaving ? "Saving..." : "Save All Changes"}
-            </Button>
-        </CardFooter>
       </Card>
+      
+      <div className="mt-8">
+          <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSaving ? "Saving..." : "Save All Changes"}
+          </Button>
+      </div>
     </div>
   );
 }
