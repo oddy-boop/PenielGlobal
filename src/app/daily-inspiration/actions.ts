@@ -1,20 +1,31 @@
 
 "use server";
 
-import { getDailyInspiration } from "@/ai/flows/daily-inspiration";
-import type { DailyInspirationOutput } from "@/ai/flows/daily-inspiration";
+import { supabase } from "@/lib/supabaseClient";
 
-// This server action provides a secure way for the client to request a daily inspiration prompt.
-// It now calls the Genkit flow to generate a prompt.
-export async function fetchDailyInspiration(): Promise<DailyInspirationOutput | { error: string }> {
+interface Inspiration {
+  prompt: string;
+}
+
+export async function fetchDailyInspiration(): Promise<{ prompt: string } | { error: string }> {
   try {
-    const result = await getDailyInspiration({});
-    if (!result || !result.prompt) {
-        return { error: 'Failed to get an inspiration. Please try again.' };
+    // Fetch all prompts from the database
+    const { data, error } = await supabase.from('inspirations').select('prompt');
+
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      return { prompt: "No inspirational messages have been added yet. Please check back later." };
     }
-    return result;
-  } catch (e) {
+
+    // Select one at random
+    const randomIndex = Math.floor(Math.random() * data.length);
+    const randomInspiration = data[randomIndex] as Inspiration;
+    
+    return { prompt: randomInspiration.prompt };
+
+  } catch (e: any) {
     console.error(e);
-    return { error: 'An unexpected error occurred. Please try again later.' };
+    return { error: 'An unexpected error occurred: ' + e.message };
   }
 }

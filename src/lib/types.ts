@@ -86,6 +86,12 @@ export interface Service {
     icon: string;
 }
 
+export interface Inspiration {
+    id: number;
+    prompt: string;
+    created_at: string;
+}
+
 
 // Generic type for site content stored in the 'site_content' table
 export interface SiteContent<T> {

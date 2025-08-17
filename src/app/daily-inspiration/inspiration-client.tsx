@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { RefreshCw, AlertTriangle } from "lucide-react";
 import { fetchDailyInspiration } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -53,7 +54,7 @@ export function InspirationClient() {
       </Card>
       <div className="mt-6 flex justify-center">
         <Button onClick={getInspiration} size="lg" disabled={isLoading}>
-          <Sparkles className="mr-2 h-5 w-5" />
+          <RefreshCw className="mr-2 h-5 w-5" />
           {isLoading ? "Loading..." : "Get New Inspiration"}
         </Button>
       </div>
