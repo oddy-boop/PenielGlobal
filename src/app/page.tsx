@@ -59,6 +59,7 @@ export default function Home() {
         const sermonData = sermonRes.data;
         const mappedSermon = {
           ...sermonData,
+          id: sermonData.id.toString(),
           videoUrl: sermonData.video_url,
           audioUrl: sermonData.audio_url,
           thumbnailUrl: sermonData.thumbnail_url,
@@ -114,11 +115,11 @@ export default function Home() {
         {/* About Us Skeleton */}
         <section id="about" className="py-16 lg:py-24 bg-card">
             <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                <div className="md:w-1/2"><Skeleton className="w-full h-64" /></div>
-                <div className="md:w-1/2 space-y-4">
-                    <Skeleton className="h-10 w-64" />
+                <div className="md:w-1/2"><Skeleton className="w-full h-64 md:h-80" /></div>
+                <div className="md:w-1/2 space-y-4 text-center md:text-left">
+                    <Skeleton className="h-10 w-64 mx-auto md:mx-0" />
                     <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-8 w-40" />
+                    <Skeleton className="h-8 w-40 mx-auto md:mx-0" />
                 </div>
             </div>
         </section>
@@ -153,10 +154,10 @@ export default function Home() {
     <>
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="relative h-[60vh] min-h-[400px] w-full bg-cover bg-center flex items-center justify-center text-center text-white">
+        <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white">
           {hasHeroImages ? (
               <Carousel
-                  className="w-full h-full"
+                  className="absolute w-full h-full"
                   plugins={[Autoplay({ delay: 5000 })]}
                   opts={{ loop: true }}
               >
@@ -177,15 +178,7 @@ export default function Home() {
                   </CarouselContent>
               </Carousel>
           ) : (
-              <Image
-                  src={"https://placehold.co/1920x1080.png"}
-                  alt="Church congregation"
-                  fill
-                  style={{objectFit:"cover"}}
-                  className="z-0 brightness-50"
-                  data-ai-hint="church congregation"
-                  priority
-              />
+              <div className="absolute inset-0 bg-muted z-0"></div>
           )}
           <div className="z-10 p-4 max-w-4xl">
             <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
@@ -254,7 +247,7 @@ export default function Home() {
                 alt="Church interior"
                 width={600}
                 height={400}
-                className="rounded-lg shadow-xl"
+                className="rounded-lg shadow-xl w-full h-auto"
                 data-ai-hint="church interior"
               />
             </div>
@@ -282,8 +275,8 @@ export default function Home() {
                   </p>
                   <div className="mt-12 max-w-2xl mx-auto">
                       <Card className="shadow-lg overflow-hidden">
-                          <div className="relative">
-                              <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                          <div className="relative aspect-video">
+                              <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
                               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
                                     <Video className="h-12 w-12"/>
@@ -294,8 +287,8 @@ export default function Home() {
                           <CardContent className="p-6 text-left">
                               <CardTitle className="font-headline text-2xl">{latestSermon.title}</CardTitle>
                               <p className="text-muted-foreground mt-2">Speaker: {latestSermon.speaker}</p>
-                              <Button asChild className="mt-4">
-                                  <Link href="/sermons">
+                              <Button asChild className="mt-4" onClick={handleWatchClick}>
+                                  <Link href="#">
                                       Watch Now <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>
                               </Button>
