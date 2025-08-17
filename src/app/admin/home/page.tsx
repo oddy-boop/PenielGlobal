@@ -14,6 +14,7 @@ import { logActivity } from "@/lib/activity-logger";
 import { Skeleton } from '@/components/ui/skeleton';
 import type { HomeContent } from '@/lib/types';
 import { supabase } from '@/lib/supabaseClient';
+import { uploadFileAndGetUrl } from '@/lib/storage';
 
 const defaultHomeContent: HomeContent = {
   heroHeadline: "Welcome to Peniel Global Ministry",
@@ -32,6 +33,8 @@ export default function HomePageManagement() {
   const [content, setContent] = useState<Partial<HomeContent>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
+  const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -55,9 +58,21 @@ export default function HomePageManagement() {
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
+      let finalContent = { ...content };
+
+      if (heroImageFile) {
+        const heroImageUrl = await uploadFileAndGetUrl(heroImageFile, 'content');
+        finalContent.heroImage = heroImageUrl;
+      }
+
+      if (aboutImageFile) {
+        const aboutImageUrl = await uploadFileAndGetUrl(aboutImageFile, 'content');
+        finalContent.aboutImage = aboutImageUrl;
+      }
+      
       const { error } = await supabase
         .from('site_content')
-        .update({ content: content as any })
+        .update({ content: finalContent as any })
         .eq('key', 'home');
 
       if (error) throw error;
@@ -77,6 +92,8 @@ export default function HomePageManagement() {
       });
     } finally {
       setIsSaving(false);
+      setHeroImageFile(null);
+      setAboutImageFile(null);
     }
   };
 
@@ -104,6 +121,9 @@ export default function HomePageManagement() {
     )
   }
 
+  const heroPreview = heroImageFile ? URL.createObjectURL(heroImageFile) : content.heroImage;
+  const aboutPreview = aboutImageFile ? URL.createObjectURL(aboutImageFile) : content.aboutImage;
+
   return (
     <div>
       <h1 className="text-3xl font-bold tracking-tight mb-6">Home Page Management</h1>
@@ -123,11 +143,14 @@ export default function HomePageManagement() {
             <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => setContent({...content, heroSubheadline: e.target.value})} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
-            <Label>Background Image URL</Label>
+            <Label>Background Image</Label>
             <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
-                <Image src={content.heroImage || "https://placehold.co/1920x1080.png"} alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
+                <Image src={heroPreview || "https://placehold.co/1920x1080.png"} alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
             </div>
-            <Input id="hero-image-url" type="text" className="mt-4" value={content.heroImage || ""} onChange={(e) => setContent({...content, heroImage: e.target.value})} placeholder="https://example.com/hero-image.jpg" />
+            <Input id="hero-image-file" type="file" className="mt-4" onChange={(e) => setHeroImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
+             <p className="text-sm text-muted-foreground mt-2">
+              Select a new image to replace the current one.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -147,17 +170,20 @@ export default function HomePageManagement() {
                 <Textarea id="about-text" rows={5} value={content.aboutText || ""} onChange={(e) => setContent({...content, aboutText: e.target.value})} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
             </div>
              <div>
-                <Label>Section Image URL</Label>
+                <Label>Section Image</Label>
                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
-                    <Image src={content.aboutImage || "https://placehold.co/600x400.png"} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
+                    <Image src={aboutPreview || "https://placehold.co/600x400.png"} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
                 </div>
-                <Input id="about-image-url" type="text" className="mt-4" value={content.aboutImage || ""} onChange={(e) => setContent({...content, aboutImage: e.target.value})} placeholder="https://example.com/about-image.jpg" />
+                <Input id="about-image-file" type="file" className="mt-4" onChange={(e) => setAboutImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Select a new image to replace the current one.
+                </p>
             </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-            <Button onClick={handleSaveChanges} disabled={isSaving}>
+            <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save All Changes
+                {isSaving ? "Saving..." : "Save All Changes"}
             </Button>
         </CardFooter>
       </Card>

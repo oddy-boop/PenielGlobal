@@ -13,11 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { logActivity } from "@/lib/activity-logger";
 import { supabase } from "@/lib/supabaseClient";
+import { uploadFileAndGetUrl } from "@/lib/storage";
 
 export default function LogoManagementPage() {
   const { toast } = useToast();
-  const [logoUrl, setLogoUrl] = useState("");
-  const [headerBgUrl, setHeaderBgUrl] = useState("");
+  const [branding, setBranding] = useState<Branding>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [headerBgFile, setHeaderBgFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -31,12 +33,9 @@ export default function LogoManagementPage() {
           .single();
 
       if (data?.content) {
-        const branding = data.content as Branding;
-        setLogoUrl(branding.logoUrl || "/placeholder-logo.svg");
-        setHeaderBgUrl(branding.headerBgUrl || "https://placehold.co/1200x200.png");
+        setBranding(data.content as Branding);
       } else {
-        setLogoUrl("/placeholder-logo.svg");
-        setHeaderBgUrl("https://placehold.co/1200x200.png");
+        setBranding({ logoUrl: "/placeholder-logo.svg", headerBgUrl: "https://placehold.co/1200x200.png" });
       }
       setIsLoading(false);
     };
@@ -46,10 +45,20 @@ export default function LogoManagementPage() {
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      const brandingData: Branding = { logoUrl, headerBgUrl };
+      let finalBranding = { ...branding };
+
+      if (logoFile) {
+        const logoUrl = await uploadFileAndGetUrl(logoFile, 'branding');
+        finalBranding.logoUrl = logoUrl;
+      }
+      if (headerBgFile) {
+        const headerBgUrl = await uploadFileAndGetUrl(headerBgFile, 'branding');
+        finalBranding.headerBgUrl = headerBgUrl;
+      }
+      
       const { error } = await supabase
         .from('site_content')
-        .update({ content: brandingData })
+        .update({ content: finalBranding })
         .eq('key', 'branding');
       
       if (error) throw error;
@@ -60,6 +69,9 @@ export default function LogoManagementPage() {
         title: "Success!",
         description: "Your logo and branding details have been saved.",
       });
+      
+      setBranding(finalBranding);
+
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -68,8 +80,13 @@ export default function LogoManagementPage() {
       });
     } finally {
       setIsSaving(false);
+      setLogoFile(null);
+      setHeaderBgFile(null);
     }
   }
+
+  const logoPreview = logoFile ? URL.createObjectURL(logoFile) : branding.logoUrl;
+  const headerBgPreview = headerBgFile ? URL.createObjectURL(headerBgFile) : branding.headerBgUrl;
 
   return (
     <div>
@@ -78,7 +95,7 @@ export default function LogoManagementPage() {
         <CardHeader>
           <CardTitle>Update Church Logo</CardTitle>
           <CardDescription>
-            Enter the URL for your church logo. This will replace the current logo in the header.
+            Upload a new church logo. This will replace the current logo in the header.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -86,22 +103,21 @@ export default function LogoManagementPage() {
             <Label>Logo Preview</Label>
             <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-32 relative">
               {isLoading ? <Skeleton className="h-20 w-40"/> : (
-                <Image src={logoUrl || "/placeholder-logo.svg"} alt="Current Logo" width={100} height={40} data-ai-hint="church logo" />
+                <Image src={logoPreview || "/placeholder-logo.svg"} alt="Current Logo" width={100} height={40} data-ai-hint="church logo" />
               )}
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="logo-url">Logo Image URL</Label>
+            <Label htmlFor="logo-file">Upload New Logo</Label>
             <Input 
-              id="logo-url" 
-              type="text" 
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://example.com/logo.png"
+              id="logo-file" 
+              type="file" 
+              onChange={(e) => setLogoFile(e.target.files ? e.target.files[0] : null)}
+              accept="image/*"
               disabled={isSaving}
             />
             <p className="text-sm text-muted-foreground">
-                Paste the URL of your hosted logo image.
+                Select an image file from your computer.
             </p>
           </div>
         </CardContent>
@@ -111,7 +127,7 @@ export default function LogoManagementPage() {
         <CardHeader>
           <CardTitle>Header Background</CardTitle>
           <CardDescription>
-            Enter the URL for the website header's background image.
+            Upload a new background image for the website header.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -119,22 +135,21 @@ export default function LogoManagementPage() {
             <Label>Header Background Preview</Label>
             <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative">
               {isLoading ? <Skeleton className="h-32 w-full"/> : (
-                <Image src={headerBgUrl || "https://placehold.co/1200x200.png"} alt="Header background" width={300} height={50} style={{objectFit: "cover"}} data-ai-hint="church interior abstract" />
+                <Image src={headerBgPreview || "https://placehold.co/1200x200.png"} alt="Header background" width={300} height={50} style={{objectFit: "cover"}} data-ai-hint="church interior abstract" />
               )}
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="header-bg-url">Header Background URL</Label>
+            <Label htmlFor="header-bg-file">Upload New Header Background</Label>
             <Input 
-              id="header-bg-url" 
-              type="text"
-              value={headerBgUrl}
-              onChange={(e) => setHeaderBgUrl(e.target.value)}
-              placeholder="https://example.com/header.jpg"
+              id="header-bg-file" 
+              type="file"
+              onChange={(e) => setHeaderBgFile(e.target.files ? e.target.files[0] : null)}
+              accept="image/*"
               disabled={isSaving}
             />
              <p className="text-sm text-muted-foreground">
-                Paste the URL of your hosted header image.
+                Select an image file from your computer.
             </p>
           </div>
         </CardContent>

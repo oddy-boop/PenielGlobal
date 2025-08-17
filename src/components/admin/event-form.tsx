@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
@@ -20,14 +20,14 @@ const eventFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   time: z.string().min(1, "Time is required"),
   description: z.string().min(1, "Description is required"),
-  imageUrl: z.string().url("Please enter a valid URL for the image."),
+  image: z.instanceof(FileList).refine(files => files?.length === 1, "Image is required."),
 });
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
 
 interface EventFormProps {
   onSubmit: (data: EventFormData) => void;
-  defaultValues?: Partial<EventFormData>;
+  defaultValues?: Partial<Omit<EventFormData, 'image'>>;
 }
 
 export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
@@ -38,10 +38,11 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
       location: defaultValues?.location || '',
       time: defaultValues?.time || '',
       description: defaultValues?.description || '',
-      imageUrl: defaultValues?.imageUrl || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     }
   });
+
+  const imageRef = form.register("image");
 
   return (
     <Form {...form}>
@@ -138,14 +139,14 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
         />
         <FormField
             control={form.control}
-            name="imageUrl"
+            name="image"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Event Image URL</FormLabel>
-                <FormControl>
-                    <Input placeholder="https://example.com/event-image.jpg" {...field} />
-                </FormControl>
-                <FormMessage />
+                  <FormLabel>Event Image</FormLabel>
+                  <FormControl>
+                    <Input type="file" accept="image/*" {...imageRef} />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
             )}
         />

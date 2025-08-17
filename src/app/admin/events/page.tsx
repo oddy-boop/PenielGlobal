@@ -14,6 +14,7 @@ import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
 import { supabase } from "@/lib/supabaseClient";
+import { uploadFileAndGetUrl } from "@/lib/storage";
 
 export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -43,9 +44,25 @@ export default function EventsManagementPage() {
 
   const handleAddEvent = async (data: EventFormData) => {
     try {
+      let imageUrl = '';
+      if (data.image && data.image[0]) {
+        imageUrl = await uploadFileAndGetUrl(data.image[0], 'events');
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Image required",
+            description: "Please select an image for the event.",
+        });
+        return;
+      }
+
       const newEventData = {
-        ...data,
+        title: data.title,
+        location: data.location,
         date: data.date.toISOString(),
+        time: data.time,
+        description: data.description,
+        image_url: imageUrl,
       };
 
       const { error } = await supabase.from("events").insert([newEventData]);

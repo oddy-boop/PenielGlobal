@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { logActivity } from "@/lib/activity-logger";
 import { supabase } from "@/lib/supabaseClient";
+import { uploadFileAndGetUrl } from "@/lib/storage";
 
 export default function SermonsManagementPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
@@ -44,9 +45,27 @@ export default function SermonsManagementPage() {
 
   const handleAddSermon = async (data: SermonFormData) => {
     try {
+      let thumbnailUrl = '';
+      if (data.thumbnail && data.thumbnail[0]) {
+        thumbnailUrl = await uploadFileAndGetUrl(data.thumbnail[0], 'sermons');
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Thumbnail required",
+            description: "Please select a thumbnail image for the sermon.",
+        });
+        return;
+      }
+      
       const newSermon = {
-        ...data,
+        title: data.title,
+        speaker: data.speaker,
+        topic: data.topic,
         date: data.date.toISOString(),
+        video_url: data.videoUrl,
+        audio_url: data.audioUrl,
+        thumbnail_url: thumbnailUrl,
+        description: data.description,
       };
       
       const { error } = await supabase.from('sermons').insert([newSermon]);
@@ -64,7 +83,7 @@ export default function SermonsManagementPage() {
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to add sermon. Please try again.",
+            description: "Failed to add sermon: " + error.message,
         });
     }
   };

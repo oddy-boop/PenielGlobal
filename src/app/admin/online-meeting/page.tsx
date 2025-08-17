@@ -14,6 +14,7 @@ import type { OnlineMeetingContent } from "@/lib/types";
 import { Skeleton } from '@/components/ui/skeleton';
 import { logActivity } from '@/lib/activity-logger';
 import { supabase } from '@/lib/supabaseClient';
+import { uploadFileAndGetUrl } from '@/lib/storage';
 
 const defaultContent: OnlineMeetingContent = {
   title: "Join Us Online",
@@ -29,6 +30,7 @@ export default function OnlineMeetingManagementPage() {
   const { toast } = useToast();
   
   const [content, setContent] = useState<Partial<OnlineMeetingContent>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -54,9 +56,16 @@ export default function OnlineMeetingManagementPage() {
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
+      let finalContent = { ...content };
+
+      if (imageFile) {
+        const imageUrl = await uploadFileAndGetUrl(imageFile, 'content');
+        finalContent.imageUrl = imageUrl;
+      }
+      
       const { error } = await supabase
         .from('site_content')
-        .update({ content: content as any })
+        .update({ content: finalContent as any })
         .eq('key', 'online_meeting');
 
       if (error) throw error;
@@ -75,6 +84,7 @@ export default function OnlineMeetingManagementPage() {
       });
     } finally {
       setIsSaving(false);
+      setImageFile(null);
     }
   }
 
@@ -95,6 +105,8 @@ export default function OnlineMeetingManagementPage() {
       </div>
     )
   }
+  
+  const imagePreview = imageFile ? URL.createObjectURL(imageFile) : content.imageUrl;
 
   return (
     <div>
@@ -132,17 +144,20 @@ export default function OnlineMeetingManagementPage() {
                 <Input id="meeting-link" value={content.meetingLink || ''} onChange={(e) => setContent({...content, meetingLink: e.target.value})} placeholder="https://zoom.us/..." />
             </div>
              <div>
-                <Label>Image URL</Label>
+                <Label>Image</Label>
                  <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative">
-                    <Image src={content.imageUrl || "https://placehold.co/600x450.png"} alt="Current Meeting Image" width={200} height={150} data-ai-hint="online meeting" />
+                    <Image src={imagePreview || "https://placehold.co/600x450.png"} alt="Current Meeting Image" width={200} height={150} data-ai-hint="online meeting" />
                 </div>
-                 <Input id="image-url" type="text" className="mt-4" value={content.imageUrl || ""} onChange={(e) => setContent({...content, imageUrl: e.target.value})} placeholder="https://example.com/meeting-image.jpg" />
+                 <Input id="image-file" type="file" className="mt-4" onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
+                 <p className="text-sm text-muted-foreground mt-2">
+                    Select a new image to replace the current one.
+                 </p>
             </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-          <Button onClick={handleSaveChanges} disabled={isSaving}>
+          <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Changes
+             {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </CardFooter>
       </Card>

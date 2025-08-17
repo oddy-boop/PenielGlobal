@@ -21,7 +21,7 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  thumbnailUrl: z.string().url("Please enter a valid URL for the thumbnail."),
+  thumbnail: z.instanceof(FileList).refine(files => files?.length === 1, "Thumbnail image is required."),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -29,7 +29,7 @@ export type SermonFormData = z.infer<typeof sermonFormSchema>;
 
 interface SermonFormProps {
   onSubmit: (data: SermonFormData) => void;
-  defaultValues?: Partial<SermonFormData>;
+  defaultValues?: Partial<Omit<SermonFormData, 'thumbnail'>>;
 }
 
 export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
@@ -41,11 +41,12 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
       topic: defaultValues?.topic || '',
       videoUrl: defaultValues?.videoUrl || '',
       audioUrl: defaultValues?.audioUrl || '',
-      thumbnailUrl: defaultValues?.thumbnailUrl || '',
       description: defaultValues?.description || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     },
   });
+
+  const thumbnailRef = form.register("thumbnail");
 
   return (
     <Form {...form}>
@@ -142,12 +143,12 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
         />
         <FormField
           control={form.control}
-          name="thumbnailUrl"
+          name="thumbnail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Thumbnail URL</FormLabel>
+              <FormLabel>Thumbnail Image</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/thumbnail.jpg" {...field} />
+                <Input type="file" accept="image/*" {...thumbnailRef} />
               </FormControl>
               <FormMessage />
             </FormItem>
