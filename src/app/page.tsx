@@ -47,10 +47,9 @@ export default function Home() {
         setContent(homeContent);
         
         const images: string[] = [];
-        // Correctly iterate through the hero_image fields and filter out nulls
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
-          const imageUrl = homeContent[key];
+          const imageUrl = homeContent[key] as string | null;
           if (imageUrl) {
             images.push(imageUrl);
           }
@@ -304,5 +303,3 @@ export default function Home() {
     </>
   );
 }
-
-    
