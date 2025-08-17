@@ -9,9 +9,10 @@ import { Badge } from "./ui/badge";
 
 interface SermonCardProps {
   sermon: Sermon;
+  onWatchClick: (sermon: Sermon) => void;
 }
 
-export function SermonCard({ sermon }: SermonCardProps) {
+export function SermonCard({ sermon, onWatchClick }: SermonCardProps) {
   const formattedDate = new Date(sermon.date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -51,8 +52,8 @@ export function SermonCard({ sermon }: SermonCardProps) {
       </CardContent>
       <CardFooter className="flex gap-2">
         {sermon.videoUrl && (
-          <Button asChild className="flex-1">
-            <Link href={sermon.videoUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-2 h-4 w-4"/> Watch</Link>
+          <Button onClick={() => onWatchClick(sermon)} className="flex-1">
+            <Video className="mr-2 h-4 w-4"/> Watch
           </Button>
         )}
         {sermon.audioUrl && (

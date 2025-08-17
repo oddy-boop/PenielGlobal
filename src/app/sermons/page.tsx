@@ -8,6 +8,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+function SermonPlayerDialog({ sermon, open, onOpenChange }: { sermon: Sermon | null, open: boolean, onOpenChange: (open: boolean) => void }) {
+  if (!sermon) return null;
+
+  const getYouTubeVideoId = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === 'youtu.be') {
+        return urlObj.pathname.slice(1);
+      }
+      if (urlObj.hostname.includes('youtube.com')) {
+        return urlObj.searchParams.get('v');
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const videoId = sermon.videoUrl ? getYouTubeVideoId(sermon.videoUrl) : null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="font-headline text-2xl">{sermon.title}</DialogTitle>
+          <DialogDescription>By {sermon.speaker}</DialogDescription>
+        </DialogHeader>
+        {videoId ? (
+          <div className="aspect-video">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${videoId}`}
+              title={sermon.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="rounded-lg"
+            ></iframe>
+          </div>
+        ) : (
+          <div className="p-8 text-center text-muted-foreground">
+            <p>The video for this sermon could not be loaded. It might be an invalid or unsupported link.</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 export default function SermonsPage() {
   const [allSermons, setAllSermons] = useState<Sermon[]>([]);
@@ -15,6 +66,8 @@ export default function SermonsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("all");
   const [selectedSpeaker, setSelectedSpeaker] = useState("all");
+  const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   useEffect(() => {
     const fetchSermons = async () => {
@@ -30,14 +83,18 @@ export default function SermonsPage() {
           videoUrl: s.video_url,
           audioUrl: s.audio_url,
           thumbnailUrl: s.thumbnail_url,
-          createdAt: s.created_at,
-        }))
-        setAllSermons(mappedData as Sermon[]);
+        })) as unknown as Sermon[];
+        setAllSermons(mappedData);
       }
       setIsLoading(false);
     };
     fetchSermons();
   }, []);
+
+  const handleWatchClick = (sermon: Sermon) => {
+    setSelectedSermon(sermon);
+    setIsPlayerOpen(true);
+  }
 
   const { uniqueTopics, uniqueSpeakers, filteredSermons } = useMemo(() => {
     const topics = new Set<string>();
@@ -107,7 +164,7 @@ export default function SermonsPage() {
       ) : filteredSermons.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredSermons.map((sermon) => (
-            <SermonCard key={sermon.id} sermon={sermon} />
+            <SermonCard key={sermon.id} sermon={sermon} onWatchClick={handleWatchClick} />
           ))}
         </div>
       ) : (
@@ -116,6 +173,7 @@ export default function SermonsPage() {
           <p className="text-muted-foreground mt-2">No sermons match your current filters. Try adjusting your search.</p>
         </div>
       )}
+      <SermonPlayerDialog sermon={selectedSermon} open={isPlayerOpen} onOpenChange={setIsPlayerOpen} />
     </div>
   );
 }
