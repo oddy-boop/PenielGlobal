@@ -35,22 +35,23 @@ export default function HomePageManagement() {
   const [heroImageFiles, setHeroImageFiles] = useState<(File | null)[]>(Array(MAX_HERO_IMAGES).fill(null));
   const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    const fetchContent = async () => {
-        setIsLoading(true);
-        const { data, error } = await supabase
-            .from('site_content')
-            .select('content')
-            .eq('key', 'home')
-            .single();
+  const fetchContent = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('key', 'home')
+        .single();
 
-        if (error || !data?.content || Object.keys(data.content).length === 0) {
-            setContent(defaultHomeContent);
-        } else {
-            setContent(data.content as HomeContent);
-        }
-        setIsLoading(false);
-    };
+    if (error || !data?.content || Object.keys(data.content).length === 0) {
+        setContent(defaultHomeContent);
+    } else {
+        setContent(data.content as HomeContent);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     fetchContent();
   }, []);
 
@@ -89,9 +90,12 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
+      // Crucial Fix: Update state directly with the saved data
       setContent(updatedContent);
       setHeroImageFiles(Array(MAX_HERO_IMAGES).fill(null));
       setAboutImageFile(null);
+      // Re-fetch to be absolutely sure we have the latest data.
+      await fetchContent();
 
     } catch (error: any) {
       toast({
@@ -251,3 +255,5 @@ export default function HomePageManagement() {
     </div>
   );
 }
+
+    
