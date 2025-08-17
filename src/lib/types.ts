@@ -38,7 +38,7 @@ export interface ActivityLog {
 export interface HomeContent {
   heroHeadline: string;
   heroSubheadline: string;
-  heroImages: string[];
+  heroImage: string;
   aboutTitle: string;
   aboutText: string;
   aboutImage: string;

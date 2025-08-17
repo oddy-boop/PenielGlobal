@@ -12,8 +12,6 @@ import Link from "next/link";
 import type { HomeContent, Sermon, Service } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabaseClient';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { SermonPlayerDialog } from '@/components/sermon-player-dialog';
 
 const iconMap: { [key: string]: LucideIcon } = {
@@ -48,7 +46,7 @@ export default function Home() {
         setContent({
             heroHeadline: "Welcome",
             heroSubheadline: "Faith, Hope, Community",
-            heroImages: ["https://placehold.co/1920x1080.png"],
+            heroImage: "https://placehold.co/1920x1080.png",
             aboutTitle: "About Us",
             aboutText: "Learn more about our community.",
             aboutImage: "https://placehold.co/600x400.png",
@@ -148,35 +146,25 @@ export default function Home() {
     )
   }
 
-  const hasHeroImages = content.heroImages && content.heroImages.length > 0;
+  const hasHeroImage = content.heroImage && content.heroImage.length > 0;
 
   return (
     <>
       <div className="flex flex-col">
         {/* Hero Section */}
         <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white">
-          {hasHeroImages ? (
-              <Carousel
-                  className="absolute w-full h-full"
-                  plugins={[Autoplay({ delay: 5000 })]}
-                  opts={{ loop: true }}
-              >
-                  <CarouselContent className="h-full">
-                      {content.heroImages.map((src, index) => (
-                          <CarouselItem key={index} className="h-full relative">
-                              <Image
-                                  src={src}
-                                  alt={`Hero background ${index + 1}`}
-                                  fill
-                                  style={{objectFit:"cover"}}
-                                  className="z-0 brightness-50"
-                                  priority={index === 0}
-                                  data-ai-hint="church congregation"
-                              />
-                          </CarouselItem>
-                      ))}
-                  </CarouselContent>
-              </Carousel>
+          {hasHeroImage ? (
+              <>
+                <Image
+                    src={content.heroImage}
+                    alt="Hero background"
+                    fill
+                    style={{objectFit:"cover"}}
+                    className="z-0 brightness-50"
+                    priority
+                    data-ai-hint="church congregation"
+                />
+              </>
           ) : (
               <div className="absolute inset-0 bg-muted z-0"></div>
           )}

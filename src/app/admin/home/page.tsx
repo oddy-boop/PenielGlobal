@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, PlusCircle, Trash2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
@@ -20,7 +20,7 @@ import { uploadFileAndGetUrl } from '@/lib/storage';
 const defaultHomeContent: HomeContent = {
   heroHeadline: "Welcome to Peniel Global Ministry",
   heroSubheadline: "A place of faith, hope, and community.",
-  heroImages: ["https://placehold.co/1920x1080.png"],
+  heroImage: "https://placehold.co/1920x1080.png",
   aboutTitle: "Our Community of Faith",
   aboutText: "Peniel Global Ministry is more than just a building...",
   aboutImage: "https://placehold.co/600x400.png",
@@ -32,7 +32,7 @@ export default function HomePageManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   
-  const [heroImageFiles, setHeroImageFiles] = useState<File[]>([]);
+  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
   const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -47,11 +47,7 @@ export default function HomePageManagement() {
         if (error || !data?.content || Object.keys(data.content).length === 0) {
             setContent(defaultHomeContent);
         } else {
-            const homeContent = data.content as HomeContent;
-            if (!homeContent.heroImages) {
-              homeContent.heroImages = [];
-            }
-            setContent(homeContent);
+            setContent(data.content as HomeContent);
         }
         setIsLoading(false);
     };
@@ -62,10 +58,9 @@ export default function HomePageManagement() {
     setIsSaving(true);
     let updatedContent = { ...content };
     try {
-      if (heroImageFiles.length > 0) {
-        const uploadPromises = heroImageFiles.map(file => uploadFileAndGetUrl(file, 'content'));
-        const newImageUrls = await Promise.all(uploadPromises);
-        updatedContent.heroImages = [...(updatedContent.heroImages || []), ...newImageUrls];
+      if (heroImageFile) {
+        const newImageUrl = await uploadFileAndGetUrl(heroImageFile, 'content');
+        updatedContent.heroImage = newImageUrl;
       }
 
       if (aboutImageFile) {
@@ -98,7 +93,7 @@ export default function HomePageManagement() {
       });
     } finally {
       setIsSaving(false);
-      setHeroImageFiles([]);
+      setHeroImageFile(null);
       setAboutImageFile(null);
       // Clear the file input visually
       const heroInput = document.getElementById('hero-image-file') as HTMLInputElement;
@@ -107,13 +102,6 @@ export default function HomePageManagement() {
       if(aboutInput) aboutInput.value = '';
     }
   };
-
-  const removeHeroImage = (index: number) => {
-    setContent(prev => ({
-        ...prev,
-        heroImages: prev.heroImages?.filter((_, i) => i !== index)
-    }));
-  }
 
   if (isLoading) {
     return (
@@ -139,6 +127,7 @@ export default function HomePageManagement() {
     )
   }
 
+  const heroPreview = heroImageFile ? URL.createObjectURL(heroImageFile) : content.heroImage;
   const aboutPreview = aboutImageFile ? URL.createObjectURL(aboutImageFile) : content.aboutImage;
 
   return (
@@ -148,7 +137,7 @@ export default function HomePageManagement() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Hero Section</CardTitle>
-          <CardDescription>Update the main welcome message and background image carousel.</CardDescription>
+          <CardDescription>Update the main welcome message and background image.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -160,26 +149,13 @@ export default function HomePageManagement() {
             <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => setContent({...content, heroSubheadline: e.target.value})} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
-            <Label>Background Images</Label>
-            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {(content.heroImages || []).map((image, index) => (
-                    <div key={index} className="relative group">
-                        <Image src={image} alt={`Hero background ${index+1}`} width={200} height={120} className="rounded-lg object-cover w-full h-full" data-ai-hint="church congregation" />
-                        <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removeHeroImage(index)}
-                        >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                        </Button>
-                    </div>
-                ))}
+            <Label>Background Image</Label>
+            <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
+                {heroPreview && <Image src={heroPreview} alt="Hero background" width={250} height={120} style={{objectFit:"cover"}} data-ai-hint="church congregation" />}
             </div>
-            <Input id="hero-image-file" type="file" className="mt-4" onChange={(e) => setHeroImageFiles(Array.from(e.target.files || []))} accept="image/*" multiple/>
-             <p className="text-sm text-muted-foreground mt-2">
-              Select one or more new images to add to the carousel.
+            <Input id="hero-image-file" type="file" className="mt-4" onChange={(e) => setHeroImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
+            <p className="text-sm text-muted-foreground mt-2">
+              Select a new image to replace the current hero background.
             </p>
           </div>
         </CardContent>
