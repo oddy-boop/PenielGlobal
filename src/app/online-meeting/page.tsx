@@ -78,14 +78,16 @@ export default function OnlineMeetingPage() {
             </CardContent>
         </Card>
         <div className="p-4">
-            <Image 
-                src={content.imageUrl}
-                alt="People in an online meeting"
-                width={600}
-                height={450}
-                className="rounded-lg shadow-xl"
-                data-ai-hint="online meeting"
-            />
+            {content.imageUrl && (
+              <Image 
+                  src={content.imageUrl}
+                  alt="People in an online meeting"
+                  width={600}
+                  height={450}
+                  className="rounded-lg shadow-xl"
+                  data-ai-hint="online meeting"
+              />
+            )}
         </div>
       </div>
     </div>
