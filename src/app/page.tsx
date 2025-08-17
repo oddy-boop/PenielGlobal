@@ -43,15 +43,14 @@ export default function Home() {
       ]);
 
       if (homeRes.data) {
-        const homeContent = homeRes.data as HomeContent;
-        setContent(homeContent);
+        const homeData = homeRes.data;
+        setContent(homeData);
         
         const images: string[] = [];
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
-          const imageUrl = homeContent[key] as string | null;
-          if (imageUrl) {
-            images.push(imageUrl);
+          if (homeData[key]) {
+            images.push(homeData[key] as string);
           }
         }
         setHeroImages(images);
@@ -59,13 +58,13 @@ export default function Home() {
 
       if (sermonRes.data) {
         const sermonData = sermonRes.data;
-        const mappedSermon = {
-          ...sermonData,
-          id: sermonData.id.toString(),
-          video_url: sermonData.video_url,
-          audio_url: sermonData.audio_url,
-          thumbnail_url: sermonData.thumbnail_url,
-        } as Sermon;
+        const mappedSermon: Sermon = {
+            ...sermonData,
+            id: sermonData.id.toString(),
+            video_url: sermonData.video_url || undefined,
+            audio_url: sermonData.audio_url || undefined,
+            thumbnail_url: sermonData.thumbnail_url || '',
+        };
         setLatestSermon(mappedSermon);
       }
 
@@ -168,7 +167,7 @@ export default function Home() {
                     <CarouselItem key={index} className="relative">
                       <Image
                         src={src}
-                        alt="Hero background"
+                        alt={`Hero background ${index + 1}`}
                         fill
                         style={{objectFit:"cover"}}
                         className="z-0 brightness-50"
@@ -303,3 +302,5 @@ export default function Home() {
     </>
   );
 }
+
+    
