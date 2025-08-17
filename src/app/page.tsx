@@ -66,6 +66,7 @@ export default function Home() {
             aboutText: "Learn more about our community.",
             aboutImage: "https://placehold.co/600x400.png",
         });
+        setHeroImages([]); // Ensure empty array if no content
       }
 
       if (sermonRes.data) {
