@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -11,6 +12,8 @@ import Link from "next/link";
 import type { HomeContent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabaseClient';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export default function Home() {
   const [content, setContent] = useState<HomeContent | null>(null);
@@ -99,19 +102,45 @@ export default function Home() {
     )
   }
 
+  const hasHeroImages = content.heroImages && content.heroImages.length > 0;
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] w-full bg-cover bg-center flex items-center justify-center text-center text-white">
-        <Image
-          src={content.heroImage || "https://placehold.co/1920x1080.png"}
-          alt="Church congregation"
-          fill
-          objectFit="cover"
-          className="z-0 brightness-50"
-          data-ai-hint="church congregation"
-          priority
-        />
+        {hasHeroImages ? (
+            <Carousel
+                className="w-full h-full"
+                plugins={[Autoplay({ delay: 5000 })]}
+                opts={{ loop: true }}
+            >
+                <CarouselContent className="h-full">
+                    {content.heroImages.map((src, index) => (
+                        <CarouselItem key={index} className="h-full">
+                            <Image
+                                src={src}
+                                alt={`Hero background ${index + 1}`}
+                                fill
+                                objectFit="cover"
+                                className="z-0 brightness-50"
+                                priority={index === 0}
+                                data-ai-hint="church congregation"
+                            />
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+            </Carousel>
+        ) : (
+            <Image
+                src={"https://placehold.co/1920x1080.png"}
+                alt="Church congregation"
+                fill
+                objectFit="cover"
+                className="z-0 brightness-50"
+                data-ai-hint="church congregation"
+                priority
+            />
+        )}
         <div className="z-10 p-4 max-w-4xl">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
             {content.heroHeadline}
