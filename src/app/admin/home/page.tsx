@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +111,11 @@ export default function HomePageManagement() {
     }));
   }
 
+  const newHeroImagePreviews = useMemo(() => {
+    return newHeroImageFiles.map(file => URL.createObjectURL(file));
+  }, [newHeroImageFiles]);
+
+
   if (isLoading) {
     return (
         <div>
@@ -172,6 +177,11 @@ export default function HomePageManagement() {
                         </Button>
                     </div>
                 ))}
+                 {newHeroImagePreviews.map((previewUrl, index) => (
+                    <div key={previewUrl} className="relative aspect-video group">
+                        <Image src={previewUrl} alt={`New hero image ${index + 1}`} fill style={{objectFit:"cover"}} className="rounded-md" />
+                    </div>
+                ))}
             </div>
             <Input id="hero-image-file" type="file" className="mt-4" onChange={(e) => setNewHeroImageFiles(Array.from(e.target.files || []))} multiple accept="image/*" />
             <p className="text-sm text-muted-foreground mt-2">
@@ -185,7 +195,7 @@ export default function HomePageManagement() {
         <CardHeader>
           <CardTitle>Community of Faith Section</CardTitle>
           <CardDescription>Update the brief "About Us" section (titled "Our Community of Faith") on the home page.</CardDescription>
-        </Header>
+        </CardHeader>
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="about-title">Section Title</Label>
@@ -217,5 +227,3 @@ export default function HomePageManagement() {
     </div>
   );
 }
-
-    
