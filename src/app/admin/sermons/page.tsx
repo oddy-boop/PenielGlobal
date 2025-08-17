@@ -21,6 +21,7 @@ export default function SermonsManagementPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
   const { toast } = useToast();
 
   const fetchSermons = useCallback(async () => {
@@ -39,7 +40,6 @@ export default function SermonsManagementPage() {
         videoUrl: s.video_url,
         audioUrl: s.audio_url,
         thumbnailUrl: s.thumbnail_url,
-        createdAt: s.created_at,
       }))
       setSermons(mappedData as Sermon[]);
     }
@@ -49,6 +49,24 @@ export default function SermonsManagementPage() {
   useEffect(() => {
     fetchSermons();
   }, [fetchSermons]);
+
+  const handleEditClick = (sermon: Sermon) => {
+    setEditingSermon(sermon);
+    setIsDialogOpen(true);
+  }
+
+  const handleAddClick = () => {
+    setEditingSermon(null);
+    setIsDialogOpen(true);
+  }
+
+  const handleSubmit = async (data: SermonFormData) => {
+    if (editingSermon) {
+      await handleEditSermon(data);
+    } else {
+      await handleAddSermon(data);
+    }
+  }
 
   const handleAddSermon = async (data: SermonFormData) => {
     try {
@@ -95,6 +113,47 @@ export default function SermonsManagementPage() {
     }
   };
 
+  const handleEditSermon = async (data: SermonFormData) => {
+    if (!editingSermon) return;
+    try {
+      let thumbnailUrl = editingSermon.thumbnailUrl;
+      // If a new thumbnail is uploaded, replace the old one
+      if (data.thumbnail && data.thumbnail[0]) {
+        thumbnailUrl = await uploadFileAndGetUrl(data.thumbnail[0], 'sermons');
+      }
+
+      const updatedSermon = {
+        title: data.title,
+        speaker: data.speaker,
+        topic: data.topic,
+        date: data.date.toISOString(),
+        video_url: data.videoUrl,
+        audio_url: data.audioUrl,
+        thumbnail_url: thumbnailUrl,
+        description: data.description,
+      };
+
+      const { error } = await supabase.from('sermons').update(updatedSermon).eq('id', editingSermon.id);
+      if (error) throw error;
+
+      await logActivity("Updated Sermon", `Sermon Title: ${data.title}`);
+      
+      setIsDialogOpen(false);
+      setEditingSermon(null);
+      toast({
+          title: "Sermon Updated",
+          description: "The sermon has been successfully updated.",
+      });
+      fetchSermons();
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to update sermon: " + error.message,
+        });
+    }
+  }
+
   const handleRemoveSermon = async (sermonToRemove: Sermon) => {
     try {
         const { error } = await supabase.from('sermons').delete().eq('id', sermonToRemove.id);
@@ -122,24 +181,29 @@ export default function SermonsManagementPage() {
             <h1 className="text-3xl font-bold tracking-tight">Sermon Management</h1>
             <p className="text-muted-foreground">Add, edit, or remove sermons.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Sermon
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>Add New Sermon</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details below to create a new sermon entry.
-                    </DialogDescription>
-                </DialogHeader>
-                <SermonForm onSubmit={handleAddSermon} />
-            </DialogContent>
-        </Dialog>
+        <Button onClick={handleAddClick}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Sermon
+        </Button>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                  <DialogTitle>{editingSermon ? "Edit Sermon" : "Add New Sermon"}</DialogTitle>
+                  <DialogDescription>
+                      {editingSermon ? "Update the details for this sermon." : "Fill in the details below to create a new sermon entry."}
+                  </DialogDescription>
+              </DialogHeader>
+              <SermonForm
+                key={editingSermon ? editingSermon.id : 'new'}
+                onSubmit={handleSubmit}
+                defaultValues={editingSermon || undefined}
+                isEditing={!!editingSermon}
+              />
+          </DialogContent>
+      </Dialog>
+
 
       <Card>
         <CardHeader>
@@ -192,7 +256,7 @@ export default function SermonsManagementPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem disabled>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditClick(sermon)}>Edit</DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                               <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                             </AlertDialogTrigger>

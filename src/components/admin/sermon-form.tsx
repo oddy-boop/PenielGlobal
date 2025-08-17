@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
@@ -21,8 +21,12 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  thumbnail: z.instanceof(FileList).refine(files => files?.length === 1, "Thumbnail image is required."),
+  thumbnail: z.instanceof(FileList).optional(),
   description: z.string().min(1, "Description is required"),
+});
+
+const createSermonSchema = sermonFormSchema.extend({
+    thumbnail: z.instanceof(FileList).refine(files => files?.length === 1, "Thumbnail image is required."),
 });
 
 export type SermonFormData = z.infer<typeof sermonFormSchema>;
@@ -30,11 +34,12 @@ export type SermonFormData = z.infer<typeof sermonFormSchema>;
 interface SermonFormProps {
   onSubmit: (data: SermonFormData) => void;
   defaultValues?: Partial<Omit<SermonFormData, 'thumbnail'>>;
+  isEditing?: boolean;
 }
 
-export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
+export function SermonForm({ onSubmit, defaultValues, isEditing = false }: SermonFormProps) {
   const form = useForm<SermonFormData>({
-    resolver: zodResolver(sermonFormSchema),
+    resolver: zodResolver(isEditing ? sermonFormSchema : createSermonSchema),
     defaultValues: {
       title: defaultValues?.title || '',
       speaker: defaultValues?.speaker || '',
@@ -150,6 +155,9 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
               <FormControl>
                 <Input type="file" accept="image/*" {...thumbnailRef} />
               </FormControl>
+               <FormDescription>
+                {isEditing ? "Upload a new image to replace the existing one. Leave blank to keep the current thumbnail." : "Select a thumbnail for the sermon."}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -180,7 +188,7 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Save Sermon</Button>
+        <Button type="submit" className="w-full">{isEditing ? 'Save Changes' : 'Add Sermon'}</Button>
       </form>
     </Form>
   );
