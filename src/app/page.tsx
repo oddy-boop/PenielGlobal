@@ -80,11 +80,12 @@ export default function Home() {
     }
   }
 
-  const heroImages = content 
+  const heroImages = content
     ? Object.keys(content)
-        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent])
+        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent] && (content[key as keyof HomeContent] as string).trim() !== '')
         .map(key => content[key as keyof HomeContent] as string)
     : [];
+
 
   if (isLoading) {
     return (
