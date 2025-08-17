@@ -47,12 +47,13 @@ export default function Home() {
         const homeContent = homeRes.data.content as HomeContent;
         setContent(homeContent);
 
-        // **FIXED LOGIC**: Correctly extract hero images from the content object
+        // **DEFINITIVE FIX**: Correctly extract hero images from the content object
         const images: string[] = [];
         for (let i = 1; i <= 10; i++) {
           const key = `heroImage${i}` as keyof HomeContent;
-          if (homeContent[key] && typeof homeContent[key] === 'string') {
-            images.push(homeContent[key] as string);
+          const imageUrl = homeContent[key];
+          if (imageUrl && typeof imageUrl === 'string') {
+            images.push(imageUrl);
           }
         }
         setHeroImages(images);
