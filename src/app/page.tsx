@@ -30,7 +30,6 @@ export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
-  
   const [heroImages, setHeroImages] = useState<string[]>([]);
 
   useEffect(() => {
@@ -48,6 +47,7 @@ export default function Home() {
         setContent(homeContent);
         
         const images: string[] = [];
+        // Correctly iterate through the hero_image fields and filter out nulls
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
           const imageUrl = homeContent[key] as string | null;
@@ -279,7 +279,7 @@ export default function Home() {
                   <div className="mt-12 max-w-2xl mx-auto">
                       <Card className="shadow-lg overflow-hidden">
                           <div className="relative aspect-video">
-                              <Image src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
+                              <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
                               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
                                     <Video className="h-12 w-12"/>
@@ -304,3 +304,5 @@ export default function Home() {
     </>
   );
 }
+
+    
