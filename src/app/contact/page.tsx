@@ -114,7 +114,7 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Follow Us</CardTitle>
             </CardHeader>
             <CardContent className="flex gap-4">
-               {content.socials.map(social => {
+               {content.socials && content.socials.map(social => {
                   const Icon = getIcon(social.platform);
                   return (
                     <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
