@@ -6,32 +6,44 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Church, Clock, Calendar, ArrowRight, Video, Rss } from "lucide-react";
+import { ArrowRight, Calendar, Church, Clock, Rss, Video, Sparkles, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { HomeContent } from '@/lib/types';
+import type { HomeContent, Sermon, Service } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabaseClient';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 
+const iconMap: { [key: string]: LucideIcon } = {
+  Clock,
+  Rss,
+  Church,
+  Video,
+  Sparkles,
+  Calendar,
+};
+
 export default function Home() {
   const [content, setContent] = useState<HomeContent | null>(null);
+  const [latestSermon, setLatestSermon] = useState<Sermon | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchContent = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch Home Page Content
+      const { data: homeData, error: homeError } = await supabase
         .from('site_content')
         .select('content')
         .eq('key', 'home')
         .single();
       
-      if (data?.content && Object.keys(data.content).length > 0) {
-        setContent(data.content as HomeContent);
+      if (homeData?.content && Object.keys(homeData.content).length > 0) {
+        setContent(homeData.content as HomeContent);
       } else {
-        // You can set default content here if the DB is empty
         setContent({
             heroHeadline: "Welcome",
             heroSubheadline: "Faith, Hope, Community",
@@ -39,11 +51,31 @@ export default function Home() {
             aboutTitle: "About Us",
             aboutText: "Learn more about our community.",
             aboutImage: "https://placehold.co/600x400.png",
-            latestSermonTitle: "Latest Sermon",
-            latestSermonSpeaker: "Pastor",
-            latestSermonImage: "https://placehold.co/800x450.png"
         });
       }
+
+      // Fetch Latest Sermon
+      const { data: sermonData, error: sermonError } = await supabase
+        .from('sermons')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (sermonData) {
+        setLatestSermon(sermonData as Sermon);
+      }
+
+       // Fetch Services
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('services')
+        .select('*')
+        .order('id', { ascending: true });
+      
+      if(servicesData) {
+        setServices(servicesData as Service[]);
+      }
+
       setIsLoading(false);
     };
     fetchContent();
@@ -187,42 +219,25 @@ export default function Home() {
             We gather every week to celebrate, worship, and learn from the Word.
           </p>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
-                  <Clock className="h-8 w-8 text-accent" />
-                  Sunday Worship
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg">Every Sunday at 10:00 AM</p>
-                <p className="text-muted-foreground">In-person & Online</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
-                  <Rss className="h-8 w-8 text-accent" />
-                  Midweek Bible Study
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg">Every Wednesday at 7:00 PM</p>
-                <p className="text-muted-foreground">Online via Zoom</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
-                  <Church className="h-8 w-8 text-accent" />
-                  Youth Group
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg">Every Friday at 6:30 PM</p>
-                <p className="text-muted-foreground">At the church hall</p>
-              </CardContent>
-            </Card>
+             {services.length > 0 ? services.map((service) => {
+              const Icon = iconMap[service.icon] || Church;
+              return (
+                <Card key={service.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
+                      <Icon className="h-8 w-8 text-accent" />
+                      {service.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-lg">{service.schedule}</p>
+                    <p className="text-muted-foreground">{service.details}</p>
+                  </CardContent>
+                </Card>
+              )
+            }) : (
+                <p className="text-muted-foreground col-span-3">Services have not been configured yet.</p>
+            )}
           </div>
         </div>
       </section>
@@ -257,38 +272,40 @@ export default function Home() {
       </section>
       
       {/* Featured Sermons */}
-      <section className="py-16 lg:py-24 bg-background">
-          <div className="container mx-auto px-4 text-center">
-              <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">Latest Message</h2>
-              <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Get inspired by our recent sermon on faith and perseverance.
-              </p>
-              <div className="mt-12 max-w-2xl mx-auto">
-                  <Card className="shadow-lg overflow-hidden">
-                      <div className="relative">
-                          <Image src={content.latestSermonImage || "https://placehold.co/800x450.png"} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
-                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                            <Link href="/sermons">
-                              <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
-                                <Video className="h-12 w-12"/>
-                                <span className="sr-only">Play Sermon</span>
-                              </Button>
-                            </Link>
-                          </div>
-                      </div>
-                      <CardContent className="p-6 text-left">
-                          <CardTitle className="font-headline text-2xl">{content.latestSermonTitle}</CardTitle>
-                          <p className="text-muted-foreground mt-2">Speaker: {content.latestSermonSpeaker}</p>
-                          <Button asChild className="mt-4">
-                              <Link href="/sermons">
-                                  Watch Now <ArrowRight className="ml-2 h-4 w-4" />
+      {latestSermon && (
+        <section className="py-16 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">Latest Message</h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Get inspired by our recent sermon on faith and perseverance.
+                </p>
+                <div className="mt-12 max-w-2xl mx-auto">
+                    <Card className="shadow-lg overflow-hidden">
+                        <div className="relative">
+                            <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                              <Link href={`/sermons`}>
+                                <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
+                                  <Video className="h-12 w-12"/>
+                                  <span className="sr-only">Play Sermon</span>
+                                </Button>
                               </Link>
-                          </Button>
-                      </CardContent>
-                  </Card>
-              </div>
-          </div>
-      </section>
+                            </div>
+                        </div>
+                        <CardContent className="p-6 text-left">
+                            <CardTitle className="font-headline text-2xl">{latestSermon.title}</CardTitle>
+                            <p className="text-muted-foreground mt-2">Speaker: {latestSermon.speaker}</p>
+                            <Button asChild className="mt-4">
+                                <Link href="/sermons">
+                                    Watch Now <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </section>
+      )}
     </div>
   );
 }

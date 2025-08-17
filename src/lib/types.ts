@@ -9,7 +9,7 @@ export interface Sermon {
   audioUrl?: string;
   thumbnailUrl: string;
   description: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface Event {
@@ -42,9 +42,6 @@ export interface HomeContent {
   aboutTitle: string;
   aboutText: string;
   aboutImage: string;
-  latestSermonTitle: string;
-  latestSermonSpeaker: string;
-  latestSermonImage: string;
 }
 
 export interface OnlineMeetingContent {
@@ -80,6 +77,15 @@ export interface DonationsContent {
     link: string;
   }[];
 }
+
+export interface Service {
+    id: string;
+    title: string;
+    schedule: string;
+    details: string;
+    icon: string;
+}
+
 
 // Generic type for site content stored in the 'site_content' table
 export interface SiteContent<T> {

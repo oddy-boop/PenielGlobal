@@ -16,7 +16,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop, Home, MessageSquare, Phone, DollarSign, Shield } from 'lucide-react';
+import { Video, Calendar, Image as ImageIcon, LogOut, LayoutDashboard, Laptop, Home, MessageSquare, Phone, DollarSign, Shield, Church } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -121,6 +121,7 @@ const adminNavLinks = [
   { href: '/admin/home', label: 'Home Page', icon: Home },
   { href: '/admin/logo', label: 'Church Logo', icon: ImageIcon },
   { href: '/admin/sermons', label: 'Sermons', icon: Video },
+  { href: '/admin/services', label: 'Services', icon: Church },
   { href: '/admin/events', label: 'Events', icon: Calendar },
   { href: '/admin/daily-inspiration', label: 'Inspirations', icon: MessageSquare },
   { href: '/admin/online-meeting', label: 'Online Meeting', icon: Laptop },

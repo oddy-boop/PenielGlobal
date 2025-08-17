@@ -24,9 +24,6 @@ const defaultHomeContent: HomeContent = {
   aboutTitle: "Our Community of Faith",
   aboutText: "Peniel Global Ministry is more than just a building...",
   aboutImage: "https://placehold.co/600x400.png",
-  latestSermonTitle: "The Power of Unwavering Faith",
-  latestSermonSpeaker: "Pastor John Doe",
-  latestSermonImage: "https://placehold.co/800x450.png",
 };
 
 export default function HomePageManagement() {
@@ -191,8 +188,8 @@ export default function HomePageManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>About Us Snippet</CardTitle>
-          <CardDescription>Update the brief "About Us" section on the home page.</CardDescription>
+          <CardTitle>Community of Faith Section</CardTitle>
+          <CardDescription>Update the brief "About Us" section (titled "Our Community of Faith") on the home page.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="space-y-2">
