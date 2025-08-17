@@ -20,14 +20,20 @@ export function SermonCard({ sermon }: SermonCardProps) {
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
-        <div className="relative aspect-video">
-           <Image 
-             src={sermon.thumbnailUrl} 
-             alt={sermon.title} 
-             fill
-             className="object-cover rounded-md"
-             data-ai-hint="sermon abstract"
-           />
+        <div className="relative aspect-video bg-muted rounded-md">
+           {sermon.thumbnailUrl ? (
+            <Image 
+              src={sermon.thumbnailUrl} 
+              alt={sermon.title} 
+              fill
+              className="object-cover"
+              data-ai-hint="sermon abstract"
+            />
+           ) : (
+            <div className="flex items-center justify-center h-full">
+              <Video className="w-12 h-12 text-muted-foreground" />
+            </div>
+           )}
         </div>
         <CardTitle className="font-headline text-xl mt-4">{sermon.title}</CardTitle>
         <CardDescription>
