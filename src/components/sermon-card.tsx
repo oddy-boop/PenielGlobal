@@ -1,3 +1,4 @@
+
 import type { Sermon } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
@@ -51,12 +52,12 @@ export function SermonCard({ sermon }: SermonCardProps) {
       <CardFooter className="flex gap-2">
         {sermon.videoUrl && (
           <Button asChild className="flex-1">
-            <Link href={sermon.videoUrl}><Video className="mr-2 h-4 w-4"/> Watch</Link>
+            <Link href={sermon.videoUrl} target="_blank" rel="noopener noreferrer"><Video className="mr-2 h-4 w-4"/> Watch</Link>
           </Button>
         )}
         {sermon.audioUrl && (
           <Button asChild variant="outline" className="flex-1">
-            <Link href={sermon.audioUrl}><Mic className="mr-2 h-4 w-4"/> Listen</Link>
+            <Link href={sermon.audioUrl} target="_blank" rel="noopener noreferrer"><Mic className="mr-2 h-4 w-4"/> Listen</Link>
           </Button>
         )}
       </CardFooter>

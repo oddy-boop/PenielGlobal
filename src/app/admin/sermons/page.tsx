@@ -34,7 +34,14 @@ export default function SermonsManagementPage() {
       toast({ variant: "destructive", title: "Error fetching sermons", description: error.message });
       setSermons([]);
     } else {
-      setSermons(data as Sermon[]);
+       const mappedData = data.map(s => ({
+        ...s,
+        videoUrl: s.video_url,
+        audioUrl: s.audio_url,
+        thumbnailUrl: s.thumbnail_url,
+        createdAt: s.created_at,
+      }))
+      setSermons(mappedData as Sermon[]);
     }
     setIsLoading(false);
   }, [toast]);

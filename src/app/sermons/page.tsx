@@ -25,7 +25,14 @@ export default function SermonsPage() {
         .order('date', { ascending: false });
 
       if (data) {
-        setAllSermons(data as Sermon[]);
+        const mappedData = data.map(s => ({
+          ...s,
+          videoUrl: s.video_url,
+          audioUrl: s.audio_url,
+          thumbnailUrl: s.thumbnail_url,
+          createdAt: s.created_at,
+        }))
+        setAllSermons(mappedData as Sermon[]);
       }
       setIsLoading(false);
     };

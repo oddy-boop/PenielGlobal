@@ -1,16 +1,15 @@
 
-
 export interface Sermon {
   id: string;
   title: string;
   speaker: string;
   date: string; // ISO 8601 date string
   topic: string;
-  video_url?: string;
-  audio_url?: string;
-  thumbnail_url: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  thumbnailUrl: string;
   description: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface Event {
@@ -20,7 +19,7 @@ export interface Event {
   time: string;
   location: string;
   description: string;
-  image_url: string;
+  imageUrl: string;
   created_at: string;
 }
 
