@@ -30,6 +30,8 @@ export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  
+  const [heroImages, setHeroImages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -42,7 +44,19 @@ export default function Home() {
       ]);
 
       if (homeRes.data?.content && Object.keys(homeRes.data.content).length > 0) {
-        setContent(homeRes.data.content as HomeContent);
+        const homeContent = homeRes.data.content as HomeContent;
+        setContent(homeContent);
+
+        // **FIXED LOGIC**: Correctly extract hero images from the content object
+        const images: string[] = [];
+        for (let i = 1; i <= 10; i++) {
+          const key = `heroImage${i}` as keyof HomeContent;
+          if (homeContent[key] && typeof homeContent[key] === 'string') {
+            images.push(homeContent[key] as string);
+          }
+        }
+        setHeroImages(images);
+
       } else {
         setContent({
             heroHeadline: "Welcome",
@@ -79,14 +93,6 @@ export default function Home() {
       setIsPlayerOpen(true);
     }
   }
-
-  const heroImages = content
-    ? Object.keys(content)
-        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent])
-        .map(key => content[key as keyof HomeContent] as string)
-        .filter(url => url.trim() !== '') // Ensure no empty strings
-    : [];
-
 
   if (isLoading) {
     return (
