@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import type { ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
+import { MotionWrapper } from "@/components/motion-wrapper";
 
 // Helper to get the correct icon component
 const getIcon = (platform: string) => {
@@ -75,96 +76,98 @@ export default function ContactPage() {
   
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          {content.intro}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="space-y-8">
-          <Card>
-            <CardHeader className="flex-row items-center gap-4">
-              <MapPin className="h-8 w-8 text-accent" />
-              <CardTitle className="font-headline">Our Location</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{content.addressLine1}</p>
-              <p>{content.addressLine2}</p>
-              <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
-                {mapSrc && (
-                    <iframe
-                        width="100%"
-                        height="100%"
-                        loading="lazy"
-                        allowFullScreen
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src={mapSrc}
-                        className="border-0"
-                    ></iframe>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex-row items-center gap-4">
-              <Phone className="h-8 w-8 text-accent" />
-              <CardTitle className="font-headline">Call Us</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Main Office: {content.phone}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex-row items-center gap-4">
-              <Mail className="h-8 w-8 text-accent" />
-              <CardTitle className="font-headline">Email Us</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>General Inquiries: {content.generalEmail}</p>
-              <p>Prayer Requests: {content.prayerEmail}</p>
-            </CardContent>
-          </Card>
-
-           <Card>
-            <CardHeader className="flex-row items-center gap-4">
-              <Share2 className="h-8 w-8 text-accent" />
-              <CardTitle className="font-headline">Follow Us</CardTitle>
-            </CardHeader>
-            <CardContent className="flex gap-4">
-               {content.socials && content.socials.map(social => {
-                  const Icon = getIcon(social.platform);
-                  return (
-                    <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
-                  )
-               })}
-            </CardContent>
-          </Card>
+    <MotionWrapper>
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            {content.intro}
+          </p>
         </div>
 
-        <div>
-          <Card className="p-6 md:p-8">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="font-headline text-2xl">Send us a Message</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input placeholder="Your Name" />
-                  <Input type="email" placeholder="Your Email" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="space-y-8">
+            <Card>
+              <CardHeader className="flex-row items-center gap-4">
+                <MapPin className="h-8 w-8 text-accent" />
+                <CardTitle className="font-headline">Our Location</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{content.addressLine1}</p>
+                <p>{content.addressLine2}</p>
+                <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
+                  {mapSrc && (
+                      <iframe
+                          width="100%"
+                          height="100%"
+                          loading="lazy"
+                          allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={mapSrc}
+                          className="border-0"
+                      ></iframe>
+                  )}
                 </div>
-                <Input placeholder="Subject" />
-                <Textarea placeholder="Your Message" rows={6} />
-                <Button type="submit" size="lg" className="w-full">Send Message</Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex-row items-center gap-4">
+                <Phone className="h-8 w-8 text-accent" />
+                <CardTitle className="font-headline">Call Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Main Office: {content.phone}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex-row items-center gap-4">
+                <Mail className="h-8 w-8 text-accent" />
+                <CardTitle className="font-headline">Email Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>General Inquiries: {content.generalEmail}</p>
+                <p>Prayer Requests: {content.prayerEmail}</p>
+              </CardContent>
+            </Card>
+
+             <Card>
+              <CardHeader className="flex-row items-center gap-4">
+                <Share2 className="h-8 w-8 text-accent" />
+                <CardTitle className="font-headline">Follow Us</CardTitle>
+              </CardHeader>
+              <CardContent className="flex gap-4">
+                 {content.socials && content.socials.map(social => {
+                    const Icon = getIcon(social.platform);
+                    return (
+                      <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
+                    )
+                 })}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div>
+            <Card className="p-6 md:p-8">
+              <CardHeader className="p-0 mb-6">
+                <CardTitle className="font-headline text-2xl">Send us a Message</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input placeholder="Your Name" />
+                    <Input type="email" placeholder="Your Email" />
+                  </div>
+                  <Input placeholder="Subject" />
+                  <Textarea placeholder="Your Message" rows={6} />
+                  <Button type="submit" size="lg" className="w-full">Send Message</Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </MotionWrapper>
   );
 }

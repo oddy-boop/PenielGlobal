@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { OnlineMeetingContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
+import { MotionWrapper } from "@/components/motion-wrapper";
 
 export default function OnlineMeetingPage() {
   const [content, setContent] = useState<OnlineMeetingContent | null>(null);
@@ -49,47 +50,49 @@ export default function OnlineMeetingPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{content.title}</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          {content.intro}
-        </p>
-      </div>
+    <MotionWrapper>
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{content.title}</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            {content.intro}
+          </p>
+        </div>
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                    <Video className="w-6 h-6 text-accent"/>
-                    {content.meetingTitle}
-                </CardTitle>
-                <CardDescription>{content.meetingTime}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <p>
-                    {content.description}
-                </p>
-                <Button asChild className="mt-6 w-full">
-                    <Link href={content.meetingLink || '#'}>
-                        Join via Zoom <ArrowRight className="ml-2 h-4 w-4"/>
-                    </Link>
-                </Button>
-            </CardContent>
-        </Card>
-        <div className="p-4">
-            {content.imageUrl && (
-              <Image 
-                  src={content.imageUrl}
-                  alt="People in an online meeting"
-                  width={600}
-                  height={450}
-                  className="rounded-lg shadow-xl"
-                  data-ai-hint="online meeting"
-              />
-            )}
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <Card className="shadow-lg">
+              <CardHeader>
+                  <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                      <Video className="w-6 h-6 text-accent"/>
+                      {content.meetingTitle}
+                  </CardTitle>
+                  <CardDescription>{content.meetingTime}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p>
+                      {content.description}
+                  </p>
+                  <Button asChild className="mt-6 w-full">
+                      <Link href={content.meetingLink || '#'}>
+                          Join via Zoom <ArrowRight className="ml-2 h-4 w-4"/>
+                      </Link>
+                  </Button>
+              </CardContent>
+          </Card>
+          <div className="p-4">
+              {content.imageUrl && (
+                <Image 
+                    src={content.imageUrl}
+                    alt="People in an online meeting"
+                    width={600}
+                    height={450}
+                    className="rounded-lg shadow-xl"
+                    data-ai-hint="online meeting"
+                />
+              )}
+          </div>
         </div>
       </div>
-    </div>
+    </MotionWrapper>
   );
 }
