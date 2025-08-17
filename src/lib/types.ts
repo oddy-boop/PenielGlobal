@@ -6,9 +6,9 @@ export interface Sermon {
   speaker: string;
   date: string; // ISO 8601 date string
   topic: string;
-  videoUrl?: string;
-  audioUrl?: string;
-  thumbnailUrl: string;
+  video_url?: string;
+  audio_url?: string;
+  thumbnail_url: string;
   description: string;
   created_at: string;
 }
@@ -20,7 +20,7 @@ export interface Event {
   time: string;
   location: string;
   description: string;
-  imageUrl: string;
+  image_url: string;
   created_at: string;
 }
 
@@ -38,21 +38,21 @@ export interface ActivityLog {
 
 export interface HomeContent {
   id: number;
-  heroHeadline: string;
-  heroSubheadline: string;
-  aboutTitle: string;
-  aboutText: string;
-  aboutImage: string;
-  heroImage1: string | null;
-  heroImage2: string | null;
-  heroImage3: string | null;
-  heroImage4: string | null;
-  heroImage5: string | null;
-  heroImage6: string | null;
-  heroImage7: string | null;
-  heroImage8: string | null;
-  heroImage9: string | null;
-  heroImage10: string | null;
+  hero_headline: string;
+  hero_subheadline: string;
+  about_title: string;
+  about_text: string;
+  about_image: string;
+  hero_image_1: string | null;
+  hero_image_2: string | null;
+  hero_image_3: string | null;
+  hero_image_4: string | null;
+  hero_image_5: string | null;
+  hero_image_6: string | null;
+  hero_image_7: string | null;
+  hero_image_8: string | null;
+  hero_image_9: string | null;
+  hero_image_10: string | null;
 }
 
 export interface OnlineMeetingContent {

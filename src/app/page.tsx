@@ -49,7 +49,7 @@ export default function Home() {
 
         const images: string[] = [];
         for (let i = 1; i <= 10; i++) {
-          const key = `heroImage${i}` as keyof HomeContent;
+          const key = `hero_image_${i}` as keyof HomeContent;
           const imageUrl = homeContent[key];
           if (imageUrl && typeof imageUrl === 'string') {
             images.push(imageUrl);
@@ -185,10 +185,10 @@ export default function Home() {
           )}
           <div className="z-10 p-4 max-w-4xl">
             <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
-              {content.heroHeadline}
+              {content.hero_headline}
             </h1>
             <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
-              {content.heroSubheadline}
+              {content.hero_subheadline}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="md:w-1/2">
               <Image
-                src={content.aboutImage || "https://placehold.co/600x400.png"}
+                src={content.about_image || "https://placehold.co/600x400.png"}
                 alt="Church interior"
                 width={600}
                 height={400}
@@ -256,10 +256,10 @@ export default function Home() {
             </div>
             <div className="md:w-1/2 text-center md:text-left">
               <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
-                {content.aboutTitle}
+                {content.about_title}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                {content.aboutText}
+                {content.about_text}
               </p>
               <Button asChild className="mt-6" variant="link" size="lg">
                 <Link href="/contact">Learn More About Us <ArrowRight className="ml-2 h-5 w-5" /></Link>
@@ -279,7 +279,7 @@ export default function Home() {
                   <div className="mt-12 max-w-2xl mx-auto">
                       <Card className="shadow-lg overflow-hidden">
                           <div className="relative aspect-video">
-                              <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
+                              <Image src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
                               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
                                     <Video className="h-12 w-12"/>

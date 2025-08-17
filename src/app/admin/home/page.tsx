@@ -17,22 +17,22 @@ import { supabase } from '@/lib/supabaseClient';
 import { uploadFileAndGetUrl } from '@/lib/storage';
 
 const defaultHomeContent: HomeContent = {
-  id: 1, // Default ID
-  heroHeadline: "Welcome to Peniel Global Ministry",
-  heroSubheadline: "A place of faith, hope, and community.",
-  aboutTitle: "Our Community of Faith",
-  aboutText: "Peniel Global Ministry is more than just a building...",
-  aboutImage: "https://placehold.co/600x400.png",
-  heroImage1: null,
-  heroImage2: null,
-  heroImage3: null,
-  heroImage4: null,
-  heroImage5: null,
-  heroImage6: null,
-  heroImage7: null,
-  heroImage8: null,
-  heroImage9: null,
-  heroImage10: null,
+  id: 1,
+  hero_headline: "Welcome to Peniel Global Ministry",
+  hero_subheadline: "A place of faith, hope, and community.",
+  about_title: "Our Community of Faith",
+  about_text: "Peniel Global Ministry is more than just a building...",
+  about_image: "https://placehold.co/600x400.png",
+  hero_image_1: null,
+  hero_image_2: null,
+  hero_image_3: null,
+  hero_image_4: null,
+  hero_image_5: null,
+  hero_image_6: null,
+  hero_image_7: null,
+  hero_image_8: null,
+  hero_image_9: null,
+  hero_image_10: null,
 };
 
 const MAX_HERO_IMAGES = 10;
@@ -80,7 +80,7 @@ export default function HomePageManagement() {
         const file = heroImageFiles[i];
         if (file) {
           const imageUrl = await uploadFileAndGetUrl(file, 'content');
-          const key = `heroImage${i + 1}` as keyof HomeContent;
+          const key = `hero_image_${i + 1}` as keyof HomeContent;
           updatedContent[key] = imageUrl;
         }
       }
@@ -88,13 +88,15 @@ export default function HomePageManagement() {
       // Handle About Image Upload
       if (aboutImageFile) {
         const aboutImageUrl = await uploadFileAndGetUrl(aboutImageFile, 'content');
-        updatedContent.aboutImage = aboutImageUrl;
+        updatedContent.about_image = aboutImageUrl;
       }
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('home_content')
         .update(updatedContent)
-        .eq('id', 1);
+        .eq('id', 1)
+        .select()
+        .single();
 
       if (error) throw error;
       
@@ -105,10 +107,10 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
-      // Clear file inputs and refetch data to show the new state
+      // Clear file inputs and update state with the response from the database
+      setContent(data);
       setHeroImageFiles(Array(MAX_HERO_IMAGES).fill(null));
       setAboutImageFile(null);
-      await fetchContent();
 
     } catch (error: any) {
       toast({
@@ -130,7 +132,7 @@ export default function HomePageManagement() {
   };
 
   const handleRemoveHeroImage = async (index: number) => {
-    const key = `heroImage${index + 1}` as keyof HomeContent;
+    const key = `hero_image_${index + 1}` as keyof HomeContent;
     
     // Optimistically update UI
     setContent(prev => ({ ...prev, [key]: null }));
@@ -144,7 +146,7 @@ export default function HomePageManagement() {
 
         toast({
             title: `Image ${index + 1} Removed`,
-            description: "Don't forget to save all your changes.",
+            description: "You can save this change now.",
         });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error', description: `Could not remove image: ${error.message}`});
@@ -176,7 +178,7 @@ export default function HomePageManagement() {
     )
   }
 
-  const aboutPreview = aboutImageFile ? URL.createObjectURL(aboutImageFile) : content.aboutImage;
+  const aboutPreview = aboutImageFile ? URL.createObjectURL(aboutImageFile) : content.about_image;
 
   return (
     <div>
@@ -190,17 +192,17 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="hero-title">Headline</Label>
-            <Input id="hero-title" value={content.heroHeadline || ""} onChange={(e) => handleFieldChange('heroHeadline', e.target.value)} placeholder="e.g. Welcome to Peniel Global Ministry" />
+            <Input id="hero-title" value={content.hero_headline || ""} onChange={(e) => handleFieldChange('hero_headline', e.target.value)} placeholder="e.g. Welcome to Peniel Global Ministry" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="hero-subtitle">Sub-headline</Label>
-            <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => handleFieldChange('heroSubheadline', e.target.value)} placeholder="e.g. A place of faith, hope, and community." />
+            <Textarea id="hero-subtitle" value={content.hero_subheadline || ""} onChange={(e) => handleFieldChange('hero_subheadline', e.target.value)} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
             <Label>Slideshow Images (up to 10)</Label>
             <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {Array.from({ length: MAX_HERO_IMAGES }).map((_, index) => {
-                const key = `heroImage${index + 1}` as keyof HomeContent;
+                const key = `hero_image_${index + 1}` as keyof HomeContent;
                 const existingImageUrl = content[key] as string | undefined | null;
                 const newFile = heroImageFiles[index];
                 const previewUrl = newFile ? URL.createObjectURL(newFile) : existingImageUrl;
@@ -252,11 +254,11 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="about-title">Section Title</Label>
-                <Input id="about-title" value={content.aboutTitle || ""} onChange={(e) => handleFieldChange('aboutTitle', e.target.value)} placeholder="e.g. Our Community of Faith" />
+                <Input id="about-title" value={content.about_title || ""} onChange={(e) => handleFieldChange('about_title', e.target.value)} placeholder="e.g. Our Community of Faith" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="about-text">Content</Label>
-                <Textarea id="about-text" rows={5} value={content.aboutText || ""} onChange={(e) => handleFieldChange('aboutText', e.target.value)} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
+                <Textarea id="about-text" rows={5} value={content.about_text || ""} onChange={(e) => handleFieldChange('about_text', e.target.value)} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
             </div>
              <div>
                 <Label>Section Image</Label>
