@@ -55,13 +55,13 @@ export default function HomePageManagement() {
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    let updatedContent = { ...content, heroImages: [...(content.heroImages || [])] };
+    let updatedContent = { ...content };
     
     try {
       if (newHeroImageFiles.length > 0) {
         const uploadPromises = newHeroImageFiles.map(file => uploadFileAndGetUrl(file, 'content'));
         const newImageUrls = await Promise.all(uploadPromises);
-        updatedContent.heroImages.push(...newImageUrls);
+        updatedContent.heroImages = [...(updatedContent.heroImages || []), ...newImageUrls];
       }
 
       if (aboutImageFile) {
@@ -83,6 +83,7 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
+      // Correctly update the state with the new content
       setContent(updatedContent);
       setNewHeroImageFiles([]);
       setAboutImageFile(null);
@@ -158,7 +159,7 @@ export default function HomePageManagement() {
             <Label>Slideshow Images</Label>
             <div className="mt-2 p-4 border rounded-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-muted/40 min-h-[150px]">
                 {content.heroImages?.map((imageUrl, index) => (
-                    <div key={index} className="relative aspect-video group">
+                    <div key={imageUrl} className="relative aspect-video group">
                         <Image src={imageUrl} alt={`Hero background ${index + 1}`} fill style={{objectFit:"cover"}} className="rounded-md" data-ai-hint="church congregation" />
                         <Button
                             variant="destructive"
@@ -184,7 +185,7 @@ export default function HomePageManagement() {
         <CardHeader>
           <CardTitle>Community of Faith Section</CardTitle>
           <CardDescription>Update the brief "About Us" section (titled "Our Community of Faith") on the home page.</CardDescription>
-        </CardHeader>
+        </Header>
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="about-title">Section Title</Label>
@@ -216,3 +217,5 @@ export default function HomePageManagement() {
     </div>
   );
 }
+
+    
