@@ -163,7 +163,7 @@ export default function Home() {
               >
                   <CarouselContent className="h-full">
                       {content.heroImages.map((src, index) => (
-                          <CarouselItem key={index} className="h-full">
+                          <CarouselItem key={index} className="h-full relative">
                               <Image
                                   src={src}
                                   alt={`Hero background ${index + 1}`}
@@ -287,10 +287,8 @@ export default function Home() {
                           <CardContent className="p-6 text-left">
                               <CardTitle className="font-headline text-2xl">{latestSermon.title}</CardTitle>
                               <p className="text-muted-foreground mt-2">Speaker: {latestSermon.speaker}</p>
-                              <Button asChild className="mt-4" onClick={handleWatchClick}>
-                                  <Link href="#">
-                                      Watch Now <ArrowRight className="ml-2 h-4 w-4" />
-                                  </Link>
+                              <Button onClick={handleWatchClick} className="mt-4">
+                                  Watch Now <ArrowRight className="ml-2 h-4 w-4" />
                               </Button>
                           </CardContent>
                       </Card>
