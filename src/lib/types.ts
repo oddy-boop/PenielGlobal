@@ -88,7 +88,9 @@ export interface Service {
 
 export interface Inspiration {
     id: number;
-    prompt: string;
+    prompt: string | null;
+    type: 'text' | 'image';
+    image_url: string | null;
     created_at: string;
 }
 

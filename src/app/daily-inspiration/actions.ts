@@ -2,27 +2,28 @@
 "use server";
 
 import { supabase } from "@/lib/supabaseClient";
+import type { Inspiration } from "@/lib/types";
 
-interface Inspiration {
-  prompt: string;
-}
-
-export async function fetchDailyInspiration(): Promise<{ prompt: string } | { error: string }> {
+export async function fetchDailyInspiration(): Promise<{ inspiration: Inspiration } | { error: string }> {
   try {
-    // Fetch all prompts from the database
-    const { data, error } = await supabase.from('inspirations').select('prompt');
+    const { data, error } = await supabase.from('inspirations').select('*');
 
     if (error) throw error;
     
     if (!data || data.length === 0) {
-      return { prompt: "No inspirational messages have been added yet. Please check back later." };
+      return { inspiration: { 
+        id: 0, 
+        type: 'text', 
+        prompt: "No inspirational messages have been added yet.",
+        image_url: null,
+        created_at: new Date().toISOString()
+      }};
     }
 
-    // Select one at random
     const randomIndex = Math.floor(Math.random() * data.length);
     const randomInspiration = data[randomIndex] as Inspiration;
     
-    return { prompt: randomInspiration.prompt };
+    return { inspiration: randomInspiration };
 
   } catch (e: any) {
     console.error(e);
