@@ -104,7 +104,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] w-full bg-cover bg-center flex items-center justify-center text-center text-white">
         <Image
-          src={content.heroImage}
+          src={content.heroImage || "https://placehold.co/1920x1080.png"}
           alt="Church congregation"
           fill
           objectFit="cover"
@@ -192,7 +192,7 @@ export default function Home() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/2">
             <Image
-              src={content.aboutImage}
+              src={content.aboutImage || "https://placehold.co/600x400.png"}
               alt="Church interior"
               width={600}
               height={400}
@@ -224,7 +224,7 @@ export default function Home() {
               <div className="mt-12 max-w-2xl mx-auto">
                   <Card className="shadow-lg overflow-hidden">
                       <div className="relative">
-                          <Image src={content.latestSermonImage} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                          <Image src={content.latestSermonImage || "https://placehold.co/800x450.png"} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <Link href="/sermons">
                               <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
