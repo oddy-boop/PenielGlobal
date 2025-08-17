@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Trash2, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
@@ -17,11 +17,22 @@ import { supabase } from '@/lib/supabaseClient';
 import { uploadFileAndGetUrl } from '@/lib/storage';
 
 const defaultHomeContent: HomeContent = {
+  id: 1, // Default ID
   heroHeadline: "Welcome to Peniel Global Ministry",
   heroSubheadline: "A place of faith, hope, and community.",
   aboutTitle: "Our Community of Faith",
   aboutText: "Peniel Global Ministry is more than just a building...",
   aboutImage: "https://placehold.co/600x400.png",
+  heroImage1: null,
+  heroImage2: null,
+  heroImage3: null,
+  heroImage4: null,
+  heroImage5: null,
+  heroImage6: null,
+  heroImage7: null,
+  heroImage8: null,
+  heroImage9: null,
+  heroImage10: null,
 };
 
 const MAX_HERO_IMAGES = 10;
@@ -38,15 +49,15 @@ export default function HomePageManagement() {
   const fetchContent = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-        .from('site_content')
-        .select('content')
-        .eq('key', 'home')
+        .from('home_content')
+        .select('*')
+        .eq('id', 1)
         .single();
 
-    if (error || !data?.content || Object.keys(data.content).length === 0) {
+    if (error || !data) {
         setContent(defaultHomeContent);
     } else {
-        setContent(data.content as HomeContent);
+        setContent(data as HomeContent);
     }
     setIsLoading(false);
   };
@@ -55,12 +66,16 @@ export default function HomePageManagement() {
     fetchContent();
   }, []);
 
+  const handleFieldChange = (field: keyof HomeContent, value: string) => {
+    setContent(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    let updatedContent = { ...content };
+    let updatedContent: Partial<HomeContent> = { ...content };
     
     try {
-      // Handle Hero Images
+      // Handle Hero Images Upload
       for (let i = 0; i < MAX_HERO_IMAGES; i++) {
         const file = heroImageFiles[i];
         if (file) {
@@ -70,16 +85,16 @@ export default function HomePageManagement() {
         }
       }
 
-      // Handle About Image
+      // Handle About Image Upload
       if (aboutImageFile) {
         const aboutImageUrl = await uploadFileAndGetUrl(aboutImageFile, 'content');
         updatedContent.aboutImage = aboutImageUrl;
       }
       
       const { error } = await supabase
-        .from('site_content')
-        .update({ content: updatedContent as any })
-        .eq('key', 'home');
+        .from('home_content')
+        .update(updatedContent)
+        .eq('id', 1);
 
       if (error) throw error;
       
@@ -90,11 +105,9 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
-      // Crucial Fix: Update state directly with the saved data
-      setContent(updatedContent);
+      // Clear file inputs and refetch data to show the new state
       setHeroImageFiles(Array(MAX_HERO_IMAGES).fill(null));
       setAboutImageFile(null);
-      // Re-fetch to be absolutely sure we have the latest data.
       await fetchContent();
 
     } catch (error: any) {
@@ -116,15 +129,27 @@ export default function HomePageManagement() {
     });
   };
 
-  const handleRemoveHeroImage = (index: number) => {
-    setContent(prev => {
-      const key = `heroImage${index + 1}` as keyof HomeContent;
-      const newContent = { ...prev };
-      delete newContent[key];
-      return newContent;
-    });
-    // Also clear any staged file for this slot
-    handleHeroImageFileChange(index, null);
+  const handleRemoveHeroImage = async (index: number) => {
+    const key = `heroImage${index + 1}` as keyof HomeContent;
+    
+    // Optimistically update UI
+    setContent(prev => ({ ...prev, [key]: null }));
+
+    try {
+        const { error } = await supabase
+            .from('home_content')
+            .update({ [key]: null })
+            .eq('id', 1);
+        if (error) throw error;
+
+        toast({
+            title: `Image ${index + 1} Removed`,
+            description: "Don't forget to save all your changes.",
+        });
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: `Could not remove image: ${error.message}`});
+        fetchContent(); // Revert UI on error
+    }
   };
 
   if (isLoading) {
@@ -165,18 +190,18 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="hero-title">Headline</Label>
-            <Input id="hero-title" value={content.heroHeadline || ""} onChange={(e) => setContent({...content, heroHeadline: e.target.value})} placeholder="e.g. Welcome to Peniel Global Ministry" />
+            <Input id="hero-title" value={content.heroHeadline || ""} onChange={(e) => handleFieldChange('heroHeadline', e.target.value)} placeholder="e.g. Welcome to Peniel Global Ministry" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="hero-subtitle">Sub-headline</Label>
-            <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => setContent({...content, heroSubheadline: e.target.value})} placeholder="e.g. A place of faith, hope, and community." />
+            <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => handleFieldChange('heroSubheadline', e.target.value)} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
             <Label>Slideshow Images (up to 10)</Label>
             <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {Array.from({ length: MAX_HERO_IMAGES }).map((_, index) => {
                 const key = `heroImage${index + 1}` as keyof HomeContent;
-                const existingImageUrl = content[key] as string | undefined;
+                const existingImageUrl = content[key] as string | undefined | null;
                 const newFile = heroImageFiles[index];
                 const previewUrl = newFile ? URL.createObjectURL(newFile) : existingImageUrl;
                 
@@ -227,11 +252,11 @@ export default function HomePageManagement() {
         <CardContent className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="about-title">Section Title</Label>
-                <Input id="about-title" value={content.aboutTitle || ""} onChange={(e) => setContent({...content, aboutTitle: e.target.value})} placeholder="e.g. Our Community of Faith" />
+                <Input id="about-title" value={content.aboutTitle || ""} onChange={(e) => handleFieldChange('aboutTitle', e.target.value)} placeholder="e.g. Our Community of Faith" />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="about-text">Content</Label>
-                <Textarea id="about-text" rows={5} value={content.aboutText || ""} onChange={(e) => setContent({...content, aboutText: e.target.value})} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
+                <Textarea id="about-text" rows={5} value={content.aboutText || ""} onChange={(e) => handleFieldChange('aboutText', e.target.value)} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
             </div>
              <div>
                 <Label>Section Image</Label>
@@ -255,5 +280,3 @@ export default function HomePageManagement() {
     </div>
   );
 }
-
-    

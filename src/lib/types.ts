@@ -1,4 +1,5 @@
 
+
 export interface Sermon {
   id: string;
   title: string;
@@ -36,21 +37,22 @@ export interface ActivityLog {
 }
 
 export interface HomeContent {
+  id: number;
   heroHeadline: string;
   heroSubheadline: string;
   aboutTitle: string;
   aboutText: string;
   aboutImage: string;
-  heroImage1?: string;
-  heroImage2?: string;
-  heroImage3?: string;
-  heroImage4?: string;
-  heroImage5?: string;
-  heroImage6?: string;
-  heroImage7?: string;
-  heroImage8?: string;
-  heroImage9?: string;
-  heroImage10?: string;
+  heroImage1: string | null;
+  heroImage2: string | null;
+  heroImage3: string | null;
+  heroImage4: string | null;
+  heroImage5: string | null;
+  heroImage6: string | null;
+  heroImage7: string | null;
+  heroImage8: string | null;
+  heroImage9: string | null;
+  heroImage10: string | null;
 }
 
 export interface OnlineMeetingContent {

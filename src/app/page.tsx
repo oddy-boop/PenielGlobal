@@ -38,16 +38,15 @@ export default function Home() {
       setIsLoading(true);
       
       const [homeRes, sermonRes, servicesRes] = await Promise.all([
-        supabase.from('site_content').select('content').eq('key', 'home').single(),
+        supabase.from('home_content').select('*').eq('id', 1).single(),
         supabase.from('sermons').select('*').order('date', { ascending: false }).limit(1).single(),
         supabase.from('services').select('*').order('id', { ascending: true })
       ]);
 
-      if (homeRes.data?.content && Object.keys(homeRes.data.content).length > 0) {
-        const homeContent = homeRes.data.content as HomeContent;
+      if (homeRes.data) {
+        const homeContent = homeRes.data as HomeContent;
         setContent(homeContent);
 
-        // **DEFINITIVE FIX**: Correctly extract hero images from the content object
         const images: string[] = [];
         for (let i = 1; i <= 10; i++) {
           const key = `heroImage${i}` as keyof HomeContent;
@@ -57,16 +56,6 @@ export default function Home() {
           }
         }
         setHeroImages(images);
-
-      } else {
-        setContent({
-            heroHeadline: "Welcome",
-            heroSubheadline: "Faith, Hope, Community",
-            aboutTitle: "About Us",
-            aboutText: "Learn more about our community.",
-            aboutImage: "https://placehold.co/600x400.png",
-        });
-        setHeroImages([]); // Ensure empty array if no content
       }
 
       if (sermonRes.data) {
@@ -315,5 +304,3 @@ export default function Home() {
     </>
   );
 }
-
-    
