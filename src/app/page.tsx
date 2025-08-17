@@ -57,15 +57,7 @@ export default function Home() {
       }
 
       if (sermonRes.data) {
-        const sermonData = sermonRes.data;
-        const mappedSermon: Sermon = {
-            ...sermonData,
-            id: sermonData.id.toString(),
-            video_url: sermonData.video_url || undefined,
-            audio_url: sermonData.audio_url || undefined,
-            thumbnail_url: sermonData.thumbnail_url || '',
-        };
-        setLatestSermon(mappedSermon);
+        setLatestSermon(sermonRes.data as Sermon);
       }
 
       if(servicesRes.data) {
@@ -302,5 +294,3 @@ export default function Home() {
     </>
   );
 }
-
-    
