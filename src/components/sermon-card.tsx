@@ -23,9 +23,9 @@ export function SermonCard({ sermon, onWatchClick }: SermonCardProps) {
     <Card className="flex flex-col h-full overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <div className="relative aspect-video bg-muted rounded-md">
-           {sermon.thumbnailUrl ? (
+           {sermon.thumbnail_url ? (
             <Image 
-              src={sermon.thumbnailUrl} 
+              src={sermon.thumbnail_url} 
               alt={sermon.title} 
               fill
               className="object-cover"
@@ -51,17 +51,19 @@ export function SermonCard({ sermon, onWatchClick }: SermonCardProps) {
         <p className="text-muted-foreground text-sm">{sermon.description}</p>
       </CardContent>
       <CardFooter className="flex gap-2">
-        {sermon.videoUrl && (
+        {sermon.video_url && (
           <Button onClick={() => onWatchClick(sermon)} className="flex-1">
             <Video className="mr-2 h-4 w-4"/> Watch
           </Button>
         )}
-        {sermon.audioUrl && (
+        {sermon.audio_url && (
           <Button asChild variant="outline" className="flex-1">
-            <Link href={sermon.audioUrl} target="_blank" rel="noopener noreferrer"><Mic className="mr-2 h-4 w-4"/> Listen</Link>
+            <Link href={sermon.audio_url} target="_blank" rel="noopener noreferrer"><Mic className="mr-2 h-4 w-4"/> Listen</Link>
           </Button>
         )}
       </CardFooter>
     </Card>
   );
 }
+
+    

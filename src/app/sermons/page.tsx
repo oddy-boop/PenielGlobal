@@ -29,13 +29,7 @@ export default function SermonsPage() {
         .order('date', { ascending: false });
 
       if (data) {
-        const mappedData = data.map(s => ({
-          ...s,
-          videoUrl: s.video_url,
-          audioUrl: s.audio_url,
-          thumbnailUrl: s.thumbnail_url,
-        })) as unknown as Sermon[];
-        setAllSermons(mappedData);
+        setAllSermons(data as Sermon[]);
       }
       setIsLoading(false);
     };
@@ -128,3 +122,5 @@ export default function SermonsPage() {
     </div>
   );
 }
+
+    

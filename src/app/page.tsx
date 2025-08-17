@@ -50,7 +50,7 @@ export default function Home() {
         // Correctly iterate through the hero_image fields and filter out nulls
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
-          const imageUrl = homeContent[key] as string | null;
+          const imageUrl = homeContent[key];
           if (imageUrl) {
             images.push(imageUrl);
           }
@@ -63,9 +63,9 @@ export default function Home() {
         const mappedSermon = {
           ...sermonData,
           id: sermonData.id.toString(),
-          videoUrl: sermonData.video_url,
-          audioUrl: sermonData.audio_url,
-          thumbnailUrl: sermonData.thumbnail_url,
+          video_url: sermonData.video_url,
+          audio_url: sermonData.audio_url,
+          thumbnail_url: sermonData.thumbnail_url,
         } as Sermon;
         setLatestSermon(mappedSermon);
       }
@@ -181,7 +181,7 @@ export default function Home() {
                 </CarouselContent>
               </Carousel>
           ) : (
-              <div className="absolute inset-0 bg-muted z-0"></div>
+              <div className="absolute inset-0 bg-primary/20 z-0"></div>
           )}
           <div className="z-10 p-4 max-w-4xl">
             <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
@@ -279,7 +279,7 @@ export default function Home() {
                   <div className="mt-12 max-w-2xl mx-auto">
                       <Card className="shadow-lg overflow-hidden">
                           <div className="relative aspect-video">
-                              <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
+                              <Image src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
                               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
                                     <Video className="h-12 w-12"/>

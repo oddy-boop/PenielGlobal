@@ -37,13 +37,7 @@ export default function SermonsManagementPage() {
       toast({ variant: "destructive", title: "Error fetching sermons", description: error.message });
       setSermons([]);
     } else {
-       const mappedData = data.map(s => ({
-        ...s,
-        videoUrl: s.video_url,
-        audioUrl: s.audio_url,
-        thumbnailUrl: s.thumbnail_url,
-      }));
-      setSermons(mappedData as Sermon[]);
+      setSermons(data as Sermon[]);
     }
     setIsLoading(false);
   }, [toast]);
@@ -120,7 +114,7 @@ export default function SermonsManagementPage() {
   const handleEditSermon = async (data: SermonFormData) => {
     if (!editingSermon) return;
     try {
-      let thumbnailUrl = editingSermon.thumbnailUrl;
+      let thumbnailUrl = editingSermon.thumbnail_url;
       // If a new thumbnail is uploaded, replace the old one
       if (data.thumbnail && data.thumbnail[0]) {
         thumbnailUrl = await uploadFileAndGetUrl(data.thumbnail[0], 'sermons');
@@ -294,3 +288,5 @@ export default function SermonsManagementPage() {
     </div>
   );
 }
+
+    

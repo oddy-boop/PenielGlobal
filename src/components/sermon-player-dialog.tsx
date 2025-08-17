@@ -22,7 +22,7 @@ function SermonPlayerDialog({ sermon, open, onOpenChange }: { sermon: Sermon | n
     }
   };
 
-  const videoId = sermon.videoUrl ? getYouTubeVideoId(sermon.videoUrl) : null;
+  const videoId = sermon.video_url ? getYouTubeVideoId(sermon.video_url) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,3 +54,5 @@ function SermonPlayerDialog({ sermon, open, onOpenChange }: { sermon: Sermon | n
 }
 
 export { SermonPlayerDialog };
+
+    
