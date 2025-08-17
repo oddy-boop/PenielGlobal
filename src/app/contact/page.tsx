@@ -60,6 +60,9 @@ export default function ContactPage() {
       </div>
     );
   }
+  
+  const fullAddress = encodeURIComponent(`${content.addressLine1}, ${content.addressLine2}`);
+  const mapSrc = `https://maps.google.com/maps?q=${fullAddress}&output=embed&z=15`;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -80,9 +83,16 @@ export default function ContactPage() {
             <CardContent>
               <p>{content.addressLine1}</p>
               <p>{content.addressLine2}</p>
-              <div className="mt-4 h-64 bg-muted rounded-lg flex items-center justify-center">
-                {/* This could be an embedded map in a real application */}
-                <p className="text-muted-foreground">Map Placeholder</p>
+              <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={mapSrc}
+                    className="border-0"
+                ></iframe>
               </div>
             </CardContent>
           </Card>
