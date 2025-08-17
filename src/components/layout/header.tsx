@@ -90,12 +90,6 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex">
-                <Link href="/login">
-                    <Shield className="h-5 w-5" />
-                    <span className="sr-only">Admin Login</span>
-                </Link>
-            </Button>
             <div className="md:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
@@ -119,10 +113,6 @@ export function Header() {
                     {navLinks.map((link) => (
                       <NavLink key={link.href} {...link} className="py-2" />
                     ))}
-                    <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors py-2 flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Shield className="h-5 w-5" />
-                        Admin Login
-                    </Link>
                   </nav>
                 </SheetContent>
               </Sheet>
