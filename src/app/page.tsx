@@ -63,7 +63,13 @@ export default function Home() {
         .single();
 
       if (sermonData) {
-        setLatestSermon(sermonData as Sermon);
+        const mappedSermon = {
+          ...sermonData,
+          videoUrl: sermonData.video_url,
+          audioUrl: sermonData.audio_url,
+          thumbnailUrl: sermonData.thumbnail_url,
+        } as Sermon;
+        setLatestSermon(mappedSermon);
       }
 
        // Fetch Services
@@ -282,7 +288,7 @@ export default function Home() {
                 <div className="mt-12 max-w-2xl mx-auto">
                     <Card className="shadow-lg overflow-hidden">
                         <div className="relative">
-                            <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
+                            <Image src={latestSermon.thumbnailUrl || "https://placehold.co/800x450.png"} alt={latestSermon.title} width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                               <Link href={`/sermons`}>
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
