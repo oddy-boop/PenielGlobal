@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import type { Branding } from "@/lib/types";
+import { supabase } from '@/lib/supabaseClient';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function AdminSidebar() {
   const pathname = usePathname();
@@ -31,15 +33,23 @@ function AdminSidebar() {
   const [logoUrl, setLogoUrl] = useState("/placeholder-logo.svg");
 
   useEffect(() => {
-    const storedBranding = localStorage.getItem("branding_content");
-    if (storedBranding) {
-      const data: Branding = JSON.parse(storedBranding);
-      if(data.logoUrl) setLogoUrl(data.logoUrl);
-    }
+    const fetchBranding = async () => {
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'branding')
+            .single();
+
+        if (data && data.content) {
+            const branding = data.content as Branding;
+            if (branding.logoUrl) setLogoUrl(branding.logoUrl);
+        }
+    };
+    fetchBranding();
   }, []);
 
-  const handleSignOut = () => {
-    localStorage.removeItem('isLoggedIn');
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
@@ -124,13 +134,28 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn !== 'true') {
-      router.replace('/login');
-    }
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace('/login');
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
   }, [router]);
+
+  if (isLoading) {
+      return (
+        <div className="flex h-screen w-screen items-center justify-center">
+          <Skeleton className="h-24 w-24 rounded-full" />
+        </div>
+      )
+  }
 
   return (
     <SidebarProvider>

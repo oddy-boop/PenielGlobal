@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
 import { Skeleton } from '@/components/ui/skeleton';
 import type { HomeContent } from '@/lib/types';
+import { supabase } from '@/lib/supabaseClient';
 
 const defaultHomeContent: HomeContent = {
   heroHeadline: "Welcome to Peniel Global Ministry",
@@ -33,46 +34,46 @@ export default function HomePageManagement() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("home_content");
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    } else {
-      setContent(defaultHomeContent);
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'home')
+            .single();
+
+        if (error || !data?.content || Object.keys(data.content).length === 0) {
+            setContent(defaultHomeContent);
+        } else {
+            setContent(data.content as HomeContent);
+        }
+        setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      const updatedContent: HomeContent = {
-        heroHeadline: content.heroHeadline || "",
-        heroSubheadline: content.heroSubheadline || "",
-        heroImage: content.heroImage || "https://placehold.co/1920x1080.png",
-        aboutTitle: content.aboutTitle || "",
-        aboutText: content.aboutText || "",
-        aboutImage: content.aboutImage || "https://placehold.co/600x400.png",
-        latestSermonTitle: content.latestSermonTitle || "",
-        latestSermonSpeaker: content.latestSermonSpeaker || "",
-        latestSermonImage: content.latestSermonImage || "https://placehold.co/800x450.png",
-      };
+      const { error } = await supabase
+        .from('site_content')
+        .update({ content: content as any })
+        .eq('key', 'home');
 
-      localStorage.setItem("home_content", JSON.stringify(updatedContent));
-      setContent(updatedContent);
-      logActivity("Updated Home Page", "Home page text and images updated.");
+      if (error) throw error;
+      
+      await logActivity("Updated Home Page", "Home page text and images updated.");
 
       toast({
         title: "Changes Saved!",
-        description: "Your home page details have been updated locally.",
+        description: "Your home page details have been updated.",
       });
 
-    } catch (error) {
-      console.error("Error saving content to localStorage: ", error);
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save changes locally.",
+        description: `Failed to save changes: ${error.message}`,
       });
     } finally {
       setIsSaving(false);

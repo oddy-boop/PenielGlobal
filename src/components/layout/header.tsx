@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X, Shield } from "lucide-react";
 import Image from "next/image";
 import type { Branding } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -27,23 +28,18 @@ export function Header() {
   const [branding, setBranding] = useState<Branding>({});
   
   useEffect(() => {
-    // On component mount, read from localStorage
-    const storedBranding = localStorage.getItem("branding_content");
-    if (storedBranding) {
-      setBranding(JSON.parse(storedBranding));
-    }
+    const fetchBranding = async () => {
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'branding')
+            .single();
 
-    // Optional: listen for storage changes from other tabs
-    const handleStorageChange = () => {
-       const storedBranding = localStorage.getItem("branding_content");
-       if (storedBranding) {
-         setBranding(JSON.parse(storedBranding));
-       }
+        if (data && data.content) {
+            setBranding(data.content as Branding);
+        }
     };
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    fetchBranding();
   }, []);
 
   // Do not render header on admin or login routes

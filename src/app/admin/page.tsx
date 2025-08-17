@@ -4,9 +4,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DollarSign, Users, Activity, Video, ExternalLink, History } from "lucide-react";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { ActivityLog, Event, Sermon } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function AdminDashboard() {
   const [sermonCount, setSermonCount] = useState(0);
@@ -14,14 +14,26 @@ export default function AdminDashboard() {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
 
   useEffect(() => {
-    const sermonsData = JSON.parse(localStorage.getItem('sermons_data') || '[]');
-    setSermonCount(sermonsData.length);
-    
-    const eventsData = JSON.parse(localStorage.getItem('events_data') || '[]');
-    setEventCount(eventsData.length);
-    
-    const activitiesData = JSON.parse(localStorage.getItem('activity_logs') || '[]');
-    setActivities(activitiesData);
+    const fetchData = async () => {
+      const { count: sermonData, error: sermonError } = await supabase
+        .from('sermons')
+        .select('*', { count: 'exact', head: true });
+      if (sermonData) setSermonCount(sermonData);
+
+      const { count: eventData, error: eventError } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true });
+      if (eventData) setEventCount(eventData);
+
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(5);
+      if (activitiesData) setActivities(activitiesData);
+    };
+
+    fetchData();
   }, []);
 
 
@@ -69,7 +81,7 @@ export default function AdminDashboard() {
           <CardContent>
              <div className="text-2xl font-bold">N/A</div>
              <p className="text-xs text-muted-foreground">
-               Analytics not available in local mode
+               Analytics not available in this demo
             </p>
           </CardContent>
         </Card>
@@ -83,7 +95,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">N/A</div>
             <p className="text-xs text-muted-foreground">
-              Donation tracking not available in local mode
+              Donation tracking not available in this demo
             </p>
           </CardContent>
         </Card>
@@ -106,7 +118,7 @@ export default function AdminDashboard() {
                             <p className="font-medium text-sm">{activity.action}</p>
                             <p className="text-xs text-muted-foreground">{activity.details}</p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(activity.timestamp!), { addSuffix: true })}
                             </p>
                           </div>
                         </div>

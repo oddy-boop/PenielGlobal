@@ -12,6 +12,7 @@ import type { Branding } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { logActivity } from "@/lib/activity-logger";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LogoManagementPage() {
   const { toast } = useToast();
@@ -21,38 +22,49 @@ export default function LogoManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedBranding = localStorage.getItem("branding_content");
-    if (storedBranding) {
-      const data: Branding = JSON.parse(storedBranding);
-      setLogoUrl(data.logoUrl || "");
-      setHeaderBgUrl(data.headerBgUrl || "");
-    } else {
-      // Set default placeholder if nothing is in localStorage
-      setLogoUrl("/placeholder-logo.svg");
-      setHeaderBgUrl("https://placehold.co/1200x200.png");
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+          .from('site_content')
+          .select('content')
+          .eq('key', 'branding')
+          .single();
+
+      if (data?.content) {
+        const branding = data.content as Branding;
+        setLogoUrl(branding.logoUrl || "/placeholder-logo.svg");
+        setHeaderBgUrl(branding.headerBgUrl || "https://placehold.co/1200x200.png");
+      } else {
+        setLogoUrl("/placeholder-logo.svg");
+        setHeaderBgUrl("https://placehold.co/1200x200.png");
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
       const brandingData: Branding = { logoUrl, headerBgUrl };
-      localStorage.setItem("branding_content", JSON.stringify(brandingData));
+      const { error } = await supabase
+        .from('site_content')
+        .update({ content: brandingData })
+        .eq('key', 'branding');
       
-      logActivity("Updated Branding", "Logo and/or Header Background updated.");
+      if (error) throw error;
+      
+      await logActivity("Updated Branding", "Logo and/or Header Background updated.");
 
       toast({
         title: "Success!",
-        description: "Your logo and branding details have been saved locally.",
+        description: "Your logo and branding details have been saved.",
       });
-    } catch (error) {
-      console.error("Error saving branding details to localStorage: ", error);
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save changes. Please check browser permissions.",
+        description: "Failed to save changes: " + error.message,
       });
     } finally {
       setIsSaving(false);

@@ -5,18 +5,26 @@ import type { Event } from "@/lib/types";
 import { EventCard } from "@/components/event-card";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedEvents = localStorage.getItem("events_data");
-    const eventsData = storedEvents ? JSON.parse(storedEvents) : [];
-    eventsData.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setEvents(eventsData);
-    setIsLoading(false);
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: false });
+      
+      if (data) {
+        setEvents(data as Event[]);
+      }
+      setIsLoading(false);
+    };
+    fetchEvents();
   }, []);
 
   return (

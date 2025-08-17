@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,28 +18,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState('password');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    setTimeout(() => {
-      if (email === 'admin@example.com' && password === 'password') {
-        localStorage.setItem('isLoggedIn', 'true');
-        toast({
-            title: "Login Successful",
-            description: "Redirecting to the admin dashboard...",
-        });
-        router.push('/admin');
-      } else {
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: "Invalid credentials. Use admin@example.com and 'password'.",
-        });
-      }
-      setIsLoading(false);
-    }, 500);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message,
+      });
+    } else {
+      toast({
+          title: "Login Successful",
+          description: "Redirecting to the admin dashboard...",
+      });
+      router.push('/admin');
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -83,7 +85,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter>
             <p className="text-xs text-muted-foreground text-center w-full">
-                For demo purposes, use admin@example.com and 'password'.
+                Use the email and password from your Supabase project.
             </p>
         </CardFooter>
       </Card>

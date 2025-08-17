@@ -8,6 +8,7 @@ import { DollarSign, Heart, Gift, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import type { DonationsContent } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
 
 interface DonationTier {
   id: string;
@@ -23,18 +24,26 @@ export default function DonationsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("donations_content");
-    if (storedContent) {
-      const data = JSON.parse(storedContent) as DonationsContent;
-      // Assign icons based on tier index for variety
-      const tiersWithIcons = data.tiers.map((tier, index) => {
-          const icons = [DollarSign, Heart, Gift];
-          return {...tier, icon: icons[index % icons.length]};
-      });
-      setContent({...data, tiers: tiersWithIcons});
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('key', 'donations')
+        .single();
+      
+      if (data?.content) {
+        const pageData = data.content as DonationsContent;
+        // Assign icons based on tier index for variety
+        const tiersWithIcons = pageData.tiers.map((tier, index) => {
+            const icons = [DollarSign, Heart, Gift];
+            return {...tier, icon: icons[index % icons.length]};
+        });
+        setContent({...pageData, tiers: tiersWithIcons});
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
   if (isLoading) {

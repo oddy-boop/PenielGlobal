@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -20,63 +21,70 @@ export default function EventsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchEvents = () => {
+  const fetchEvents = useCallback(async () => {
     setIsLoading(true);
-    const storedEvents = localStorage.getItem("events_data");
-    const eventsData = storedEvents ? JSON.parse(storedEvents) : [];
-    eventsData.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setEvents(eventsData);
+    const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: false });
+
+    if (error) {
+        toast({ variant: "destructive", title: "Error fetching events", description: error.message });
+        setEvents([]);
+    } else {
+        setEvents(data as Event[]);
+    }
     setIsLoading(false);
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [fetchEvents]);
 
-  const handleAddEvent = (data: EventFormData) => {
+  const handleAddEvent = async (data: EventFormData) => {
     try {
-      const newEvent: Event = {
+      const newEventData = {
         ...data,
-        id: `event-${Date.now()}`,
         date: data.date.toISOString(),
       };
 
-      const updatedEvents = [newEvent, ...events];
-      localStorage.setItem("events_data", JSON.stringify(updatedEvents));
-      logActivity("Created Event", `Event Title: ${data.title}`);
+      const { error } = await supabase.from("events").insert([newEventData]);
+
+      if (error) throw error;
       
-      setEvents(updatedEvents);
+      await logActivity("Created Event", `Event Title: ${data.title}`);
+      
       setIsDialogOpen(false);
       toast({
           title: "Event Added",
-          description: "The new event has been successfully created locally.",
-      })
-    } catch (error) {
-       console.error("Error adding event to localStorage: ", error);
+          description: "The new event has been successfully created.",
+      });
+      fetchEvents(); // Refresh the list
+    } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Failed to add event. Please try again.",
+            title: "Error adding event",
+            description: error.message,
         });
     }
   }
   
-  const handleRemoveEvent = (eventToDelete: Event) => {
+  const handleRemoveEvent = async (eventToDelete: Event) => {
     try {
-        const updatedEvents = events.filter(event => event.id !== eventToDelete.id);
-        localStorage.setItem("events_data", JSON.stringify(updatedEvents));
-        logActivity("Deleted Event", `Event Title: ${eventToDelete.title}`);
-        setEvents(updatedEvents);
+        const { error } = await supabase.from("events").delete().eq("id", eventToDelete.id);
+        if (error) throw error;
+
+        await logActivity("Deleted Event", `Event Title: ${eventToDelete.title}`);
         toast({
             title: "Event Removed",
-            description: "The event has been deleted locally.",
+            description: "The event has been deleted.",
         });
-    } catch (error) {
-        console.error("Error removing event from localStorage: ", error);
+        fetchEvents(); // Refresh the list
+    } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Failed to remove event. Please try again.",
+            title: "Error removing event",
+            description: error.message,
         });
     }
   }

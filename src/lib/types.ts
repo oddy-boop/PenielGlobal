@@ -5,20 +5,22 @@ export interface Sermon {
   speaker: string;
   date: string; // ISO 8601 date string
   topic: string;
-  videoUrl?: string;
-  audioUrl?: string;
-  thumbnailUrl: string;
+  video_url?: string;
+  audio_url?: string;
+  thumbnail_url: string;
   description: string;
+  created_at: string;
 }
 
 export interface Event {
-  id:string;
+  id: string;
   title: string;
   date: string; // ISO 8601 date string
   time: string;
   location: string;
   description: string;
-  imageUrl: string;
+  image_url: string;
+  created_at: string;
 }
 
 export interface Branding {
@@ -27,10 +29,10 @@ export interface Branding {
 }
 
 export interface ActivityLog {
-  id: string;
+  id?: number;
   action: string;
   details: string;
-  timestamp: string; // ISO 8601 date string
+  timestamp?: string; // ISO 8601 date string
 }
 
 export interface HomeContent {
@@ -75,4 +77,10 @@ export interface DonationsContent {
     suggestedAmount: string;
     link: string;
   }[];
+}
+
+// Generic type for site content stored in the 'site_content' table
+export interface SiteContent<T> {
+    key: string;
+    content: T;
 }

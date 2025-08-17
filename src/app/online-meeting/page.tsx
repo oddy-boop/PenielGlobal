@@ -8,18 +8,27 @@ import { Video, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import type { OnlineMeetingContent } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function OnlineMeetingPage() {
   const [content, setContent] = useState<OnlineMeetingContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("online_meeting_content");
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('key', 'online_meeting')
+        .single();
+      
+      if (data?.content) {
+        setContent(data.content as OnlineMeetingContent);
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
   if (isLoading) {

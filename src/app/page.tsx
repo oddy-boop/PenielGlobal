@@ -10,19 +10,27 @@ import Image from "next/image";
 import Link from "next/link";
 import type { HomeContent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function Home() {
   const [content, setContent] = useState<HomeContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem('home_content');
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    }
-    // No default content here, will show a message if nothing is set.
-    setIsLoading(false);
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('key', 'home')
+        .single();
+      
+      if (data?.content) {
+        setContent(data.content as HomeContent);
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
   if (isLoading) {

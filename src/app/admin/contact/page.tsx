@@ -11,6 +11,7 @@ import { PlusCircle, Trash2, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { logActivity } from '@/lib/activity-logger';
 import type { ContactContent } from '@/lib/types';
+import { supabase } from '@/lib/supabaseClient';
 
 const defaultContent: ContactContent = {
   intro: "We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out.",
@@ -33,30 +34,44 @@ export default function ContactPageManagement() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem('contact_content');
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    } else {
-      setContent(defaultContent);
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'contact')
+            .single();
+
+        if (data?.content && Object.keys(data.content).length > 0) {
+            setContent(data.content as ContactContent);
+        } else {
+            setContent(defaultContent);
+        }
+        setIsLoading(false);
+    };
+    fetchContent();
   }, []);
   
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      localStorage.setItem('contact_content', JSON.stringify(content));
-      logActivity("Updated Contact Page", "Contact page details updated.");
+      const { error } = await supabase
+        .from('site_content')
+        .update({ content: content as any })
+        .eq('key', 'contact');
+
+      if (error) throw error;
+      
+      await logActivity("Updated Contact Page", "Contact page details updated.");
       toast({
           title: "Changes Saved!",
-          description: "Your contact page details have been updated locally.",
+          description: "Your contact page details have been updated.",
       });
-    } catch (e) {
+    } catch (e: any) {
       toast({
         variant: "destructive",
         title: "Error saving changes",
-        description: "Could not save contact details to local storage."
+        description: e.message
       })
     } finally {
       setIsSaving(false);

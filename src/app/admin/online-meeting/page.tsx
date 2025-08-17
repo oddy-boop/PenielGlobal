@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { OnlineMeetingContent } from "@/lib/types";
 import { Skeleton } from '@/components/ui/skeleton';
 import { logActivity } from '@/lib/activity-logger';
+import { supabase } from '@/lib/supabaseClient';
 
 const defaultContent: OnlineMeetingContent = {
   title: "Join Us Online",
@@ -32,32 +33,45 @@ export default function OnlineMeetingManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("online_meeting_content");
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    } else {
-      setContent(defaultContent);
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'online_meeting')
+            .single();
+
+        if (data?.content && Object.keys(data.content).length > 0) {
+            setContent(data.content as OnlineMeetingContent);
+        } else {
+            setContent(defaultContent);
+        }
+        setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      localStorage.setItem("online_meeting_content", JSON.stringify(content));
-      logActivity("Updated Online Meeting Page", `New title: ${content.title}`);
+      const { error } = await supabase
+        .from('site_content')
+        .update({ content: content as any })
+        .eq('key', 'online_meeting');
+
+      if (error) throw error;
+      
+      await logActivity("Updated Online Meeting Page", `New title: ${content.title}`);
       
       toast({
         title: "Changes Saved!",
-        description: "Your online meeting details have been updated locally.",
+        description: "Your online meeting details have been updated.",
       });
-    } catch (error) {
-       console.error("Error saving content to localStorage: ", error);
+    } catch (error: any) {
        toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save changes locally.",
+        description: "Failed to save changes: " + error.message,
       });
     } finally {
       setIsSaving(false);

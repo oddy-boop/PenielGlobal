@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SermonsPage() {
   const [allSermons, setAllSermons] = useState<Sermon[]>([]);
@@ -16,12 +17,19 @@ export default function SermonsPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState("all");
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedSermons = localStorage.getItem("sermons_data");
-    const sermonsData = storedSermons ? JSON.parse(storedSermons) : [];
-    sermonsData.sort((a: Sermon, b: Sermon) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setAllSermons(sermonsData);
-    setIsLoading(false);
+    const fetchSermons = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('sermons')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (data) {
+        setAllSermons(data as Sermon[]);
+      }
+      setIsLoading(false);
+    };
+    fetchSermons();
   }, []);
 
   const { uniqueTopics, uniqueSpeakers, filteredSermons } = useMemo(() => {

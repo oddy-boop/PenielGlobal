@@ -10,6 +10,7 @@ import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { ContactContent } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
 
 // Helper to get the correct icon component
 const getIcon = (platform: string) => {
@@ -27,12 +28,20 @@ export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("contact_content");
-    if (storedContent) {
-      setContent(JSON.parse(storedContent));
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('content')
+        .eq('key', 'contact')
+        .single();
+      
+      if (data?.content) {
+        setContent(data.content as ContactContent);
+      }
+      setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
   if (isLoading) {

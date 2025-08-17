@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
 import { logActivity } from "@/lib/activity-logger";
 import type { DonationsContent } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
 
 interface DonationTier {
   id: string;
@@ -33,44 +34,49 @@ const defaultContent: DonationsContent = {
 
 export default function DonationsPageManagement() {
   const { toast } = useToast();
-  const [headline, setHeadline] = useState("");
-  const [intro, setIntro] = useState("");
-  const [tiers, setTiers] = useState<DonationTier[]>([]);
+  const [content, setContent] = useState<DonationsContent>(defaultContent);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    const storedContent = localStorage.getItem("donations_content");
-    if (storedContent) {
-        const data = JSON.parse(storedContent);
-        setHeadline(data.headline || "");
-        setIntro(data.intro || "");
-        setTiers(data.tiers || []);
-    } else {
-        setHeadline(defaultContent.headline);
-        setIntro(defaultContent.intro);
-        setTiers(defaultContent.tiers);
-    }
-    setIsLoading(false);
+    const fetchContent = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('content')
+            .eq('key', 'donations')
+            .single();
+
+        if (data?.content && Object.keys(data.content).length > 0) {
+            setContent(data.content as DonationsContent);
+        } else {
+            setContent(defaultContent);
+        }
+        setIsLoading(false);
+    };
+    fetchContent();
   }, []);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      const donationsData: DonationsContent = { headline, intro, tiers };
-      localStorage.setItem("donations_content", JSON.stringify(donationsData));
-      logActivity("Updated Donations Page", `New headline: ${headline}`);
+      const { error } = await supabase
+        .from('site_content')
+        .update({ content: content as any })
+        .eq('key', 'donations');
+      
+      if (error) throw error;
+      
+      await logActivity("Updated Donations Page", `New headline: ${content.headline}`);
       toast({
         title: "Changes Saved!",
-        description: "Your donations page details have been updated locally.",
+        description: "Your donations page details have been updated.",
       });
-    } catch (error) {
-      console.error("Error saving donations content to localStorage: ", error);
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save changes. Please try again.",
+        description: "Failed to save changes. " + error.message,
       });
     } finally {
       setIsSaving(false);
@@ -78,20 +84,24 @@ export default function DonationsPageManagement() {
   };
 
   const handleAddTier = () => {
-    setTiers([
-      ...tiers,
-      { id: `tier-${Date.now()}`, title: "", description: "", suggestedAmount: "", link: "" },
-    ]);
+    setContent(prev => ({
+        ...prev,
+        tiers: [
+          ...prev.tiers,
+          { id: `tier-${Date.now()}`, title: "", description: "", suggestedAmount: "", link: "" },
+        ]
+    }));
   };
 
   const handleRemoveTier = (id: string) => {
-    setTiers(tiers.filter(tier => tier.id !== id));
+    setContent(prev => ({ ...prev, tiers: prev.tiers.filter(tier => tier.id !== id)}));
   };
 
   const handleTierChange = (id: string, field: keyof Omit<DonationTier, 'id'>, value: string) => {
-    setTiers(
-      tiers.map(tier => (tier.id === id ? { ...tier, [field]: value } : tier))
-    );
+    setContent(prev => ({
+        ...prev,
+        tiers: prev.tiers.map(tier => (tier.id === id ? { ...tier, [field]: value } : tier))
+    }));
   };
   
   if (isLoading) {
@@ -110,11 +120,11 @@ export default function DonationsPageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="donations-title">Headline</Label>
-            <Input id="donations-title" placeholder="e.g. Support Our Ministry" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+            <Input id="donations-title" placeholder="e.g. Support Our Ministry" value={content.headline} onChange={(e) => setContent({...content, headline: e.target.value})} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="donations-intro">Introductory Paragraph</Label>
-            <Textarea id="donations-intro" rows={4} placeholder="e.g. Your generous giving enables us..." value={intro} onChange={(e) => setIntro(e.target.value)} />
+            <Textarea id="donations-intro" rows={4} placeholder="e.g. Your generous giving enables us..." value={content.intro} onChange={(e) => setContent({...content, intro: e.target.value})} />
           </div>
         </CardContent>
       </Card>
@@ -125,7 +135,7 @@ export default function DonationsPageManagement() {
           <CardDescription>Update the details for the donation options. For the 'Donate Now' buttons, you'll need to provide links to your payment processor (e.g., Stripe, PayPal).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
-            {tiers.map((tier) => (
+            {content.tiers.map((tier) => (
               <div key={tier.id} className="p-4 border rounded-lg space-y-4 relative">
                   <div className="flex justify-between items-center">
                     <Input placeholder="Tier Title" className="font-semibold text-lg border-none shadow-none p-0 focus-visible:ring-0" value={tier.title} onChange={(e) => handleTierChange(tier.id, 'title', e.target.value)} />
