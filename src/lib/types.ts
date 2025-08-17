@@ -54,3 +54,25 @@ export interface OnlineMeetingContent {
     meetingLink: string;
     imageUrl: string;
 }
+
+export interface ContactContent {
+    intro: string;
+    addressLine1: string;
+    addressLine2: string;
+    phone: string;
+    generalEmail: string;
+    prayerEmail: string;
+    socials: { platform: string, url: string }[];
+}
+
+export interface DonationsContent {
+  headline: string;
+  intro: string;
+  tiers: {
+    id: string;
+    title: string;
+    description: string;
+    suggestedAmount: string;
+    link: string;
+  }[];
+}

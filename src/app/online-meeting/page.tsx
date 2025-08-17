@@ -1,27 +1,50 @@
+
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Video, ArrowRight } from "lucide-react";
+import { Video, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import type { OnlineMeetingContent } from "@/lib/types";
 
 export default function OnlineMeetingPage() {
-  // In a real app, this data would be fetched from Firestore
-  const meetingDetails = {
-    title: "Join Us Online",
-    intro: "Connect with our church family from anywhere in the world. Our online services and meetings are a great way to stay engaged.",
-    meetingTitle: "Midweek Bible Study",
-    meetingTime: "Every Wednesday at 7:00 PM",
-    description: "Dive deeper into the scriptures with us in our interactive online Bible study. It's a time of learning, discussion, and fellowship.",
-    meetingLink: "#",
-    imageUrl: "https://placehold.co/600x450.png"
-  };
+  const [content, setContent] = useState<OnlineMeetingContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const storedContent = localStorage.getItem("online_meeting_content");
+    if (storedContent) {
+      setContent(JSON.parse(storedContent));
+    }
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center min-h-[50vh]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary"/>
+        </div>
+    )
+  }
+
+  if (!content) {
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-semibold text-primary">Online Meeting Information Not Available</h2>
+        <p className="text-muted-foreground mt-2">Please configure this page in the admin panel.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{meetingDetails.title}</h1>
+        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">{content.title}</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          {meetingDetails.intro}
+          {content.intro}
         </p>
       </div>
 
@@ -30,16 +53,16 @@ export default function OnlineMeetingPage() {
             <CardHeader>
                 <CardTitle className="font-headline text-2xl flex items-center gap-2">
                     <Video className="w-6 h-6 text-accent"/>
-                    {meetingDetails.meetingTitle}
+                    {content.meetingTitle}
                 </CardTitle>
-                <CardDescription>{meetingDetails.meetingTime}</CardDescription>
+                <CardDescription>{content.meetingTime}</CardDescription>
             </CardHeader>
             <CardContent>
                 <p>
-                    {meetingDetails.description}
+                    {content.description}
                 </p>
                 <Button asChild className="mt-6 w-full">
-                    <Link href={meetingDetails.meetingLink}>
+                    <Link href={content.meetingLink || '#'}>
                         Join via Zoom <ArrowRight className="ml-2 h-4 w-4"/>
                     </Link>
                 </Button>
@@ -47,7 +70,7 @@ export default function OnlineMeetingPage() {
         </Card>
         <div className="p-4">
             <Image 
-                src={meetingDetails.imageUrl}
+                src={content.imageUrl}
                 alt="People in an online meeting"
                 width={600}
                 height={450}

@@ -5,11 +5,9 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Church, Clock, Calendar, ArrowRight, Video, Rss, Loader2 } from "lucide-react";
+import { Church, Clock, Calendar, ArrowRight, Video, Rss } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 import type { HomeContent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,16 +16,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchContent = async () => {
-      setIsLoading(true);
-      const docRef = doc(db, 'siteContent', 'home');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setContent(docSnap.data() as HomeContent);
-      }
-      setIsLoading(false);
-    };
-    fetchContent();
+    setIsLoading(true);
+    const storedContent = localStorage.getItem('home_content');
+    if (storedContent) {
+      setContent(JSON.parse(storedContent));
+    }
+    // No default content here, will show a message if nothing is set.
+    setIsLoading(false);
   }, []);
 
   if (isLoading) {
@@ -91,7 +86,7 @@ export default function Home() {
      return (
         <div className="flex justify-center items-center min-h-[50vh] flex-col gap-4">
             <h2 className="text-2xl font-semibold text-primary">Welcome!</h2>
-            <p className="text-muted-foreground">Content is being configured. Please check back soon.</p>
+            <p className="text-muted-foreground">Content is not yet configured. Please visit the admin panel.</p>
         </div>
     )
   }
@@ -103,7 +98,7 @@ export default function Home() {
         <Image
           src={content.heroImage}
           alt="Church congregation"
-          layout="fill"
+          fill
           objectFit="cover"
           className="z-0 brightness-50"
           data-ai-hint="church congregation"
@@ -223,10 +218,12 @@ export default function Home() {
                       <div className="relative">
                           <Image src={content.latestSermonImage} alt="Sermon thumbnail" width={800} height={450} className="w-full" data-ai-hint="sermon abstract"/>
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                            <Link href="/sermons">
                               <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20">
                                 <Video className="h-12 w-12"/>
                                 <span className="sr-only">Play Sermon</span>
                               </Button>
+                            </Link>
                           </div>
                       </div>
                       <CardContent className="p-6 text-left">

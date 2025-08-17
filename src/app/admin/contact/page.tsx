@@ -1,41 +1,90 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { logActivity } from '@/lib/activity-logger';
+import type { ContactContent } from '@/lib/types';
+
+const defaultContent: ContactContent = {
+  intro: "We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out.",
+  addressLine1: "123 Faith Avenue",
+  addressLine2: "Hope City, HC 12345",
+  phone: "(123) 456-7890",
+  generalEmail: "contact@penielchurch.org",
+  prayerEmail: "prayer@penielchurch.org",
+  socials: [
+      { platform: "Facebook", url: "https://facebook.com" },
+      { platform: "Twitter", url: "https://twitter.com" },
+      { platform: "Youtube", url: "https://youtube.com" },
+  ]
+};
 
 export default function ContactPageManagement() {
   const { toast } = useToast();
-  const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
+  const [content, setContent] = useState<ContactContent>(defaultContent);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const storedContent = localStorage.getItem('contact_content');
+    if (storedContent) {
+      setContent(JSON.parse(storedContent));
+    } else {
+      setContent(defaultContent);
+    }
+    setIsLoading(false);
+  }, []);
+  
+  const handleSaveChanges = () => {
+    setIsSaving(true);
+    try {
+      localStorage.setItem('contact_content', JSON.stringify(content));
+      logActivity("Updated Contact Page", "Contact page details updated.");
+      toast({
+          title: "Changes Saved!",
+          description: "Your contact page details have been updated locally.",
+      });
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Error saving changes",
+        description: "Could not save contact details to local storage."
+      })
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   const handleAddSocialLink = () => {
-    setSocialLinks([...socialLinks, { platform: "", url: "" }]);
+    setContent(prev => ({
+      ...prev,
+      socials: [...prev.socials, { platform: "", url: "" }]
+    }));
   };
 
   const handleRemoveSocialLink = (index: number) => {
-    const newLinks = socialLinks.filter((_, i) => i !== index);
-    setSocialLinks(newLinks);
+    setContent(prev => ({
+      ...prev,
+      socials: prev.socials.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSocialLinkChange = (index: number, field: 'platform' | 'url', value: string) => {
-    const newLinks = [...socialLinks];
+    const newLinks = [...content.socials];
     newLinks[index][field] = value;
-    setSocialLinks(newLinks);
+    setContent(prev => ({...prev, socials: newLinks}));
   };
 
-  const handleSaveChanges = () => {
-    // Here you would typically gather all the data from the form fields
-    // and save it to your Firestore database.
-    toast({
-        title: "Changes Saved!",
-        description: "Your contact page details have been updated.",
-    });
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>
   }
 
   return (
@@ -50,27 +99,27 @@ export default function ContactPageManagement() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="address-line1">Address Line 1</Label>
-            <Input id="address-line1" placeholder="e.g. 123 Faith Avenue" />
+            <Input id="address-line1" value={content.addressLine1} onChange={e => setContent({...content, addressLine1: e.target.value})} placeholder="e.g. 123 Faith Avenue" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="address-line2">Address Line 2</Label>
-            <Input id="address-line2" placeholder="e.g. Hope City, HC 12345" />
+            <Input id="address-line2" value={content.addressLine2} onChange={e => setContent({...content, addressLine2: e.target.value})} placeholder="e.g. Hope City, HC 12345" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" placeholder="e.g. (123) 456-7890" />
+            <Input id="phone" value={content.phone} onChange={e => setContent({...content, phone: e.target.value})} placeholder="e.g. (123) 456-7890" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="email-general">General Inquiries Email</Label>
-            <Input id="email-general" type="email" placeholder="e.g. contact@penielchurch.org" />
+            <Input id="email-general" type="email" value={content.generalEmail} onChange={e => setContent({...content, generalEmail: e.target.value})} placeholder="e.g. contact@penielchurch.org" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="email-prayer">Prayer Requests Email</Label>
-            <Input id="email-prayer" type="email" placeholder="e.g. prayer@penielchurch.org" />
+            <Input id="email-prayer" type="email" value={content.prayerEmail} onChange={e => setContent({...content, prayerEmail: e.target.value})} placeholder="e.g. prayer@penielchurch.org" />
           </div>
            <div className="space-y-2">
             <Label htmlFor="page-intro">Introductory Text</Label>
-            <Textarea id="page-intro" placeholder="e.g. We would love to hear from you..." />
+            <Textarea id="page-intro" value={content.intro} onChange={e => setContent({...content, intro: e.target.value})} placeholder="e.g. We would love to hear from you..." />
           </div>
         </CardContent>
       </Card>
@@ -81,7 +130,7 @@ export default function ContactPageManagement() {
           <CardDescription>Update the links to your social media profiles. You can add or remove platforms as needed.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {socialLinks.map((link, index) => (
+          {content.socials.map((link, index) => (
             <div key={index} className="flex items-end gap-4 p-4 border rounded-lg">
               <div className="flex-1 space-y-2">
                 <Label htmlFor={`platform-${index}`}>Platform</Label>
@@ -120,7 +169,10 @@ export default function ContactPageManagement() {
       </Card>
       
       <div className="mt-8">
-        <Button onClick={handleSaveChanges}>Save All Changes</Button>
+        <Button onClick={handleSaveChanges} disabled={isSaving}>
+          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save All Changes
+        </Button>
       </div>
     </div>
   );

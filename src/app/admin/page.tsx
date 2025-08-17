@@ -4,10 +4,8 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DollarSign, Users, Activity, Video, ExternalLink, History } from "lucide-react";
 import { useEffect, useState } from "react";
-import { collection, getDocs, orderBy, query, limit, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ActivityLog } from "@/lib/types";
+import { ActivityLog, Event, Sermon } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminDashboard() {
@@ -16,29 +14,14 @@ export default function AdminDashboard() {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
 
   useEffect(() => {
-    const fetchCounts = async () => {
-      const sermonsSnapshot = await getDocs(collection(db, "sermons"));
-      setSermonCount(sermonsSnapshot.size);
-      const eventsSnapshot = await getDocs(collection(db, "events"));
-      setEventCount(eventsSnapshot.size);
-    };
-
-    const fetchActivities = async () => {
-      const q = query(collection(db, "activity_logs"), orderBy("timestamp", "desc"), limit(5));
-      const querySnapshot = await getDocs(q);
-      const activitiesData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-              id: doc.id,
-              ...data,
-              timestamp: (data.timestamp as Timestamp).toDate().toISOString(),
-          } as ActivityLog
-      });
-      setActivities(activitiesData);
-    };
-
-    fetchCounts();
-    fetchActivities();
+    const sermonsData = JSON.parse(localStorage.getItem('sermons_data') || '[]');
+    setSermonCount(sermonsData.length);
+    
+    const eventsData = JSON.parse(localStorage.getItem('events_data') || '[]');
+    setEventCount(eventsData.length);
+    
+    const activitiesData = JSON.parse(localStorage.getItem('activity_logs') || '[]');
+    setActivities(activitiesData);
   }, []);
 
 
@@ -67,7 +50,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Upcoming Events
+              Total Events
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -84,10 +67,10 @@ export default function AdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">View on Vercel</div>
-             <Link href="https://vercel.com" target="_blank" className="text-xs text-muted-foreground flex items-center gap-1 hover:underline">
-               Analytics available in your Vercel dashboard <ExternalLink className="h-3 w-3" />
-            </Link>
+             <div className="text-2xl font-bold">N/A</div>
+             <p className="text-xs text-muted-foreground">
+               Analytics not available in local mode
+            </p>
           </CardContent>
         </Card>
          <Card>
@@ -98,9 +81,9 @@ export default function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">External</div>
+            <div className="text-2xl font-bold">N/A</div>
             <p className="text-xs text-muted-foreground">
-              Track donations via your payment provider (e.g. Stripe, PayPal)
+              Donation tracking not available in local mode
             </p>
           </CardContent>
         </Card>

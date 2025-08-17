@@ -12,9 +12,6 @@ import { EventForm, EventFormData } from "@/components/admin/event-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, deleteDoc, Timestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { logActivity } from "@/lib/activity-logger";
 
 export default function EventsManagementPage() {
@@ -23,10 +20,11 @@ export default function EventsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchEvents = async () => {
+  const fetchEvents = () => {
     setIsLoading(true);
-    const querySnapshot = await getDocs(collection(db, "events"));
-    const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+    const storedEvents = localStorage.getItem("events_data");
+    const eventsData = storedEvents ? JSON.parse(storedEvents) : [];
+    eventsData.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setEvents(eventsData);
     setIsLoading(false);
   };
@@ -35,31 +33,26 @@ export default function EventsManagementPage() {
     fetchEvents();
   }, []);
 
-  const handleAddEvent = async (data: EventFormData) => {
+  const handleAddEvent = (data: EventFormData) => {
     try {
-      const imageFile = data.imageUrl[0];
-      const storageRef = ref(storage, `events/${Date.now()}_${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(storageRef);
-      
-      const newEventData = {
+      const newEvent: Event = {
         ...data,
-        imageUrl,
-        date: Timestamp.fromDate(data.date), // Convert JS Date to Firestore Timestamp
+        id: `event-${Date.now()}`,
+        date: data.date.toISOString(),
       };
 
-      const docRef = await addDoc(collection(db, "events"), newEventData);
+      const updatedEvents = [newEvent, ...events];
+      localStorage.setItem("events_data", JSON.stringify(updatedEvents));
+      logActivity("Created Event", `Event Title: ${data.title}`);
       
-      await logActivity("Created Event", `Event Title: ${data.title}`);
-      
-      setEvents(prev => [...prev, { id: docRef.id, ...newEventData, date: data.date.toISOString() }]);
+      setEvents(updatedEvents);
       setIsDialogOpen(false);
       toast({
           title: "Event Added",
-          description: "The new event has been successfully created.",
+          description: "The new event has been successfully created locally.",
       })
     } catch (error) {
-       console.error("Error adding event: ", error);
+       console.error("Error adding event to localStorage: ", error);
         toast({
             variant: "destructive",
             title: "Error",
@@ -68,17 +61,18 @@ export default function EventsManagementPage() {
     }
   }
   
-  const handleRemoveEvent = async (eventToDelete: Event) => {
+  const handleRemoveEvent = (eventToDelete: Event) => {
     try {
-        await deleteDoc(doc(db, "events", eventToDelete.id));
-        await logActivity("Deleted Event", `Event Title: ${eventToDelete.title}`);
-        setEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+        const updatedEvents = events.filter(event => event.id !== eventToDelete.id);
+        localStorage.setItem("events_data", JSON.stringify(updatedEvents));
+        logActivity("Deleted Event", `Event Title: ${eventToDelete.title}`);
+        setEvents(updatedEvents);
         toast({
             title: "Event Removed",
-            description: "The event has been deleted.",
+            description: "The event has been deleted locally.",
         });
     } catch (error) {
-        console.error("Error removing event: ", error);
+        console.error("Error removing event from localStorage: ", error);
         toast({
             variant: "destructive",
             title: "Error",

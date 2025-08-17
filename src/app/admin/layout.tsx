@@ -22,10 +22,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import type { Branding } from "@/lib/types";
-
 
 function AdminSidebar() {
   const pathname = usePathname();
@@ -34,18 +31,15 @@ function AdminSidebar() {
   const [logoUrl, setLogoUrl] = useState("/placeholder-logo.svg");
 
   useEffect(() => {
-    const fetchLogo = async () => {
-      const docRef = doc(db, "siteContent", "branding");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data() as Branding;
-        if(data.logoUrl) setLogoUrl(data.logoUrl);
-      }
-    };
-    fetchLogo();
+    const storedBranding = localStorage.getItem("branding_content");
+    if (storedBranding) {
+      const data: Branding = JSON.parse(storedBranding);
+      if(data.logoUrl) setLogoUrl(data.logoUrl);
+    }
   }, []);
 
   const handleSignOut = () => {
+    localStorage.removeItem('isLoggedIn');
     toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
@@ -124,12 +118,19 @@ const adminNavLinks = [
   { href: '/admin/contact', label: 'Contact Page', icon: Phone },
 ];
 
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+      router.replace('/login');
+    }
+  }, [router]);
 
   return (
     <SidebarProvider>

@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
 import { logActivity } from "@/lib/activity-logger";
+import type { DonationsContent } from "@/lib/types";
 
 interface DonationTier {
   id: string;
@@ -20,6 +19,17 @@ interface DonationTier {
   suggestedAmount: string;
   link: string;
 }
+
+const defaultContent: DonationsContent = {
+  headline: "Support Our Ministry",
+  intro: "Your generous giving enables us to spread the message of hope and continue our work in the community. Thank you for your support.",
+  tiers: [
+    { id: 'tier-1', title: 'General Fund', description: 'Support the day-to-day operations and ministries of the church.', suggestedAmount: '50', link: '#' },
+    { id: 'tier-2', title: 'Missions', description: 'Help us support missionaries and outreach programs around the world.', suggestedAmount: '100', link: '#' },
+    { id: 'tier-3', title: 'Building Fund', description: 'Contribute to the maintenance and improvement of our church facilities.', suggestedAmount: '250', link: '#' },
+  ],
+};
+
 
 export default function DonationsPageManagement() {
   const { toast } = useToast();
@@ -30,33 +40,33 @@ export default function DonationsPageManagement() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const fetchDonationsContent = async () => {
-      setIsLoading(true);
-      const docRef = doc(db, "siteContent", "donations");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+    setIsLoading(true);
+    const storedContent = localStorage.getItem("donations_content");
+    if (storedContent) {
+        const data = JSON.parse(storedContent);
         setHeadline(data.headline || "");
         setIntro(data.intro || "");
         setTiers(data.tiers || []);
-      }
-      setIsLoading(false);
-    };
-    fetchDonationsContent();
+    } else {
+        setHeadline(defaultContent.headline);
+        setIntro(defaultContent.intro);
+        setTiers(defaultContent.tiers);
+    }
+    setIsLoading(false);
   }, []);
 
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = () => {
     setIsSaving(true);
     try {
-      const donationsData = { headline, intro, tiers };
-      await setDoc(doc(db, "siteContent", "donations"), donationsData);
-      await logActivity("Updated Donations Page", `New headline: ${headline}`);
+      const donationsData: DonationsContent = { headline, intro, tiers };
+      localStorage.setItem("donations_content", JSON.stringify(donationsData));
+      logActivity("Updated Donations Page", `New headline: ${headline}`);
       toast({
         title: "Changes Saved!",
-        description: "Your donations page details have been updated.",
+        description: "Your donations page details have been updated locally.",
       });
     } catch (error) {
-      console.error("Error saving donations content: ", error);
+      console.error("Error saving donations content to localStorage: ", error);
       toast({
         variant: "destructive",
         title: "Error",

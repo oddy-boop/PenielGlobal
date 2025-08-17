@@ -21,7 +21,7 @@ const sermonFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   videoUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   audioUrl: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  thumbnailUrl: z.any().refine((files) => files?.length >= 1, "Image is required."),
+  thumbnailUrl: z.string().url("Please enter a valid URL for the thumbnail."),
   description: z.string().min(1, "Description is required"),
 });
 
@@ -41,6 +41,7 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
       topic: defaultValues?.topic || '',
       videoUrl: defaultValues?.videoUrl || '',
       audioUrl: defaultValues?.audioUrl || '',
+      thumbnailUrl: defaultValues?.thumbnailUrl || '',
       description: defaultValues?.description || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     },
@@ -140,27 +141,17 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
           )}
         />
         <FormField
-            control={form.control}
-            name="thumbnailUrl"
-            render={({ field: { value, onChange, ...fieldProps } }) => (
-                <FormItem>
-                <FormLabel>Thumbnail</FormLabel>
-                <FormControl>
-                    <div className="flex items-center gap-4">
-                        <Input
-                            {...fieldProps}
-                            type="file"
-                            accept="image/png, image/jpeg, image/gif"
-                            onChange={(event) => {
-                                onChange(event.target.files && event.target.files);
-                            }}
-                            className="flex-1"
-                        />
-                    </div>
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+          control={form.control}
+          name="thumbnailUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Thumbnail URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/thumbnail.jpg" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <FormField
           control={form.control}
@@ -169,7 +160,7 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
             <FormItem>
               <FormLabel>Video URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. https://youtube.com/watch?v=..." {...field} />
+                <Input placeholder="https://youtube.com/watch?v=..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -182,7 +173,7 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
             <FormItem>
               <FormLabel>Audio URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. https://spotify.com/episode/..." {...field} />
+                <Input placeholder="https://spotify.com/episode/..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -193,5 +184,3 @@ export function SermonForm({ onSubmit, defaultValues }: SermonFormProps) {
     </Form>
   );
 }
-
-    

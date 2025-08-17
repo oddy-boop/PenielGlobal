@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { DollarSign, Heart, Gift, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import type { DonationsContent } from "@/lib/types";
 
 interface DonationTier {
   id: string;
@@ -19,33 +18,23 @@ interface DonationTier {
   icon?: React.ElementType;
 }
 
-interface DonationsContent {
-  headline: string;
-  intro: string;
-  tiers: DonationTier[];
-}
-
 export default function DonationsPage() {
   const [content, setContent] = useState<DonationsContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDonationsContent = async () => {
-      setIsLoading(true);
-      const docRef = doc(db, "siteContent", "donations");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data() as DonationsContent;
-        // Assign icons based on tier index for variety
-        const tiersWithIcons = data.tiers.map((tier, index) => {
-            const icons = [DollarSign, Heart, Gift];
-            return {...tier, icon: icons[index % icons.length]};
-        });
-        setContent({...data, tiers: tiersWithIcons});
-      }
-      setIsLoading(false);
-    };
-    fetchDonationsContent();
+    setIsLoading(true);
+    const storedContent = localStorage.getItem("donations_content");
+    if (storedContent) {
+      const data = JSON.parse(storedContent) as DonationsContent;
+      // Assign icons based on tier index for variety
+      const tiersWithIcons = data.tiers.map((tier, index) => {
+          const icons = [DollarSign, Heart, Gift];
+          return {...tier, icon: icons[index % icons.length]};
+      });
+      setContent({...data, tiers: tiersWithIcons});
+    }
+    setIsLoading(false);
   }, []);
 
   if (isLoading) {
@@ -60,7 +49,7 @@ export default function DonationsPage() {
     return (
         <div className="text-center py-16">
           <h2 className="text-2xl font-semibold text-primary">Donation Information Not Available</h2>
-          <p className="text-muted-foreground mt-2">Please check back soon.</p>
+          <p className="text-muted-foreground mt-2">Please configure this page in the admin panel.</p>
         </div>
       )
   }

@@ -1,23 +1,25 @@
 
-"use server";
+"use client";
 
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import type { ActivityLog } from './types';
 
 /**
- * Logs an activity to the 'activity_logs' collection in Firestore.
+ * Logs an activity to localStorage.
  * @param action - A short description of the action (e.g., "Created Event").
  * @param details - More specific details about the action (e.g., the title of the event).
  */
-export async function logActivity(action: string, details: string): Promise<void> {
+export function logActivity(action: string, details: string): void {
   try {
-    await addDoc(collection(db, "activity_logs"), {
+    const logs = JSON.parse(localStorage.getItem('activity_logs') || '[]');
+    const newLog: ActivityLog = {
+      id: `log-${Date.now()}`,
       action,
       details,
-      timestamp: serverTimestamp(),
-    });
+      timestamp: new Date().toISOString(),
+    };
+    const updatedLogs = [newLog, ...logs].slice(0, 20); // Keep last 20 logs
+    localStorage.setItem('activity_logs', JSON.stringify(updatedLogs));
   } catch (error) {
-    console.error("Error logging activity:", error);
-    // Depending on requirements, you might want to handle this error more gracefully
+    console.error("Error logging activity to localStorage:", error);
   }
 }

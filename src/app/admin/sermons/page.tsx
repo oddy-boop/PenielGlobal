@@ -14,10 +14,6 @@ import type { Sermon } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { logActivity } from "@/lib/activity-logger";
-import { db, storage } from "@/lib/firebase";
-import { collection, addDoc, getDocs, doc, deleteDoc, Timestamp, query, orderBy } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 
 export default function SermonsManagementPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
@@ -25,15 +21,12 @@ export default function SermonsManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchSermons = async () => {
+  const fetchSermons = () => {
     setIsLoading(true);
-    const q = query(collection(db, "sermons"), orderBy("date", "desc"));
-    const querySnapshot = await getDocs(q);
-    const sermonsData = querySnapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data(),
-        date: (doc.data().date as Timestamp).toDate().toISOString(),
-    } as Sermon));
+    const storedSermons = localStorage.getItem("sermons_data");
+    const sermonsData = storedSermons ? JSON.parse(storedSermons) : [];
+    // Sort by date descending
+    sermonsData.sort((a: Sermon, b: Sermon) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setSermons(sermonsData);
     setIsLoading(false);
   };
@@ -42,31 +35,27 @@ export default function SermonsManagementPage() {
     fetchSermons();
   }, []);
 
-  const handleAddSermon = async (data: SermonFormData) => {
+  const handleAddSermon = (data: SermonFormData) => {
     try {
-      const imageFile = data.thumbnailUrl[0];
-      const storageRef = ref(storage, `sermons/${Date.now()}_${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      const thumbnailUrl = await getDownloadURL(storageRef);
-      
-      const newSermonData = {
+      const newSermon: Sermon = {
         ...data,
-        thumbnailUrl,
-        date: Timestamp.fromDate(data.date),
+        id: `sermon-${Date.now()}`,
+        date: data.date.toISOString(),
       };
-
-      const docRef = await addDoc(collection(db, "sermons"), newSermonData);
       
-      await logActivity("Created Sermon", `Sermon Title: ${data.title}`);
+      const updatedSermons = [newSermon, ...sermons];
+      localStorage.setItem("sermons_data", JSON.stringify(updatedSermons));
       
-      setSermons(prev => [{ id: docRef.id, ...newSermonData, date: data.date.toISOString() }, ...prev]);
+      logActivity("Created Sermon", `Sermon Title: ${data.title}`);
+      
+      setSermons(updatedSermons);
       setIsDialogOpen(false);
       toast({
           title: "Sermon Added",
-          description: "The new sermon has been successfully created.",
-      })
+          description: "The new sermon has been successfully created locally.",
+      });
     } catch (error) {
-       console.error("Error adding sermon: ", error);
+       console.error("Error adding sermon to localStorage: ", error);
         toast({
             variant: "destructive",
             title: "Error",
@@ -75,17 +64,18 @@ export default function SermonsManagementPage() {
     }
   };
 
-  const handleRemoveSermon = async (sermonToRemove: Sermon) => {
+  const handleRemoveSermon = (sermonToRemove: Sermon) => {
     try {
-        await deleteDoc(doc(db, "sermons", sermonToRemove.id));
-        await logActivity("Deleted Sermon", `Sermon Title: ${sermonToRemove.title}`);
-        setSermons(prev => prev.filter(sermon => sermon.id !== sermonToRemove.id));
+        const updatedSermons = sermons.filter(sermon => sermon.id !== sermonToRemove.id);
+        localStorage.setItem("sermons_data", JSON.stringify(updatedSermons));
+        logActivity("Deleted Sermon", `Sermon Title: ${sermonToRemove.title}`);
+        setSermons(updatedSermons);
         toast({
             title: "Sermon Removed",
-            description: "The sermon has been deleted.",
+            description: "The sermon has been deleted locally.",
         });
     } catch (error) {
-        console.error("Error removing sermon: ", error);
+        console.error("Error removing sermon from localStorage: ", error);
         toast({
             variant: "destructive",
             title: "Error",
@@ -201,5 +191,3 @@ export default function SermonsManagementPage() {
     </div>
   );
 }
-
-    

@@ -1,33 +1,63 @@
+
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Share2 } from "lucide-react";
-import { Facebook, Twitter, Youtube } from "lucide-react";
+import { Mail, Phone, MapPin, Share2, Loader2 } from "lucide-react";
+import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import type { ContactContent } from "@/lib/types";
+
+// Helper to get the correct icon component
+const getIcon = (platform: string) => {
+  switch (platform.toLowerCase()) {
+    case 'facebook': return Facebook;
+    case 'twitter': return Twitter;
+    case 'youtube': return Youtube;
+    case 'instagram': return Instagram;
+    default: return Share2;
+  }
+}
 
 export default function ContactPage() {
-  // In a real app, you would fetch this data from Firestore
-  const contactInfo = {
-    intro: "We would love to hear from you. Whether you have a question, a prayer request, or just want to say hello, feel free to reach out.",
-    addressLine1: "123 Faith Avenue",
-    addressLine2: "Hope City, HC 12345",
-    phone: "(123) 456-7890",
-    generalEmail: "contact@penielchurch.org",
-    prayerEmail: "prayer@penielchurch.org",
-    socials: [
-        { platform: "Facebook", url: "https://facebook.com", icon: Facebook },
-        { platform: "Twitter", url: "https://twitter.com", icon: Twitter },
-        { platform: "Youtube", url: "https://youtube.com", icon: Youtube },
-    ]
-  };
+  const [content, setContent] = useState<ContactContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const storedContent = localStorage.getItem("contact_content");
+    if (storedContent) {
+      setContent(JSON.parse(storedContent));
+    }
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center min-h-[50vh]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary"/>
+        </div>
+    )
+  }
+
+  if (!content) {
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-semibold text-primary">Contact Information Not Available</h2>
+        <p className="text-muted-foreground mt-2">Please configure this page in the admin panel.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          {contactInfo.intro}
+          {content.intro}
         </p>
       </div>
 
@@ -39,9 +69,10 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Our Location</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{contactInfo.addressLine1}</p>
-              <p>{contactInfo.addressLine2}</p>
+              <p>{content.addressLine1}</p>
+              <p>{content.addressLine2}</p>
               <div className="mt-4 h-64 bg-muted rounded-lg flex items-center justify-center">
+                {/* This could be an embedded map in a real application */}
                 <p className="text-muted-foreground">Map Placeholder</p>
               </div>
             </CardContent>
@@ -53,7 +84,7 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Call Us</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Main Office: {contactInfo.phone}</p>
+              <p>Main Office: {content.phone}</p>
             </CardContent>
           </Card>
 
@@ -63,8 +94,8 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Email Us</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>General Inquiries: {contactInfo.generalEmail}</p>
-              <p>Prayer Requests: {contactInfo.prayerEmail}</p>
+              <p>General Inquiries: {content.generalEmail}</p>
+              <p>Prayer Requests: {content.prayerEmail}</p>
             </CardContent>
           </Card>
 
@@ -74,9 +105,12 @@ export default function ContactPage() {
               <CardTitle className="font-headline">Follow Us</CardTitle>
             </CardHeader>
             <CardContent className="flex gap-4">
-               {contactInfo.socials.map(social => (
-                 <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><social.icon size={24} /></Link>
-               ))}
+               {content.socials.map(social => {
+                  const Icon = getIcon(social.platform);
+                  return (
+                    <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
+                  )
+               })}
             </CardContent>
           </Card>
         </div>

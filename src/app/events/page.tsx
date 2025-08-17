@@ -4,8 +4,6 @@
 import type { Event } from "@/lib/types";
 import { EventCard } from "@/components/event-card";
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 
 export default function EventsPage() {
@@ -13,23 +11,12 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      const q = query(collection(db, "events"), orderBy("date", "desc"));
-      const querySnapshot = await getDocs(q);
-      const eventsData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          // Convert Firestore Timestamp to ISO string for client-side date formatting
-          date: (data.date as Timestamp).toDate().toISOString(),
-        } as Event;
-      });
-      setEvents(eventsData);
-      setIsLoading(false);
-    };
-    fetchEvents();
+    setIsLoading(true);
+    const storedEvents = localStorage.getItem("events_data");
+    const eventsData = storedEvents ? JSON.parse(storedEvents) : [];
+    eventsData.sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setEvents(eventsData);
+    setIsLoading(false);
   }, []);
 
   return (
@@ -37,7 +24,7 @@ export default function EventsPage() {
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Upcoming Events</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Stay connected with our church family. Here's what's happening at Peniel Church.
+          Stay connected with our church family. Here's what's happening at Peniel Global Ministry.
         </p>
       </div>
 

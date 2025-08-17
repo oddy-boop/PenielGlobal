@@ -1,136 +1,78 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { db, storage } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { logActivity } from "@/lib/activity-logger";
 import { Skeleton } from '@/components/ui/skeleton';
 import type { HomeContent } from '@/lib/types';
 
+const defaultHomeContent: HomeContent = {
+  heroHeadline: "Welcome to Peniel Global Ministry",
+  heroSubheadline: "A place of faith, hope, and community.",
+  heroImage: "https://placehold.co/1920x1080.png",
+  aboutTitle: "Our Community of Faith",
+  aboutText: "Peniel Global Ministry is more than just a building...",
+  aboutImage: "https://placehold.co/600x400.png",
+  latestSermonTitle: "The Power of Unwavering Faith",
+  latestSermonSpeaker: "Pastor John Doe",
+  latestSermonImage: "https://placehold.co/800x450.png",
+};
+
 export default function HomePageManagement() {
   const { toast } = useToast();
-  const [initialContent, setInitialContent] = useState<Partial<HomeContent>>({});
   const [content, setContent] = useState<Partial<HomeContent>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [heroImageFile, setHeroImageFile] = useState<File | null>(null);
-  const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
-  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
-  const [aboutImagePreview, setAboutImagePreview] = useState<string | null>(null);
-
-  const heroImageInputRef = useRef<HTMLInputElement>(null);
-  const aboutImageInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    const fetchContent = async () => {
-      setIsLoading(true);
-      const docRef = doc(db, "siteContent", "home");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data() as HomeContent;
-        setContent(data);
-        setInitialContent(data);
-      }
-      setIsLoading(false);
-    };
-    fetchContent();
+    setIsLoading(true);
+    const storedContent = localStorage.getItem("home_content");
+    if (storedContent) {
+      setContent(JSON.parse(storedContent));
+    } else {
+      setContent(defaultHomeContent);
+    }
+    setIsLoading(false);
   }, []);
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: React.Dispatch<React.SetStateAction<string | null>>,
-    fileSetter: React.Dispatch<React.SetStateAction<File | null>>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      fileSetter(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setter(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadFile = async (file: File, path: string): Promise<string> => {
-    const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file);
-    return getDownloadURL(storageRef);
-  };
-
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = () => {
     setIsSaving(true);
     try {
-      let heroImageUrl = content.heroImage;
-      let aboutImageUrl = content.aboutImage;
-      let activityDetails: string[] = [];
-
-      if (heroImageFile) {
-        heroImageUrl = await uploadFile(heroImageFile, `content/hero-${Date.now()}`);
-        setHeroImageFile(null);
-        setHeroImagePreview(null);
-        activityDetails.push("Updated Hero Image");
-      }
-
-      if (aboutImageFile) {
-        aboutImageUrl = await uploadFile(aboutImageFile, `content/about-${Date.now()}`);
-        setAboutImageFile(null);
-        setAboutImagePreview(null);
-        activityDetails.push("Updated About Image");
-      }
-
-      const textContentChanged = 
-        content.heroHeadline !== initialContent.heroHeadline ||
-        content.heroSubheadline !== initialContent.heroSubheadline ||
-        content.aboutTitle !== initialContent.aboutTitle ||
-        content.aboutText !== initialContent.aboutText;
-      
-      if (textContentChanged) {
-        activityDetails.push("Updated home page text content.");
-      }
-
       const updatedContent: HomeContent = {
         heroHeadline: content.heroHeadline || "",
         heroSubheadline: content.heroSubheadline || "",
-        heroImage: heroImageUrl || "https://placehold.co/1920x1080.png",
+        heroImage: content.heroImage || "https://placehold.co/1920x1080.png",
         aboutTitle: content.aboutTitle || "",
         aboutText: content.aboutText || "",
-        aboutImage: aboutImageUrl || "https://placehold.co/600x400.png",
+        aboutImage: content.aboutImage || "https://placehold.co/600x400.png",
         latestSermonTitle: content.latestSermonTitle || "",
         latestSermonSpeaker: content.latestSermonSpeaker || "",
         latestSermonImage: content.latestSermonImage || "https://placehold.co/800x450.png",
       };
 
-      await setDoc(doc(db, "siteContent", "home"), updatedContent);
+      localStorage.setItem("home_content", JSON.stringify(updatedContent));
       setContent(updatedContent);
-      setInitialContent(updatedContent);
-      
-      if(activityDetails.length > 0) {
-        await logActivity("Updated Home Page", activityDetails.join(" & "));
-      }
+      logActivity("Updated Home Page", "Home page text and images updated.");
 
       toast({
         title: "Changes Saved!",
-        description: "Your home page details have been updated.",
+        description: "Your home page details have been updated locally.",
       });
 
     } catch (error) {
-      console.error("Error saving content: ", error);
+      console.error("Error saving content to localStorage: ", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save changes.",
+        description: "Failed to save changes locally.",
       });
     } finally {
       setIsSaving(false);
@@ -180,22 +122,11 @@ export default function HomePageManagement() {
             <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => setContent({...content, heroSubheadline: e.target.value})} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
-            <Label>Background Image</Label>
+            <Label>Background Image URL</Label>
             <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
-                <Image src={heroImagePreview || content.heroImage || "https://placehold.co/1920x1080.png"} alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
-                {heroImagePreview &&
-                  <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setHeroImageFile(null); setHeroImagePreview(null);}}>
-                      <X className="h-4 w-4" />
-                  </Button>
-                }
+                <Image src={content.heroImage || "https://placehold.co/1920x1080.png"} alt="Hero background" width={300} height={150} style={{objectFit:"cover"}} data-ai-hint="church congregation" />
             </div>
-            <div className="flex items-center gap-4 mt-4">
-                <Input id="hero-image-upload" type="file" className="hidden" ref={heroImageInputRef} onChange={(e) => handleFileChange(e, setHeroImagePreview, setHeroImageFile)} />
-                <Button onClick={() => heroImageInputRef.current?.click()} disabled={isSaving}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload New Image
-                </Button>
-            </div>
+            <Input id="hero-image-url" type="text" className="mt-4" value={content.heroImage || ""} onChange={(e) => setContent({...content, heroImage: e.target.value})} placeholder="https://example.com/hero-image.jpg" />
           </div>
         </CardContent>
       </Card>
@@ -215,22 +146,11 @@ export default function HomePageManagement() {
                 <Textarea id="about-text" rows={5} value={content.aboutText || ""} onChange={(e) => setContent({...content, aboutText: e.target.value})} placeholder="e.g. Peniel Global Ministry is more than just a building..." />
             </div>
              <div>
-                <Label>Section Image</Label>
+                <Label>Section Image URL</Label>
                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 relative min-h-[150px]">
-                    <Image src={aboutImagePreview || content.aboutImage || "https://placehold.co/600x400.png"} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
-                    {aboutImagePreview &&
-                      <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => {setAboutImageFile(null); setAboutImagePreview(null);}}>
-                          <X className="h-4 w-4" />
-                      </Button>
-                    }
+                    <Image src={content.aboutImage || "https://placehold.co/600x400.png"} alt="About us" width={200} height={150} style={{objectFit:"cover"}} data-ai-hint="church interior" />
                 </div>
-                <div className="flex items-center gap-4 mt-4">
-                    <Input id="about-image-upload" type="file" className="hidden" ref={aboutImageInputRef} onChange={(e) => handleFileChange(e, setAboutImagePreview, setAboutImageFile)}/>
-                    <Button onClick={() => aboutImageInputRef.current?.click()} disabled={isSaving}>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload New Image
-                    </Button>
-                </div>
+                <Input id="about-image-url" type="text" className="mt-4" value={content.aboutImage || ""} onChange={(e) => setContent({...content, aboutImage: e.target.value})} placeholder="https://example.com/about-image.jpg" />
             </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
@@ -243,5 +163,3 @@ export default function HomePageManagement() {
     </div>
   );
 }
-
-    

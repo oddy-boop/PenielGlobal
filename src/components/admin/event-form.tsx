@@ -20,7 +20,7 @@ const eventFormSchema = z.object({
   date: z.date({ required_error: "A date is required." }),
   time: z.string().min(1, "Time is required"),
   description: z.string().min(1, "Description is required"),
-  imageUrl: z.any().refine((files) => files?.length >= 1, "Image is required."),
+  imageUrl: z.string().url("Please enter a valid URL for the image."),
 });
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
@@ -38,6 +38,7 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
       location: defaultValues?.location || '',
       time: defaultValues?.time || '',
       description: defaultValues?.description || '',
+      imageUrl: defaultValues?.imageUrl || '',
       date: defaultValues?.date ? new Date(defaultValues.date) : new Date(),
     }
   });
@@ -138,21 +139,11 @@ export function EventForm({ onSubmit, defaultValues }: EventFormProps) {
         <FormField
             control={form.control}
             name="imageUrl"
-            render={({ field: { value, onChange, ...fieldProps } }) => (
+            render={({ field }) => (
                 <FormItem>
-                <FormLabel>Event Image</FormLabel>
+                <FormLabel>Event Image URL</FormLabel>
                 <FormControl>
-                    <div className="flex items-center gap-4">
-                        <Input
-                            {...fieldProps}
-                            type="file"
-                            accept="image/png, image/jpeg, image/gif"
-                            onChange={(event) => {
-                                onChange(event.target.files && event.target.files);
-                            }}
-                            className="flex-1"
-                        />
-                    </div>
+                    <Input placeholder="https://example.com/event-image.jpg" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
