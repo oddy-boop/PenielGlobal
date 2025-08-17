@@ -46,12 +46,12 @@ export default function Home() {
       if (homeRes.data) {
         const homeContent = homeRes.data as HomeContent;
         setContent(homeContent);
-
+        
         const images: string[] = [];
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
-          const imageUrl = homeContent[key];
-          if (imageUrl && typeof imageUrl === 'string') {
+          const imageUrl = homeContent[key] as string | null;
+          if (imageUrl) {
             images.push(imageUrl);
           }
         }
