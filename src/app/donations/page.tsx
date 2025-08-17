@@ -35,7 +35,8 @@ export default function DonationsPage() {
       if (data?.content) {
         const pageData = data.content as DonationsContent;
         // Assign icons based on tier index for variety
-        const tiersWithIcons = pageData.tiers.map((tier, index) => {
+        const tiers = pageData.tiers || [];
+        const tiersWithIcons = tiers.map((tier, index) => {
             const icons = [DollarSign, Heart, Gift];
             return {...tier, icon: icons[index % icons.length]};
         });
