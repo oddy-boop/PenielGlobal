@@ -47,7 +47,6 @@ export default function Home() {
         setContent({
             heroHeadline: "Welcome",
             heroSubheadline: "Faith, Hope, Community",
-            heroImages: ["https://placehold.co/1920x1080.png"],
             aboutTitle: "About Us",
             aboutText: "Learn more about our community.",
             aboutImage: "https://placehold.co/600x400.png",
@@ -80,6 +79,12 @@ export default function Home() {
       setIsPlayerOpen(true);
     }
   }
+
+  const heroImages = content 
+    ? Object.keys(content)
+        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent])
+        .map(key => content[key as keyof HomeContent] as string)
+    : [];
 
   if (isLoading) {
     return (
@@ -147,7 +152,7 @@ export default function Home() {
     )
   }
 
-  const hasHeroImages = content.heroImages && content.heroImages.length > 0;
+  const hasHeroImages = heroImages.length > 0;
 
   return (
     <>
@@ -161,7 +166,7 @@ export default function Home() {
                 opts={{ loop: true }}
               >
                 <CarouselContent>
-                  {content.heroImages!.map((src, index) => (
+                  {heroImages.map((src, index) => (
                     <CarouselItem key={index} className="relative">
                       <Image
                         src={src}

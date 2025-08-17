@@ -38,10 +38,19 @@ export interface ActivityLog {
 export interface HomeContent {
   heroHeadline: string;
   heroSubheadline: string;
-  heroImages: string[];
   aboutTitle: string;
   aboutText: string;
   aboutImage: string;
+  heroImage1?: string;
+  heroImage2?: string;
+  heroImage3?: string;
+  heroImage4?: string;
+  heroImage5?: string;
+  heroImage6?: string;
+  heroImage7?: string;
+  heroImage8?: string;
+  heroImage9?: string;
+  heroImage10?: string;
 }
 
 export interface OnlineMeetingContent {

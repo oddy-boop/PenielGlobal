@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Trash2, X } from "lucide-react";
+import { Loader2, Trash2, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activity-logger";
@@ -19,11 +19,12 @@ import { uploadFileAndGetUrl } from '@/lib/storage';
 const defaultHomeContent: HomeContent = {
   heroHeadline: "Welcome to Peniel Global Ministry",
   heroSubheadline: "A place of faith, hope, and community.",
-  heroImages: ["https://placehold.co/1920x1080.png"],
   aboutTitle: "Our Community of Faith",
   aboutText: "Peniel Global Ministry is more than just a building...",
   aboutImage: "https://placehold.co/600x400.png",
 };
+
+const MAX_HERO_IMAGES = 10;
 
 export default function HomePageManagement() {
   const { toast } = useToast();
@@ -31,7 +32,7 @@ export default function HomePageManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   
-  const [newHeroImageFiles, setNewHeroImageFiles] = useState<File[]>([]);
+  const [heroImageFiles, setHeroImageFiles] = useState<(File | null)[]>(Array(MAX_HERO_IMAGES).fill(null));
   const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -58,12 +59,17 @@ export default function HomePageManagement() {
     let updatedContent = { ...content };
     
     try {
-      if (newHeroImageFiles.length > 0) {
-        const uploadPromises = newHeroImageFiles.map(file => uploadFileAndGetUrl(file, 'content'));
-        const newImageUrls = await Promise.all(uploadPromises);
-        updatedContent.heroImages = [...(updatedContent.heroImages || []), ...newImageUrls];
+      // Handle Hero Images
+      for (let i = 0; i < MAX_HERO_IMAGES; i++) {
+        const file = heroImageFiles[i];
+        if (file) {
+          const imageUrl = await uploadFileAndGetUrl(file, 'content');
+          const key = `heroImage${i + 1}` as keyof HomeContent;
+          updatedContent[key] = imageUrl;
+        }
       }
 
+      // Handle About Image
       if (aboutImageFile) {
         const aboutImageUrl = await uploadFileAndGetUrl(aboutImageFile, 'content');
         updatedContent.aboutImage = aboutImageUrl;
@@ -83,15 +89,9 @@ export default function HomePageManagement() {
         description: "Your home page details have been updated.",
       });
 
-      // Correctly update the state with the new content
       setContent(updatedContent);
-      setNewHeroImageFiles([]);
+      setHeroImageFiles(Array(MAX_HERO_IMAGES).fill(null));
       setAboutImageFile(null);
-      
-      const heroInput = document.getElementById('hero-image-file') as HTMLInputElement;
-      if (heroInput) heroInput.value = '';
-      const aboutInput = document.getElementById('about-image-file') as HTMLInputElement;
-      if(aboutInput) aboutInput.value = '';
 
     } catch (error: any) {
       toast({
@@ -104,17 +104,24 @@ export default function HomePageManagement() {
     }
   };
 
-  const handleRemoveHeroImage = (indexToRemove: number) => {
-    setContent(prev => ({
-        ...prev,
-        heroImages: prev.heroImages?.filter((_, index) => index !== indexToRemove)
-    }));
-  }
+  const handleHeroImageFileChange = (index: number, file: File | null) => {
+    setHeroImageFiles(prev => {
+        const newFiles = [...prev];
+        newFiles[index] = file;
+        return newFiles;
+    });
+  };
 
-  const newHeroImagePreviews = useMemo(() => {
-    return newHeroImageFiles.map(file => URL.createObjectURL(file));
-  }, [newHeroImageFiles]);
-
+  const handleRemoveHeroImage = (index: number) => {
+    setContent(prev => {
+      const key = `heroImage${index + 1}` as keyof HomeContent;
+      const newContent = { ...prev };
+      delete newContent[key];
+      return newContent;
+    });
+    // Also clear any staged file for this slot
+    handleHeroImageFileChange(index, null);
+  };
 
   if (isLoading) {
     return (
@@ -149,7 +156,7 @@ export default function HomePageManagement() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Hero Section</CardTitle>
-          <CardDescription>Update the main welcome message and background image slideshow.</CardDescription>
+          <CardDescription>Update the main welcome message and the background slideshow images.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -161,32 +168,49 @@ export default function HomePageManagement() {
             <Textarea id="hero-subtitle" value={content.heroSubheadline || ""} onChange={(e) => setContent({...content, heroSubheadline: e.target.value})} placeholder="e.g. A place of faith, hope, and community." />
           </div>
           <div>
-            <Label>Slideshow Images</Label>
-            <div className="mt-2 p-4 border rounded-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-muted/40 min-h-[150px]">
-                {content.heroImages?.map((imageUrl, index) => (
-                    <div key={imageUrl} className="relative aspect-video group">
-                        <Image src={imageUrl} alt={`Hero background ${index + 1}`} fill style={{objectFit:"cover"}} className="rounded-md" data-ai-hint="church congregation" />
-                        <Button
+            <Label>Slideshow Images (up to 10)</Label>
+            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {Array.from({ length: MAX_HERO_IMAGES }).map((_, index) => {
+                const key = `heroImage${index + 1}` as keyof HomeContent;
+                const existingImageUrl = content[key] as string | undefined;
+                const newFile = heroImageFiles[index];
+                const previewUrl = newFile ? URL.createObjectURL(newFile) : existingImageUrl;
+                
+                return (
+                  <div key={index} className="space-y-2">
+                    <CardTitle className="text-sm font-medium">Slot {index + 1}</CardTitle>
+                    <div className="relative aspect-video group bg-muted/40 rounded-lg border-2 border-dashed flex items-center justify-center">
+                      {previewUrl ? (
+                        <>
+                          <Image src={previewUrl} alt={`Hero background ${index + 1}`} fill style={{objectFit:"cover"}} className="rounded-md" data-ai-hint="church congregation" />
+                          <Button
                             variant="destructive"
                             size="icon"
-                            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-1 right-1 h-7 w-7 z-10"
                             onClick={() => handleRemoveHeroImage(index)}
-                        >
+                          >
                             <X className="h-4 w-4" />
                             <span className="sr-only">Remove image</span>
-                        </Button>
+                          </Button>
+                        </>
+                      ) : (
+                         <div className="text-center text-muted-foreground p-2">
+                            <ImageIcon className="h-6 w-6 mx-auto"/>
+                            <span className="text-xs">No Image</span>
+                         </div>
+                      )}
                     </div>
-                ))}
-                 {newHeroImagePreviews.map((previewUrl, index) => (
-                    <div key={previewUrl} className="relative aspect-video group">
-                        <Image src={previewUrl} alt={`New hero image ${index + 1}`} fill style={{objectFit:"cover"}} className="rounded-md" />
-                    </div>
-                ))}
+                    <Input 
+                      type="file" 
+                      className="text-xs h-9"
+                      onChange={(e) => handleHeroImageFileChange(index, e.target.files ? e.target.files[0] : null)} 
+                      accept="image/*"
+                      disabled={isSaving}
+                    />
+                  </div>
+                )
+              })}
             </div>
-            <Input id="hero-image-file" type="file" className="mt-4" onChange={(e) => setNewHeroImageFiles(Array.from(e.target.files || []))} multiple accept="image/*" />
-            <p className="text-sm text-muted-foreground mt-2">
-              Select one or more images to add to the hero slideshow.
-            </p>
           </div>
         </CardContent>
       </Card>
