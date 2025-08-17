@@ -66,6 +66,8 @@ export interface ContactContent {
     generalEmail: string;
     prayerEmail: string;
     socials: { platform: string, url: string }[];
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface DonationsContent {

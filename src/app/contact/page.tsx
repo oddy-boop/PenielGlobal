@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Share2, Loader2 } from "lucide-react";
 import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -44,6 +44,18 @@ export default function ContactPage() {
     fetchContent();
   }, []);
 
+  const mapSrc = useMemo(() => {
+    if (content?.latitude && content?.longitude) {
+      return `https://maps.google.com/maps?q=${content.latitude},${content.longitude}&output=embed&z=15`;
+    }
+    if (content) {
+        const fullAddress = encodeURIComponent(`${content.addressLine1}, ${content.addressLine2}`);
+        return `https://maps.google.com/maps?q=${fullAddress}&output=embed&z=15`;
+    }
+    return "";
+  }, [content]);
+
+
   if (isLoading) {
     return (
         <div className="flex justify-center items-center min-h-[50vh]">
@@ -61,8 +73,6 @@ export default function ContactPage() {
     );
   }
   
-  const fullAddress = encodeURIComponent(`${content.addressLine1}, ${content.addressLine2}`);
-  const mapSrc = `https://maps.google.com/maps?q=${fullAddress}&output=embed&z=15`;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -84,15 +94,17 @@ export default function ContactPage() {
               <p>{content.addressLine1}</p>
               <p>{content.addressLine2}</p>
               <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
-                <iframe
-                    width="100%"
-                    height="100%"
-                    loading="lazy"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    src={mapSrc}
-                    className="border-0"
-                ></iframe>
+                {mapSrc && (
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        loading="lazy"
+                        allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={mapSrc}
+                        className="border-0"
+                    ></iframe>
+                )}
               </div>
             </CardContent>
           </Card>

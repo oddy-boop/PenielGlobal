@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle, Trash2, Loader2 } from "lucide-react";
+import { PlusCircle, Trash2, Loader2, MapPin } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { logActivity } from '@/lib/activity-logger';
 import type { ContactContent } from '@/lib/types';
@@ -24,7 +24,9 @@ const defaultContent: ContactContent = {
       { platform: "Facebook", url: "https://facebook.com" },
       { platform: "Twitter", url: "https://twitter.com" },
       { platform: "Youtube", url: "https://youtube.com" },
-  ]
+  ],
+  latitude: 34.052235,
+  longitude: -118.243683
 };
 
 export default function ContactPageManagement() {
@@ -32,6 +34,7 @@ export default function ContactPageManagement() {
   const [content, setContent] = useState<ContactContent>(defaultContent);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -97,9 +100,45 @@ export default function ContactPageManagement() {
     newLinks[index][field] = value;
     setContent(prev => ({...prev, socials: newLinks}));
   };
+
+  const handleSetLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: "destructive",
+        title: "Geolocation Not Supported",
+        description: "Your browser does not support geolocation.",
+      });
+      return;
+    }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setContent(prev => ({ ...prev, latitude, longitude }));
+        toast({
+          title: "Location Set!",
+          description: "Your current location has been set. Don't forget to save your changes.",
+        });
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        toast({
+          variant: "destructive",
+          title: "Could Not Get Location",
+          description: error.message,
+        });
+        setIsGettingLocation(false);
+      }
+    );
+  };
   
-  const fullAddress = encodeURIComponent(`${content.addressLine1}, ${content.addressLine2}`);
-  const mapSrc = `https://maps.google.com/maps?q=${fullAddress}&output=embed&z=15`;
+  const mapSrc = useMemo(() => {
+    if (content.latitude && content.longitude) {
+      return `https://maps.google.com/maps?q=${content.latitude},${content.longitude}&output=embed&z=15`;
+    }
+    const fullAddress = encodeURIComponent(`${content.addressLine1}, ${content.addressLine2}`);
+    return `https://maps.google.com/maps?q=${fullAddress}&output=embed&z=15`;
+  }, [content.latitude, content.longitude, content.addressLine1, content.addressLine2]);
 
 
   if (isLoading) {
@@ -193,10 +232,14 @@ export default function ContactPageManagement() {
         <div>
           <Card>
               <CardHeader>
-                <CardTitle>Map Preview</CardTitle>
-                <CardDescription>This map shows a preview of the address entered on the left. It will update as you type.</CardDescription>
+                <CardTitle>Map Location</CardTitle>
+                <CardDescription>Set the church location for the map. You can use your current location or enter the address manually on the left.</CardDescription>
               </CardHeader>
               <CardContent>
+                <Button onClick={handleSetLocation} disabled={isGettingLocation}>
+                    {isGettingLocation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
+                    Use My Current Location
+                </Button>
                  <div className="mt-4 h-96 bg-muted rounded-lg overflow-hidden">
                     <iframe
                         key={mapSrc}
