@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -101,7 +102,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-       <div className="mt-8">
+       <div className="mt-8 grid grid-cols-1">
           <Card>
               <CardHeader>
                   <CardTitle>Recent Activity</CardTitle>

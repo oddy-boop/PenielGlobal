@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import type { Sermon } from "@/lib/types";
@@ -8,57 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
-function SermonPlayerDialog({ sermon, open, onOpenChange }: { sermon: Sermon | null, open: boolean, onOpenChange: (open: boolean) => void }) {
-  if (!sermon) return null;
-
-  const getYouTubeVideoId = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      if (urlObj.hostname === 'youtu.be') {
-        return urlObj.pathname.slice(1);
-      }
-      if (urlObj.hostname.includes('youtube.com')) {
-        return urlObj.searchParams.get('v');
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const videoId = sermon.videoUrl ? getYouTubeVideoId(sermon.videoUrl) : null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">{sermon.title}</DialogTitle>
-          <DialogDescription>By {sermon.speaker}</DialogDescription>
-        </DialogHeader>
-        {videoId ? (
-          <div className="aspect-video">
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${videoId}`}
-              title={sermon.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="rounded-lg"
-            ></iframe>
-          </div>
-        ) : (
-          <div className="p-8 text-center text-muted-foreground">
-            <p>The video for this sermon could not be loaded. It might be an invalid or unsupported link.</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
+import { SermonPlayerDialog } from "@/components/sermon-player-dialog";
 
 export default function SermonsPage() {
   const [allSermons, setAllSermons] = useState<Sermon[]>([]);
@@ -134,7 +85,7 @@ export default function SermonsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input placeholder="Search sermons..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
+        <div className="flex gap-4 w-full flex-col sm:flex-row md:w-auto">
             <Select onValueChange={setSelectedTopic} value={selectedTopic}>
               <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Filter by Topic" />
