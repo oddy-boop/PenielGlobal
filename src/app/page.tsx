@@ -82,8 +82,9 @@ export default function Home() {
 
   const heroImages = content
     ? Object.keys(content)
-        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent] && (content[key as keyof HomeContent] as string).trim() !== '')
+        .filter(key => key.startsWith('heroImage') && content[key as keyof HomeContent])
         .map(key => content[key as keyof HomeContent] as string)
+        .filter(url => url.trim() !== '') // Ensure no empty strings
     : [];
 
 
@@ -307,3 +308,4 @@ export default function Home() {
   );
 }
 
+    
