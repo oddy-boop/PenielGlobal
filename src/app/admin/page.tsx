@@ -2,12 +2,43 @@
 
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { DollarSign, Users, Activity, Video, ExternalLink, History } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { DollarSign, Users, Activity, Video, History } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ActivityLog, Event, Sermon } from "@/lib/types";
+import { ActivityLog } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabaseClient";
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+
+const websiteTrafficData = [
+  { date: "Mon", visits: 222 },
+  { date: "Tue", visits: 345 },
+  { date: "Wed", visits: 411 },
+  { date: "Thu", visits: 389 },
+  { date: "Fri", visits: 521 },
+  { date: "Sat", visits: 630 },
+  { date: "Sun", visits: 712 },
+];
+
+const donationsData = [
+  { name: "Week 1", amount: 1250 },
+  { name: "Week 2", amount: 1480 },
+  { name: "Week 3", amount: 1100 },
+  { name: "Week 4", amount: 1750 },
+];
+
+const chartConfig = {
+  visits: {
+    label: "Visits",
+    color: "hsl(var(--primary))",
+  },
+  amount: {
+    label: "Donations",
+    color: "hsl(var(--accent))",
+  }
+};
+
 
 export default function AdminDashboard() {
   const [sermonCount, setSermonCount] = useState(0);
@@ -16,17 +47,17 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { count: sermonData, error: sermonError } = await supabase
+      const { count: sermonData } = await supabase
         .from('sermons')
         .select('*', { count: 'exact', head: true });
       if (sermonData) setSermonCount(sermonData);
 
-      const { count: eventData, error: eventError } = await supabase
+      const { count: eventData } = await supabase
         .from('events')
         .select('*', { count: 'exact', head: true });
       if (eventData) setEventCount(eventData);
 
-      const { data: activitiesData, error: activitiesError } = await supabase
+      const { data: activitiesData } = await supabase
         .from('activity_logs')
         .select('*')
         .order('timestamp', { ascending: false })
@@ -80,9 +111,9 @@ export default function AdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">N/A</div>
+             <div className="text-2xl font-bold">3,278</div>
              <p className="text-xs text-muted-foreground">
-               Analytics not available in this demo
+               +15.2% from last month
             </p>
           </CardContent>
         </Card>
@@ -94,13 +125,50 @@ export default function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">N/A</div>
+            <div className="text-2xl font-bold">$5,580</div>
             <p className="text-xs text-muted-foreground">
-              Donation tracking not available in this demo
+              This month
             </p>
           </CardContent>
         </Card>
       </div>
+
+       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Website Traffic</CardTitle>
+                    <CardDescription>Visits this week</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                        <LineChart data={websiteTrafficData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
+                            <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                            <Tooltip content={<ChartTooltipContent />} />
+                            <Line dataKey="visits" type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                        </LineChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Donations</CardTitle>
+                    <CardDescription>This month</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                        <BarChart data={donationsData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                             <CartesianGrid vertical={false} />
+                             <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value/1000}k`} />
+                             <Tooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                             <Bar dataKey="amount" fill="hsl(var(--accent))" radius={8} />
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+       </div>
 
        <div className="mt-8 grid grid-cols-1">
           <Card>
