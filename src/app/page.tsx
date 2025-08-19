@@ -44,11 +44,10 @@ export default function Home() {
       ]);
 
       if (homeRes.data) {
-        const homeData = homeRes.data as HomeContent;
+        const homeData = homeRes.data;
         setContent(homeData);
-        
+
         const images: string[] = [];
-        // Correctly iterate through hero_image fields from the fetched data
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
           if (homeData[key]) {
@@ -57,7 +56,7 @@ export default function Home() {
         }
         setHeroImages(images);
       }
-
+      
       if (sermonRes.data) {
         setLatestSermon(sermonRes.data as Sermon);
       }
@@ -161,7 +160,7 @@ export default function Home() {
                     <CarouselItem key={index} className="relative">
                       <Image
                         src={src}
-                        alt={`Hero background ${index + 1}`}
+                        alt={`Hero image ${index + 1}`}
                         fill
                         style={{objectFit:"cover"}}
                         className="z-0 brightness-50"
@@ -296,3 +295,5 @@ export default function Home() {
     </MotionWrapper>
   );
 }
+
+    

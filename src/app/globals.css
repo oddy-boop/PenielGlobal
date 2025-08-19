@@ -52,6 +52,12 @@
     --input: 141 10% 30%;
     --ring: 43 90% 48%;
   }
+
+  .hero-container {
+    height: 400px; /* Adjust this value as needed */
+    position: relative;
+  }
+  
 }
 
 @layer base {
