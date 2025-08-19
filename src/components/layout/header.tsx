@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Menu, X, Shield } from "lucide-react";
 import Image from "next/image";
@@ -99,16 +99,19 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-card p-0">
-                    <div className="p-6 flex items-center justify-between">
+                    <SheetHeader className="p-6 flex-row items-center justify-between">
+                         <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                           <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={32} height={32} />
                           <span className="font-headline text-xl">PGM</span>
                         </Link>
-                        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                            <X className="h-6 w-6" />
-                            <span className="sr-only">Close menu</span>
-                        </Button>
-                    </div>
+                        <SheetClose asChild>
+                            <Button variant="ghost" size="icon">
+                                <X className="h-6 w-6" />
+                                <span className="sr-only">Close menu</span>
+                            </Button>
+                        </SheetClose>
+                    </SheetHeader>
                   <nav className="flex flex-col space-y-4 p-6 text-lg">
                     {navLinks.map((link) => (
                       <NavLink key={link.href} {...link} className="py-2" />
