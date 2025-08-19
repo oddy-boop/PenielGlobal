@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Share2, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, Share2, Loader2, Music, MessageCircle } from "lucide-react";
 import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import type { ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { MotionWrapper } from "@/components/motion-wrapper";
+import { TikTokIcon } from "@/components/icons/tiktok";
 
 // Helper to get the correct icon component
 const getIcon = (platform: string) => {
@@ -20,6 +21,9 @@ const getIcon = (platform: string) => {
     case 'twitter': return Twitter;
     case 'youtube': return Youtube;
     case 'instagram': return Instagram;
+    case 'tiktok': return TikTokIcon;
+    case 'spotify': return Music;
+    case 'whatsapp': return MessageCircle;
     default: return Share2;
   }
 }
@@ -141,7 +145,7 @@ export default function ContactPage() {
                  {content.socials && content.socials.map(social => {
                     const Icon = getIcon(social.platform);
                     return (
-                      <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
+                      <Link key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
                     )
                  })}
               </CardContent>

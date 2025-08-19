@@ -24,6 +24,9 @@ const defaultContent: ContactContent = {
       { platform: "Facebook", url: "https://facebook.com" },
       { platform: "Twitter", url: "https://twitter.com" },
       { platform: "Youtube", url: "https://youtube.com" },
+      { platform: "TikTok", url: "https://tiktok.com" },
+      { platform: "Spotify", url: "https://spotify.com" },
+      { platform: "WhatsApp", url: "https://whatsapp.com" },
   ],
   latitude: 34.052235,
   longitude: -118.243683

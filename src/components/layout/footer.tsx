@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Church, Facebook, Twitter, Youtube, Share2, Instagram } from "lucide-react";
+import { Church, Facebook, Twitter, Youtube, Share2, Instagram, Music, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import { usePathname } from "next/navigation";
@@ -10,6 +10,7 @@ import type { Branding, ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
+import { TikTokIcon } from "../icons/tiktok";
 
 
 // Helper to get the correct icon component
@@ -19,6 +20,9 @@ const getIcon = (platform: string) => {
     case 'twitter': return Twitter;
     case 'youtube': return Youtube;
     case 'instagram': return Instagram;
+    case 'tiktok': return TikTokIcon;
+    case 'spotify': return Music;
+    case 'whatsapp': return MessageCircle;
     default: return Share2;
   }
 }
@@ -93,7 +97,7 @@ export function Footer() {
                     contact.socials.map(social => {
                         const Icon = getIcon(social.platform);
                         return (
-                            <Link key={social.platform} href={social.url} className="text-muted-foreground hover:text-primary"><Icon/></Link>
+                            <Link key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Icon/></Link>
                         )
                     })
                 ) : null}
