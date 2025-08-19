@@ -6,38 +6,60 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, AlertTriangle } from "lucide-react";
-import { fetchDailyInspiration } from "./actions";
+import { fetchAllInspirations } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import type { Inspiration } from "@/lib/types";
 import Image from "next/image";
 
 export function InspirationClient() {
-  const [inspiration, setInspiration] = useState<Inspiration | null>(null);
+  const [allInspirations, setAllInspirations] = useState<Inspiration[]>([]);
+  const [currentInspiration, setCurrentInspiration] = useState<Inspiration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const getInspiration = useCallback(async () => {
-    setIsLoading(true);
-    setInspiration(null);
-    setError(null);
-    const result = await fetchDailyInspiration();
-    if ('error' in result) {
-        setError(result.error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: result.error,
-        });
-    } else {
-        setInspiration(result.inspiration);
+  const getNewInspiration = useCallback(() => {
+    if (allInspirations.length > 0) {
+      const randomIndex = Math.floor(Math.random() * allInspirations.length);
+      setCurrentInspiration(allInspirations[randomIndex]);
     }
-    setIsLoading(false);
-  }, [toast]);
+  }, [allInspirations]);
 
   useEffect(() => {
-    getInspiration();
-  }, [getInspiration]);
+    async function loadInspirations() {
+      setIsLoading(true);
+      setError(null);
+      const result = await fetchAllInspirations();
+      if ('error' in result) {
+          setError(result.error);
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: result.error,
+          });
+          setAllInspirations([]);
+      } else if (result.inspirations.length === 0) {
+        setCurrentInspiration({ 
+          id: 0, 
+          type: 'text', 
+          prompt: "No inspirational messages have been added yet.",
+          image_url: null,
+          created_at: new Date().toISOString()
+        });
+      } else {
+          setAllInspirations(result.inspirations);
+      }
+      setIsLoading(false);
+    }
+    loadInspirations();
+  }, [toast]);
+  
+  useEffect(() => {
+    if (allInspirations.length > 0) {
+        getNewInspiration();
+    }
+  }, [allInspirations, getNewInspiration]);
+
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -50,20 +72,20 @@ export function InspirationClient() {
               <p>Could not load an inspirational item. Please try again.</p>
             </div>
           )}
-          {inspiration && inspiration.type === 'text' && (
+          {currentInspiration && currentInspiration.type === 'text' && (
             <blockquote className="text-xl md:text-2xl font-serif italic text-primary">
-              "{inspiration.prompt}"
+              "{currentInspiration.prompt}"
             </blockquote>
           )}
-           {inspiration && inspiration.type === 'image' && inspiration.image_url && (
+           {currentInspiration && currentInspiration.type === 'image' && currentInspiration.image_url && (
             <div className="relative w-[400px] h-[300px] rounded-lg overflow-hidden">
-                 <Image src={inspiration.image_url} alt="Inspirational image" fill style={{objectFit:"contain"}} data-ai-hint="inspiration nature" />
+                 <Image src={currentInspiration.image_url} alt="Inspirational image" fill style={{objectFit:"contain"}} data-ai-hint="inspiration nature" />
             </div>
           )}
         </CardContent>
       </Card>
       <div className="mt-6 flex justify-center">
-        <Button onClick={getInspiration} size="lg" disabled={isLoading}>
+        <Button onClick={getNewInspiration} size="lg" disabled={isLoading || allInspirations.length === 0}>
           <RefreshCw className="mr-2 h-5 w-5" />
           {isLoading ? "Loading..." : "Get New Inspiration"}
         </Button>
