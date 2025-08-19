@@ -101,9 +101,9 @@ export default function LogoManagementPage() {
         <CardContent className="space-y-6">
           <div>
             <Label>Logo Preview</Label>
-            <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-32 relative">
-              {isLoading ? <Skeleton className="h-20 w-40"/> : (
-                <Image src={logoPreview || "/placeholder-logo.svg"} alt="Current Logo" width={100} height={40} data-ai-hint="church logo" />
+            <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-32 w-32 relative">
+              {isLoading ? <Skeleton className="h-24 w-24 rounded-full"/> : (
+                <Image src={logoPreview || "/placeholder-logo.svg"} alt="Current Logo" width={100} height={100} className="rounded-full" data-ai-hint="church logo" />
               )}
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function LogoManagementPage() {
               disabled={isSaving}
             />
             <p className="text-sm text-muted-foreground">
-                Select an image file from your computer.
+                Select an image file from your computer. A square image works best.
             </p>
           </div>
         </CardContent>

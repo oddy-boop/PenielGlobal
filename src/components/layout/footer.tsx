@@ -62,8 +62,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 font-bold text-lg text-primary">
-                {isLoading ? <Skeleton className="h-6 w-6 rounded-full" /> : (
-                  <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={24} height={24} />
+                {isLoading ? <Skeleton className="h-8 w-8 rounded-full" /> : (
+                  <Image src={logoUrl} alt="Peniel Global Ministry Logo" width={32} height={32} className="rounded-full" />
                 )}
               <span className="font-headline text-xl">Peniel Global Ministry</span>
             </Link>
