@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 import type { Branding } from "@/lib/types";
 import { supabase } from '@/lib/supabaseClient';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MotionWrapper } from '@/components/motion-wrapper';
 
 function AdminSidebar() {
   const pathname = usePathname();

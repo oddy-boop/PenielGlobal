@@ -53,9 +53,20 @@
     --ring: 43 90% 48%;
   }
 
-  .hero-container {
-    height: 400px; /* Adjust this value as needed */
-    position: relative;
+  .hero-carousel [data-orientation="horizontal"] {
+    height: 100% !important;
+  }
+  
+  .hero-carousel .embla {
+    height: 100% !important;
+  }
+  
+  .hero-carousel .embla__viewport {
+    height: 100% !important;
+  }
+  
+  .hero-carousel .embla__container {
+    height: 100% !important;
   }
   
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -12,8 +11,6 @@ import type { HomeContent, Sermon, Service } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabaseClient';
 import { SermonPlayerDialog } from '@/components/sermon-player-dialog';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import Autoplay from "embla-carousel-autoplay";
 import { MotionWrapper } from '@/components/motion-wrapper';
 
 const iconMap: { [key: string]: LucideIcon } = {
@@ -32,6 +29,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [heroImages, setHeroImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -47,13 +45,13 @@ export default function Home() {
         const homeData = homeRes.data as HomeContent;
         setContent(homeData);
 
+        // Cleaner way to collect hero images
         const images: string[] = [];
-        // Correctly loop through the hero_image properties and push them to the array
         for (let i = 1; i <= 10; i++) {
-          const key = `hero_image_${i}` as keyof HomeContent;
-          const imageUrl = homeData[key];
-          if (imageUrl) {
-            images.push(imageUrl as string);
+          const imageKey = `hero_image_${i}` as keyof HomeContent;
+          const imageUrl = homeData[imageKey];
+          if (imageUrl && typeof imageUrl === 'string') {
+            images.push(imageUrl);
           }
         }
         setHeroImages(images);
@@ -71,6 +69,19 @@ export default function Home() {
     };
     fetchContent();
   }, []);
+
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (heroImages.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prevIndex) => 
+          (prevIndex + 1) % heroImages.length
+        );
+      }, 5000); // Change image every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [heroImages.length]);
 
   const handleWatchClick = () => {
     if (latestSermon) {
@@ -149,34 +160,51 @@ export default function Home() {
   return (
     <MotionWrapper>
       <div className="flex flex-col">
-        {/* Hero Section */}
-        <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white">
+        {/* Hero Section - Simple Slideshow */}
+        <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white overflow-hidden">
           {hasHeroImages ? (
-              <Carousel
-                className="absolute inset-0 w-full h-full"
-                plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
-                opts={{ loop: true }}
-              >
-                <CarouselContent>
-                  {heroImages.map((src, index) => (
-                    <CarouselItem key={index} className="relative">
-                      <Image
-                        src={src}
-                        alt={`Hero image ${index + 1}`}
-                        fill
-                        style={{objectFit:"cover"}}
-                        className="z-0 brightness-50"
-                        priority={index === 0}
-                        data-ai-hint="church congregation"
-                      />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
+            <div className="absolute inset-0 w-full h-full">
+              {heroImages.map((src, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <Image
+                    src={src}
+                    alt={`Hero image ${index + 1}`}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="brightness-50"
+                    priority={index === 0}
+                    sizes="100vw"
+                  />
+                </div>
+              ))}
+              
+              {/* Optional: Slideshow indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                {heroImages.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentImageIndex 
+                        ? 'bg-white' 
+                        : 'bg-white/50 hover:bg-white/75'
+                    }`}
+                    onClick={() => setCurrentImageIndex(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           ) : (
-              <div className="absolute inset-0 bg-primary/20 z-0"></div>
+            <div className="absolute inset-0 bg-primary/20"></div>
           )}
-          <div className="z-10 p-4 max-w-4xl">
+          
+          {/* Content overlay */}
+          <div className="z-20 p-4 max-w-4xl text-center relative">
             <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
               {content.hero_headline}
             </h1>
@@ -190,7 +218,7 @@ export default function Home() {
                   Upcoming Events
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
+              <Button asChild size="lg" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
                 <Link href="/contact">
                   Visit Us
                 </Link>
@@ -272,7 +300,14 @@ export default function Home() {
                   <div className="mt-12 max-w-2xl mx-auto">
                       <Card className="shadow-lg overflow-hidden">
                           <div className="relative aspect-video">
-                              <Image src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} alt={latestSermon.title} fill className="object-cover" data-ai-hint="sermon abstract"/>
+                              <Image 
+                                src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} 
+                                alt={latestSermon.title} 
+                                fill 
+                                className="object-cover" 
+                                sizes="(max-width: 768px) 100vw, 672px"
+                                data-ai-hint="sermon abstract"
+                              />
                               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                                 <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
                                     <Video className="h-12 w-12"/>
@@ -297,5 +332,3 @@ export default function Home() {
     </MotionWrapper>
   );
 }
-
-    
