@@ -44,14 +44,16 @@ export default function Home() {
       ]);
 
       if (homeRes.data) {
-        const homeData = homeRes.data;
+        const homeData = homeRes.data as HomeContent;
         setContent(homeData);
 
         const images: string[] = [];
+        // Correctly loop through the hero_image properties and push them to the array
         for (let i = 1; i <= 10; i++) {
           const key = `hero_image_${i}` as keyof HomeContent;
-          if (homeData[key]) {
-            images.push(homeData[key] as string);
+          const imageUrl = homeData[key];
+          if (imageUrl) {
+            images.push(imageUrl as string);
           }
         }
         setHeroImages(images);
