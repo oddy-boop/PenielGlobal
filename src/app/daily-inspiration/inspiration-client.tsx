@@ -44,6 +44,9 @@ export function InspirationClient() {
             setAllInspirations([]);
         } else {
             setAllInspirations(data);
+            // Select an initial inspiration immediately after fetching
+            const randomIndex = Math.floor(Math.random() * data.length);
+            setCurrentInspiration(data[randomIndex]);
         }
       } catch (e: any) {
          const errorMessage = 'An unexpected error occurred: ' + e.message;
@@ -60,12 +63,6 @@ export function InspirationClient() {
     }
     loadInspirations();
   }, [toast]);
-  
-  useEffect(() => {
-    if (allInspirations.length > 0) {
-        getNewInspiration();
-    }
-  }, [allInspirations, getNewInspiration]);
 
 
   return (
