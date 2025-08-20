@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -111,9 +110,9 @@ export default function AdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">3,278</div>
+             <div className="text-2xl font-bold">N/A</div>
              <p className="text-xs text-muted-foreground">
-               +15.2% from last month
+               Requires analytics integration
             </p>
           </CardContent>
         </Card>
@@ -125,9 +124,9 @@ export default function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$5,580</div>
+            <div className="text-2xl font-bold">N/A</div>
             <p className="text-xs text-muted-foreground">
-              This month
+              Requires payment integration
             </p>
           </CardContent>
         </Card>
@@ -136,8 +135,8 @@ export default function AdminDashboard() {
        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Website Traffic</CardTitle>
-                    <CardDescription>Visits this week</CardDescription>
+                    <CardTitle>Website Traffic (Placeholder)</CardTitle>
+                    <CardDescription>Visits this week. (Requires analytics integration)</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -153,15 +152,15 @@ export default function AdminDashboard() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Donations</CardTitle>
-                    <CardDescription>This month</CardDescription>
+                    <CardTitle>Donations (Placeholder)</CardTitle>
+                    <CardDescription>This month. (Requires payment integration)</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <ChartContainer config={chartConfig} className="h-[250px] w-full">
                         <BarChart data={donationsData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                              <CartesianGrid vertical={false} />
                              <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value/1000}k`} />
+                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${'value' in value ? (value.value as number)/1000 : ''}k`} />
                              <Tooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                              <Bar dataKey="amount" fill="hsl(var(--accent))" radius={8} />
                         </BarChart>
@@ -201,4 +200,5 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
+
+    
