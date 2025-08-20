@@ -133,9 +133,9 @@ export default function LogoManagementPage() {
         <CardContent className="space-y-6">
           <div>
             <Label>Header Background Preview</Label>
-            <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative">
+            <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative overflow-hidden">
               {isLoading ? <Skeleton className="h-32 w-full"/> : (
-                <Image src={headerBgPreview || "https://placehold.co/1200x200.png"} alt="Header background" width={300} height={50} style={{objectFit: "cover"}} data-ai-hint="church interior abstract" />
+                <Image src={headerBgPreview || "https://placehold.co/1200x200.png"} alt="Header background" fill style={{objectFit: "cover"}} data-ai-hint="church interior abstract" />
               )}
             </div>
           </div>

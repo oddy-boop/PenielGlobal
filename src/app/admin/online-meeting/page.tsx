@@ -145,8 +145,8 @@ export default function OnlineMeetingManagementPage() {
             </div>
              <div>
                 <Label>Image</Label>
-                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative">
-                    <Image src={imagePreview || "https://placehold.co/600x450.png"} alt="Current Meeting Image" width={200} height={150} data-ai-hint="online meeting" />
+                 <div className="mt-2 p-4 border rounded-lg flex items-center justify-center bg-muted/40 h-48 relative overflow-hidden">
+                    <Image src={imagePreview || "https://placehold.co/600x450.png"} alt="Current Meeting Image" fill style={{objectFit: "cover"}} data-ai-hint="online meeting" />
                 </div>
                  <Input id="image-file" type="file" className="mt-4" onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)} accept="image/*" />
                  <p className="text-sm text-muted-foreground mt-2">
