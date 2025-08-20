@@ -78,13 +78,15 @@ export function InspirationClient() {
         
         {!isLoading && !error && currentInspiration && (
             <>
-                <Image 
-                    src={currentInspiration.background_image_url} 
-                    alt="Inspirational background" 
-                    fill 
-                    className="object-cover brightness-50 z-0"
-                    data-ai-hint="inspirational scenery"
-                />
+                {currentInspiration.background_image_url && (
+                    <Image 
+                        src={currentInspiration.background_image_url} 
+                        alt="Inspirational background" 
+                        fill 
+                        className="object-cover brightness-50 z-0"
+                        data-ai-hint="inspirational scenery"
+                    />
+                )}
                 <CardContent className="text-center p-4 sm:p-8 z-10">
                     <blockquote className="text-2xl md:text-3xl lg:text-4xl font-serif italic drop-shadow-md">
                         "{currentInspiration.quote}"
