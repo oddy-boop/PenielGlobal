@@ -128,7 +128,7 @@ export default function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">${totalDonations.toLocaleString()}</div>
+             <div className="text-2xl font-bold">GHS {totalDonations.toLocaleString()}</div>
              <p className="text-xs text-muted-foreground">All-time giving</p>
           </CardContent>
         </Card>
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
                         <LineChart data={weeklyDonations} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                              <CartesianGrid vertical={false} />
                              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
+                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `GHS ${value}`} />
                              <Tooltip content={<ChartTooltipContent />} />
                              <Line dataKey="amount" type="monotone" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
                         </LineChart>

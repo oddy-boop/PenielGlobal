@@ -89,11 +89,11 @@ export default function DonationsPage() {
                 </CardHeader>
                 <CardContent className="flex-grow justify-center items-center flex p-6">
                     <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground">GHS</span>
                         <Input 
                             type="number" 
                             placeholder={Number(tier.suggestedAmount).toFixed(2)}
-                            className="pl-10 text-xl font-semibold text-center" 
+                            className="pl-14 text-xl font-semibold text-center" 
                         />
                     </div>
                 </CardContent>
