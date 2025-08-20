@@ -20,6 +20,7 @@ export default function EventsManagementPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
@@ -43,9 +44,28 @@ export default function EventsManagementPage() {
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+  
+  const handleAddClick = () => {
+    setEditingEvent(null);
+    setIsDialogOpen(true);
+  }
+
+  const handleEditClick = (event: Event) => {
+    setEditingEvent(event);
+    setIsDialogOpen(true);
+  }
+
+  const handleSubmit = async (data: EventFormData) => {
+    setIsSaving(true);
+    if (editingEvent) {
+      await handleEditEvent(data);
+    } else {
+      await handleAddEvent(data);
+    }
+    setIsSaving(false);
+  }
 
   const handleAddEvent = async (data: EventFormData) => {
-    setIsSaving(true);
     try {
       let imageUrl = '';
       if (data.image && data.image[0]) {
@@ -87,10 +107,47 @@ export default function EventsManagementPage() {
             title: "Error adding event",
             description: error.message,
         });
-    } finally {
-        setIsSaving(false);
     }
   }
+
+  const handleEditEvent = async (data: EventFormData) => {
+    if (!editingEvent) return;
+    try {
+        let imageUrl = editingEvent.image_url;
+        if (data.image && data.image[0]) {
+            imageUrl = await uploadFileAndGetUrl(data.image[0], 'events');
+        }
+
+        const updatedEventData = {
+            title: data.title,
+            location: data.location,
+            date: data.date.toISOString(),
+            time: data.time,
+            description: data.description,
+            image_url: imageUrl,
+        };
+
+        const { error } = await supabase.from("events").update(updatedEventData).eq("id", editingEvent.id);
+
+        if (error) throw error;
+        
+        await logActivity("Updated Event", `Event Title: ${data.title}`);
+        
+        setIsDialogOpen(false);
+        setEditingEvent(null);
+        toast({
+            title: "Event Updated",
+            description: "The event has been successfully updated.",
+        });
+        fetchEvents(); // Refresh the list
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Error updating event",
+            description: error.message,
+        });
+    }
+  };
   
   const handleRemoveEvent = async (eventToDelete: Event) => {
     setIsDeleting(eventToDelete.id);
@@ -124,19 +181,25 @@ export default function EventsManagementPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-                <Button>
+                <Button onClick={handleAddClick}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Event
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Add New Event</DialogTitle>
+                    <DialogTitle>{editingEvent ? "Edit Event" : "Add New Event"}</DialogTitle>
                     <DialogDescription>
-                        Fill in the details below to create a new event.
+                        {editingEvent ? "Update the details for this event." : "Fill in the details below to create a new event."}
                     </DialogDescription>
                 </DialogHeader>
-                <EventForm onSubmit={handleAddEvent} isSaving={isSaving} />
+                <EventForm 
+                    key={editingEvent ? editingEvent.id : 'new'}
+                    onSubmit={handleSubmit} 
+                    isSaving={isSaving}
+                    defaultValues={editingEvent || undefined}
+                    isEditing={!!editingEvent}
+                />
             </DialogContent>
         </Dialog>
       </div>
@@ -190,7 +253,7 @@ export default function EventsManagementPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem disabled>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditClick(event)}>Edit</DropdownMenuItem>
                             <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                             </AlertDialogTrigger>

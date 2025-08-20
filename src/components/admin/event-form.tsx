@@ -14,26 +14,35 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 
-const eventFormSchema = z.object({
+const baseSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
   date: z.date({ required_error: "A date is required." }),
   time: z.string().min(1, "Time is required"),
   description: z.string().min(1, "Description is required"),
+});
+
+const createEventFormSchema = baseSchema.extend({
   image: z.instanceof(FileList).refine(files => files?.length === 1, "Image is required."),
 });
 
-export type EventFormData = z.infer<typeof eventFormSchema>;
+const editEventFormSchema = baseSchema.extend({
+    image: z.instanceof(FileList).optional(),
+});
+
+
+export type EventFormData = z.infer<typeof createEventFormSchema>;
 
 interface EventFormProps {
   onSubmit: (data: EventFormData) => void;
   defaultValues?: Partial<Omit<EventFormData, 'image'>>;
   isSaving: boolean;
+  isEditing?: boolean;
 }
 
-export function EventForm({ onSubmit, defaultValues, isSaving }: EventFormProps) {
+export function EventForm({ onSubmit, defaultValues, isSaving, isEditing = false }: EventFormProps) {
   const form = useForm<EventFormData>({
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(isEditing ? editEventFormSchema : createEventFormSchema),
     defaultValues: {
       title: defaultValues?.title || '',
       location: defaultValues?.location || '',
@@ -148,13 +157,16 @@ export function EventForm({ onSubmit, defaultValues, isSaving }: EventFormProps)
                   <FormControl>
                     <Input type="file" accept="image/*" {...imageRef} disabled={isSaving} />
                   </FormControl>
+                  <FormDescription>
+                    {isEditing ? "Upload a new image to replace the existing one. Leave blank to keep the current image." : ""}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
             )}
         />
         <Button type="submit" className="w-full" disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Event
+            {isEditing ? "Save Changes" : "Create Event"}
         </Button>
       </form>
     </Form>
