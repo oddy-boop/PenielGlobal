@@ -105,6 +105,14 @@ export interface Inspiration {
     created_at: string;
 }
 
+export interface Donation {
+    id: number;
+    amount: number;
+    created_at: string;
+    donor_name: string;
+    donor_email: string;
+}
+
 
 // Generic type for site content stored in the 'site_content' table
 export interface SiteContent<T> {
