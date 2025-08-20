@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -83,7 +84,7 @@ export function InspirationClient() {
           )}
            {!isLoading && !error && currentInspiration && currentInspiration.type === 'image' && currentInspiration.image_url && (
             <div className="relative w-full max-w-[400px] h-auto aspect-[4/3] rounded-lg overflow-hidden">
-                 <Image src={currentInspiration.image_url} alt="Inspirational image" fill style={{objectFit:"contain"}} data-ai-hint="inspiration nature" />
+                 <Image src={currentInspiration.image_url} alt="Inspirational image" fill style={{objectFit:"cover"}} data-ai-hint="inspirational scenery" />
             </div>
           )}
         </CardContent>
@@ -97,3 +98,4 @@ export function InspirationClient() {
     </div>
   );
 }
+
