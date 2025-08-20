@@ -110,9 +110,9 @@ export default function AdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-             <div className="text-2xl font-bold">N/A</div>
+             <div className="text-2xl font-bold">2,748</div>
              <p className="text-xs text-muted-foreground">
-               Requires analytics integration
+               This week (placeholder data)
             </p>
           </CardContent>
         </Card>
@@ -124,9 +124,9 @@ export default function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">N/A</div>
+            <div className="text-2xl font-bold">$5,580</div>
             <p className="text-xs text-muted-foreground">
-              Requires payment integration
+              This month (placeholder data)
             </p>
           </CardContent>
         </Card>
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
             <Card>
                 <CardHeader>
                     <CardTitle>Website Traffic (Placeholder)</CardTitle>
-                    <CardDescription>Visits this week. (Requires analytics integration)</CardDescription>
+                    <CardDescription>Illustrative visits for this week. Requires analytics integration for real data.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={chartConfig} className="h-[250px] w-full">
@@ -153,14 +153,14 @@ export default function AdminDashboard() {
             <Card>
                 <CardHeader>
                     <CardTitle>Donations (Placeholder)</CardTitle>
-                    <CardDescription>This month. (Requires payment integration)</CardDescription>
+                    <CardDescription>Illustrative donations for this month. Requires payment integration for real data.</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <ChartContainer config={chartConfig} className="h-[250px] w-full">
                         <BarChart data={donationsData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
                              <CartesianGrid vertical={false} />
                              <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${'value' in value ? (value.value as number)/1000 : ''}k`} />
+                             <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value / 1000}k`} />
                              <Tooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                              <Bar dataKey="amount" fill="hsl(var(--accent))" radius={8} />
                         </BarChart>
@@ -201,4 +201,4 @@ export default function AdminDashboard() {
     </div>
   );
 
-    
+}
