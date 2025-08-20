@@ -20,9 +20,9 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card className="flex flex-col md:flex-row overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 w-full">
       <div className="md:w-1/3 relative min-h-[200px] md:min-h-0 bg-muted">
-        {event.imageUrl ? (
+        {event.image_url ? (
             <Image 
-              src={event.imageUrl} 
+              src={event.image_url} 
               alt={event.title} 
               fill
               className="object-cover"
@@ -55,9 +55,6 @@ export function EventCard({ event }: EventCardProps) {
         <CardContent className="flex-grow">
           <p>{event.description}</p>
         </CardContent>
-        <CardFooter>
-          <Button variant="outline">Learn More</Button>
-        </CardFooter>
       </div>
     </Card>
   );
