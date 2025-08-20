@@ -34,7 +34,12 @@ export function InspirationClient() {
         const { data, error: dbError } = await supabase.from('inspirations').select('*');
         if (dbError) throw dbError;
 
-        if (data.length === 0) {
+        if (data && data.length > 0) {
+            setAllInspirations(data);
+            const randomIndex = Math.floor(Math.random() * data.length);
+            setCurrentInspiration(data[randomIndex]);
+        } else {
+            setAllInspirations([]);
             setCurrentInspiration({ 
               id: 0, 
               type: 'text', 
@@ -42,15 +47,9 @@ export function InspirationClient() {
               image_url: null,
               created_at: new Date().toISOString()
             });
-            setAllInspirations([]);
-        } else {
-            setAllInspirations(data);
-            // Select an initial inspiration immediately after fetching
-            const randomIndex = Math.floor(Math.random() * data.length);
-            setCurrentInspiration(data[randomIndex]);
         }
       } catch (e: any) {
-         const errorMessage = 'An unexpected error occurred: ' + e.message;
+         const errorMessage = 'Failed to load inspirations: ' + e.message;
          setError(errorMessage);
          toast({
               variant: "destructive",
@@ -58,6 +57,7 @@ export function InspirationClient() {
               description: errorMessage,
           });
          setAllInspirations([]);
+         setCurrentInspiration(null);
       } finally {
         setIsLoading(false);
       }
@@ -71,26 +71,33 @@ export function InspirationClient() {
       <Card className="min-h-[250px] shadow-lg flex items-center justify-center p-8 bg-card/80">
         <CardContent className="text-center p-0">
           {isLoading && <Skeleton className="h-20 w-[400px]" />}
+          
           {error && !isLoading && (
             <div className="text-destructive flex flex-col items-center gap-4">
               <AlertTriangle className="h-10 w-10"/>
-              <p>Could not load an inspirational item. Please try again.</p>
+              <p>{error}</p>
             </div>
           )}
-          {!isLoading && !error && currentInspiration && currentInspiration.type === 'text' && (
-            <blockquote className="text-xl md:text-2xl font-serif italic text-primary">
-              "{currentInspiration.prompt}"
-            </blockquote>
+
+          {!isLoading && !error && currentInspiration && (
+            <>
+              {currentInspiration.type === 'text' && (
+                <blockquote className="text-xl md:text-2xl font-serif italic text-primary">
+                  "{currentInspiration.prompt}"
+                </blockquote>
+              )}
+              {currentInspiration.type === 'image' && currentInspiration.image_url && (
+                <div className="relative w-full max-w-[400px] h-auto aspect-[4/3] rounded-lg overflow-hidden">
+                     <Image src={currentInspiration.image_url} alt="Inspirational image" fill style={{objectFit:"cover"}} data-ai-hint="inspirational scenery" />
+                </div>
+              )}
+            </>
           )}
-           {!isLoading && !error && currentInspiration && currentInspiration.type === 'image' && currentInspiration.image_url && (
-            <div className="relative w-full max-w-[400px] h-auto aspect-[4/3] rounded-lg overflow-hidden">
-                 <Image src={currentInspiration.image_url} alt="Inspirational image" fill style={{objectFit:"cover"}} data-ai-hint="inspirational scenery" />
-            </div>
-          )}
+
         </CardContent>
       </Card>
       <div className="mt-6 flex justify-center">
-        <Button onClick={getNewInspiration} size="lg" disabled={isLoading || allInspirations.length === 0}>
+        <Button onClick={getNewInspiration} size="lg" disabled={isLoading || allInspirations.length < 2}>
           <RefreshCw className="mr-2 h-5 w-5" />
           {isLoading ? "Loading..." : "Get New Inspiration"}
         </Button>
@@ -99,3 +106,4 @@ export function InspirationClient() {
   );
 }
 
+    

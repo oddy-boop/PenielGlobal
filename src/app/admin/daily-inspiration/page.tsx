@@ -47,7 +47,7 @@ export default function DailyInspirationManagement() {
 
   const handleAddInspiration = async () => {
     setIsSaving(true);
-    let inspirationData: Partial<Inspiration> = { type: newInspirationType, prompt: null, image_url: null };
+    let inspirationData: Partial<Inspiration>;
 
     try {
       if (newInspirationType === 'text') {
@@ -56,7 +56,7 @@ export default function DailyInspirationManagement() {
               setIsSaving(false);
               return;
           }
-          inspirationData.prompt = newPrompt;
+          inspirationData = { type: 'text', prompt: newPrompt, image_url: null };
       } else { // type is 'image'
           if (!newImageFile) {
               toast({ variant: "destructive", title: "Error", description: "Image file is required." });
@@ -64,7 +64,7 @@ export default function DailyInspirationManagement() {
               return;
           }
           const imageUrl = await uploadFileAndGetUrl(newImageFile, 'inspirations');
-          inspirationData.image_url = imageUrl;
+          inspirationData = { type: 'image', image_url: imageUrl, prompt: null };
       }
       
       const { error } = await supabase.from('inspirations').insert([inspirationData]);
@@ -74,6 +74,7 @@ export default function DailyInspirationManagement() {
       toast({ title: "Success", description: "New inspiration added." });
       setNewPrompt("");
       setNewImageFile(null);
+      setNewInspirationType('text');
       setIsDialogOpen(false);
       fetchInspirations();
     } catch(e: any) {
