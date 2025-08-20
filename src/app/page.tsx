@@ -215,7 +215,7 @@ export default function Home() {
               <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
                 <Link href="/events">
                   <Calendar className="mr-2 h-5 w-5" />
-                  Upcoming Events
+                  Upcoming Event
                 </Link>
               </Button>
               <Button asChild size="lg" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
