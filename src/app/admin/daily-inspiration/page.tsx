@@ -2,17 +2,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, PlusCircle, Loader2, Image as ImageIcon } from "lucide-react";
+import { Trash2, PlusCircle, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabaseClient";
 import { logActivity } from "@/lib/activity-logger";
 import { type Inspiration } from "@/lib/types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
@@ -26,8 +25,8 @@ export default function DailyInspirationManagement() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
-  const [newInspirationType, setNewInspirationType] = useState<'text' | 'image'>('text');
-  const [newPrompt, setNewPrompt] = useState("");
+  const [newQuote, setNewQuote] = useState("");
+  const [newAuthor, setNewAuthor] = useState("");
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
 
   const fetchInspirations = useCallback(async () => {
@@ -46,37 +45,40 @@ export default function DailyInspirationManagement() {
   }, [fetchInspirations]);
 
   const handleAddInspiration = async () => {
+    if (!newQuote.trim()) {
+        toast({ variant: "destructive", title: "Error", description: "Quote cannot be empty." });
+        return;
+    }
+    if (!newAuthor.trim()) {
+        toast({ variant: "destructive", title: "Error", description: "Author cannot be empty." });
+        return;
+    }
+    if (!newImageFile) {
+        toast({ variant: "destructive", title: "Error", description: "Background image is required." });
+        return;
+    }
+    
     setIsSaving(true);
-    let inspirationData: Partial<Inspiration>;
-
     try {
-      if (newInspirationType === 'text') {
-          if (!newPrompt.trim()) {
-              toast({ variant: "destructive", title: "Error", description: "Prompt cannot be empty." });
-              setIsSaving(false);
-              return;
-          }
-          inspirationData = { type: 'text', prompt: newPrompt, image_url: null };
-      } else { // type is 'image'
-          if (!newImageFile) {
-              toast({ variant: "destructive", title: "Error", description: "Image file is required." });
-              setIsSaving(false);
-              return;
-          }
-          const imageUrl = await uploadFileAndGetUrl(newImageFile, 'inspirations');
-          inspirationData = { type: 'image', image_url: imageUrl, prompt: null };
-      }
+      const imageUrl = await uploadFileAndGetUrl(newImageFile, 'inspirations');
+      const inspirationData = { 
+        quote: newQuote,
+        author: newAuthor,
+        background_image_url: imageUrl
+      };
       
       const { error } = await supabase.from('inspirations').insert([inspirationData]);
       if (error) throw error;
 
-      await logActivity("Added Inspiration", `Type: ${newInspirationType}`);
+      await logActivity("Added Inspiration", `Quote: "${newQuote.substring(0, 20)}..."`);
       toast({ title: "Success", description: "New inspiration added." });
-      setNewPrompt("");
+      
+      setNewQuote("");
+      setNewAuthor("");
       setNewImageFile(null);
-      setNewInspirationType('text');
       setIsDialogOpen(false);
       fetchInspirations();
+
     } catch(e: any) {
         toast({ variant: "destructive", title: "Error", description: "Failed to add inspiration: " + e.message });
     } finally {
@@ -104,7 +106,7 @@ export default function DailyInspirationManagement() {
       <div className="flex items-center justify-between mb-6">
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Daily Inspiration Management</h1>
-            <p className="text-muted-foreground">Add or remove text or image inspirations.</p>
+            <p className="text-muted-foreground">Add or remove inspirational quotes with background images.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -113,43 +115,44 @@ export default function DailyInspirationManagement() {
               Add Inspiration
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add a New Inspiration</DialogTitle>
               <DialogDescription>
-                Choose to add a text prompt or an inspirational image. This will be randomly shown to visitors.
+                Add a quote, its author, and a background image. This will be randomly shown to visitors.
               </DialogDescription>
             </DialogHeader>
             
-            <RadioGroup defaultValue="text" value={newInspirationType} onValueChange={(value: 'text' | 'image') => setNewInspirationType(value)} className="grid grid-cols-2 gap-4">
-              <div>
-                <RadioGroupItem value="text" id="r1" className="peer sr-only" />
-                <Label htmlFor="r1" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                  Text
-                </Label>
-              </div>
-              <div>
-                <RadioGroupItem value="image" id="r2" className="peer sr-only" />
-                <Label htmlFor="r2" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                  Image
-                </Label>
-              </div>
-            </RadioGroup>
-
-            {newInspirationType === 'text' ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-quote">Quote</Label>
                 <Textarea 
-                    value={newPrompt}
-                    onChange={(e) => setNewPrompt(e.target.value)}
-                    placeholder="Enter your inspirational message here..."
-                    rows={5}
+                    id="new-quote"
+                    value={newQuote}
+                    onChange={(e) => setNewQuote(e.target.value)}
+                    placeholder="Enter the inspirational message here..."
+                    rows={4}
                 />
-            ) : (
+              </div>
+               <div className="space-y-2">
+                <Label htmlFor="new-author">Author</Label>
                 <Input 
+                    id="new-author"
+                    value={newAuthor}
+                    onChange={(e) => setNewAuthor(e.target.value)}
+                    placeholder="e.g. C.S. Lewis"
+                />
+              </div>
+               <div className="space-y-2">
+                <Label htmlFor="new-image">Background Image</Label>
+                <Input 
+                    id="new-image"
                     type="file" 
                     accept="image/*"
                     onChange={(e) => setNewImageFile(e.target.files ? e.target.files[0] : null)}
                 />
-            )}
+              </div>
+            </div>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>Cancel</Button>
@@ -174,14 +177,14 @@ export default function DailyInspirationManagement() {
                 <div className="flex justify-center items-center h-24"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
             ) : inspirations.length > 0 ? (
                  inspirations.map(p => (
-                    <div key={p.id} className="p-4 border rounded-lg bg-muted/40 flex justify-between items-center">
-                        {p.type === 'text' ? (
-                             <p className="italic font-serif text-lg">"{p.prompt}"</p>
-                        ): (
-                            <div className="relative w-24 h-16 rounded-md overflow-hidden">
-                                {p.image_url && <Image src={p.image_url} alt="Inspiration" fill style={{objectFit:"cover"}} />}
-                            </div>
-                        )}
+                    <div key={p.id} className="p-4 border rounded-lg bg-muted/40 flex justify-between items-center gap-4">
+                        <div className="relative w-24 h-16 rounded-md overflow-hidden flex-shrink-0">
+                           <Image src={p.background_image_url} alt="Inspiration background" fill style={{objectFit:"cover"}} />
+                        </div>
+                        <div className="flex-grow">
+                             <p className="italic font-serif text-base">"{p.quote}"</p>
+                             <p className="text-sm text-muted-foreground mt-1">- {p.author}</p>
+                        </div>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" disabled={isDeleting === p.id}>
@@ -211,5 +214,3 @@ export default function DailyInspirationManagement() {
     </div>
   );
 }
-
-    

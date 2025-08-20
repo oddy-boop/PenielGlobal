@@ -99,9 +99,9 @@ export interface Service {
 
 export interface Inspiration {
     id: number;
-    prompt: string | null;
-    type: 'text' | 'image';
-    image_url: string | null;
+    quote: string;
+    author: string;
+    background_image_url: string;
     created_at: string;
 }
 
