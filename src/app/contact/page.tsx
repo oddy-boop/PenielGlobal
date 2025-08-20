@@ -5,14 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Share2, Loader2, Music, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Share2, Loader2, Music, MessageCircle, Send } from "lucide-react";
 import { Facebook, Twitter, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import type { ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { TikTokIcon } from "@/components/icons/tiktok";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Helper to get the correct icon component
 const getIcon = (platform: string) => {
@@ -29,8 +31,42 @@ const getIcon = (platform: string) => {
 }
 
 export default function ContactPage() {
+  const { toast } = useToast();
   const [content, setContent] = useState<ContactContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startTransition(async () => {
+      const { data, error } = await supabase.functions.invoke('contact', {
+        body: { name, email, subject, message },
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error sending message",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for contacting us. We will get back to you shortly.",
+        });
+        setName('');
+        setEmail('');
+        setSubject('');
+        setMessage('');
+      }
+    });
+  };
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -131,8 +167,8 @@ export default function ContactPage() {
                 <CardTitle className="font-headline">Email Us</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>General Inquiries: {content.generalEmail}</p>
-                <p>Prayer Requests: {content.prayerEmail}</p>
+                <p>General Inquiries: <a href={`mailto:${content.generalEmail}`} className="hover:underline">{content.generalEmail}</a></p>
+                <p>Prayer Requests: <a href={`mailto:${content.prayerEmail}`} className="hover:underline">{content.prayerEmail}</a></p>
               </CardContent>
             </Card>
 
@@ -158,14 +194,17 @@ export default function ContactPage() {
                 <CardTitle className="font-headline text-2xl">Send us a Message</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input placeholder="Your Name" />
-                    <Input type="email" placeholder="Your Email" />
+                    <Input placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} required disabled={isPending} />
+                    <Input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isPending}/>
                   </div>
-                  <Input placeholder="Subject" />
-                  <Textarea placeholder="Your Message" rows={6} />
-                  <Button type="submit" size="lg" className="w-full">Send Message</Button>
+                  <Input placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} required disabled={isPending}/>
+                  <Textarea placeholder="Your Message" rows={6} value={message} onChange={e => setMessage(e.target.value)} required disabled={isPending}/>
+                  <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />}
+                    {isPending ? 'Sending...' : 'Send Message'}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
@@ -175,3 +214,4 @@ export default function ContactPage() {
     </MotionWrapper>
   );
 }
+

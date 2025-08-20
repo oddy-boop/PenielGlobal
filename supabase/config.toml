@@ -1,0 +1,13 @@
+
+# Supabase project configuration
+
+# This file is used to configure your Supabase project. It contains settings for
+# the various services that Supabase provides, such as the database,
+# authentication, and storage.
+
+# For more information, visit https://supabase.com/docs/guides/cli/config
+
+[functions.contact]
+  handler = "main"
+  runtime = "deno"
+  verify_jwt = false
