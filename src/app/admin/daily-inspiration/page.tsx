@@ -47,40 +47,35 @@ export default function DailyInspirationManagement() {
 
   const handleAddInspiration = async () => {
     setIsSaving(true);
-    let inspirationData: Partial<Inspiration> = { type: newInspirationType };
+    let inspirationData: Partial<Inspiration> = { type: newInspirationType, prompt: null, image_url: null };
 
-    if (newInspirationType === 'text') {
-        if (!newPrompt.trim()) {
-            toast({ variant: "destructive", title: "Error", description: "Prompt cannot be empty." });
-            setIsSaving(false);
-            return;
-        }
-        inspirationData.prompt = newPrompt;
-    } else { // type is 'image'
-        if (!newImageFile) {
-            toast({ variant: "destructive", title: "Error", description: "Image file is required." });
-            setIsSaving(false);
-            return;
-        }
-        try {
-            const imageUrl = await uploadFileAndGetUrl(newImageFile, 'inspirations');
-            inspirationData.image_url = imageUrl;
-        } catch(e: any) {
-            toast({ variant: "destructive", title: "Upload Error", description: "Failed to upload image: " + e.message });
-            setIsSaving(false);
-            return;
-        }
-    }
-    
     try {
-        const { error } = await supabase.from('inspirations').insert([inspirationData]);
-        if (error) throw error;
-        await logActivity("Added Inspiration", `Type: ${newInspirationType}`);
-        toast({ title: "Success", description: "New inspiration added." });
-        setNewPrompt("");
-        setNewImageFile(null);
-        setIsDialogOpen(false);
-        fetchInspirations();
+      if (newInspirationType === 'text') {
+          if (!newPrompt.trim()) {
+              toast({ variant: "destructive", title: "Error", description: "Prompt cannot be empty." });
+              setIsSaving(false);
+              return;
+          }
+          inspirationData.prompt = newPrompt;
+      } else { // type is 'image'
+          if (!newImageFile) {
+              toast({ variant: "destructive", title: "Error", description: "Image file is required." });
+              setIsSaving(false);
+              return;
+          }
+          const imageUrl = await uploadFileAndGetUrl(newImageFile, 'inspirations');
+          inspirationData.image_url = imageUrl;
+      }
+      
+      const { error } = await supabase.from('inspirations').insert([inspirationData]);
+      if (error) throw error;
+
+      await logActivity("Added Inspiration", `Type: ${newInspirationType}`);
+      toast({ title: "Success", description: "New inspiration added." });
+      setNewPrompt("");
+      setNewImageFile(null);
+      setIsDialogOpen(false);
+      fetchInspirations();
     } catch(e: any) {
         toast({ variant: "destructive", title: "Error", description: "Failed to add inspiration: " + e.message });
     } finally {
@@ -215,3 +210,5 @@ export default function DailyInspirationManagement() {
     </div>
   );
 }
+
+    
