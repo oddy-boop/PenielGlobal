@@ -11,7 +11,6 @@ import type { HomeContent, Sermon, Service } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabaseClient';
 import { SermonPlayerDialog } from '@/components/sermon-player-dialog';
-import { MotionWrapper } from '@/components/motion-wrapper';
 
 const iconMap: { [key: string]: LucideIcon } = {
   Clock,
@@ -158,177 +157,175 @@ export default function Home() {
   const hasHeroImages = heroImages.length > 0;
 
   return (
-    <MotionWrapper>
-      <div className="flex flex-col">
-        {/* Hero Section - Simple Slideshow */}
-        <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white overflow-hidden">
-          {hasHeroImages ? (
-            <div className="absolute inset-0 w-full h-full">
-              {heroImages.map((src, index) => (
-                <div
+    <div className="flex flex-col">
+      {/* Hero Section - Simple Slideshow */}
+      <section className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center text-center text-white overflow-hidden">
+        {hasHeroImages ? (
+          <div className="absolute inset-0 w-full h-full">
+            {heroImages.map((src, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt={`Hero image ${index + 1}`}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  className="brightness-50"
+                  priority={index === 0}
+                  sizes="100vw"
+                />
+              </div>
+            ))}
+            
+            {/* Optional: Slideshow indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+              {heroImages.map((_, index) => (
+                <button
                   key={index}
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
-                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentImageIndex 
+                      ? 'bg-white' 
+                      : 'bg-white/50 hover:bg-white/75'
                   }`}
-                >
-                  <Image
-                    src={src}
-                    alt={`Hero image ${index + 1}`}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    className="brightness-50"
-                    priority={index === 0}
-                    sizes="100vw"
-                  />
-                </div>
+                  onClick={() => setCurrentImageIndex(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
               ))}
-              
-              {/* Optional: Slideshow indicators */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-                {heroImages.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentImageIndex 
-                        ? 'bg-white' 
-                        : 'bg-white/50 hover:bg-white/75'
-                    }`}
-                    onClick={() => setCurrentImageIndex(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="absolute inset-0 bg-primary/20"></div>
-          )}
-          
-          {/* Content overlay */}
-          <div className="z-20 p-4 max-w-4xl text-center relative">
-            <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
-              {content.hero_headline}
-            </h1>
-            <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
-              {content.hero_subheadline}
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
-                <Link href="/events">
-                  <Calendar className="mr-2 h-5 w-5" />
-                  Upcoming Events
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
-                <Link href="/contact">
-                  Visit Us
-                </Link>
-              </Button>
             </div>
           </div>
-        </section>
-
-        {/* Service Times Section */}
-        <section id="service-times" className="py-16 lg:py-24 bg-background">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
-              Join Our Services
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              We gather every week to celebrate, worship, and learn from the Word.
-            </p>
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-               {services.length > 0 ? services.map((service) => {
-                const Icon = iconMap[service.icon] || Church;
-                return (
-                  <Card key={service.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
-                        <Icon className="h-8 w-8 text-accent" />
-                        {service.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-lg">{service.schedule}</p>
-                      <p className="text-muted-foreground">{service.details}</p>
-                    </CardContent>
-                  </Card>
-                )
-              }) : (
-                  <p className="text-muted-foreground col-span-3">Services have not been configured yet.</p>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <Separator />
-
-        {/* About Us Snippet */}
-        <section id="about" className="py-16 lg:py-24 bg-card">
-          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="md:w-1/2">
-              <Image
-                src={content.about_image || "https://placehold.co/600x400.png"}
-                alt="Church interior"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-xl w-full h-auto"
-                data-ai-hint="church interior"
-              />
-            </div>
-            <div className="md:w-1/2 text-center md:text-left">
-              <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
-                {content.about_title}
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                {content.about_text}
-              </p>
-              <Button asChild className="mt-6" variant="link" size="lg">
-                <Link href="/contact">Learn More About Us <ArrowRight className="ml-2 h-5 w-5" /></Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-        
-        {/* Featured Sermons */}
-        {latestSermon && (
-          <section className="py-16 lg:py-24 bg-background">
-              <div className="container mx-auto px-4 text-center">
-                  <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">Latest Message</h2>
-                  <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                      Get inspired by our recent sermon on faith and perseverance.
-                  </p>
-                  <div className="mt-12 max-w-2xl mx-auto">
-                      <Card className="shadow-lg overflow-hidden">
-                          <div className="relative aspect-video">
-                              <Image 
-                                src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} 
-                                alt={latestSermon.title} 
-                                fill 
-                                className="object-cover" 
-                                sizes="(max-width: 768px) 100vw, 672px"
-                                data-ai-hint="sermon abstract"
-                              />
-                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
-                                    <Video className="h-12 w-12"/>
-                                    <span className="sr-only">Play Sermon</span>
-                                </Button>
-                              </div>
-                          </div>
-                          <CardContent className="p-6 text-left">
-                              <CardTitle className="font-headline text-2xl">{latestSermon.title}</CardTitle>
-                              <p className="text-muted-foreground mt-2">Speaker: {latestSermon.speaker}</p>
-                              <Button onClick={handleWatchClick} className="mt-4">
-                                  Watch Now <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                          </CardContent>
-                      </Card>
-                  </div>
-              </div>
-          </section>
+        ) : (
+          <div className="absolute inset-0 bg-primary/20"></div>
         )}
-      </div>
+        
+        {/* Content overlay */}
+        <div className="z-20 p-4 max-w-4xl text-center relative">
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-lg">
+            {content.hero_headline}
+          </h1>
+          <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
+            {content.hero_subheadline}
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
+              <Link href="/events">
+                <Calendar className="mr-2 h-5 w-5" />
+                Upcoming Events
+              </Link>
+            </Button>
+            <Button asChild size="lg" className="text-white border-white hover:bg-white/20 hover:text-white w-full sm:w-auto">
+              <Link href="/contact">
+                Visit Us
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Service Times Section */}
+      <section id="service-times" className="py-16 lg:py-24 bg-background">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
+            Join Our Services
+          </h2>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            We gather every week to celebrate, worship, and learn from the Word.
+          </p>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+             {services.length > 0 ? services.map((service) => {
+              const Icon = iconMap[service.icon] || Church;
+              return (
+                <Card key={service.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-center gap-3 font-headline text-2xl">
+                      <Icon className="h-8 w-8 text-accent" />
+                      {service.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-lg">{service.schedule}</p>
+                    <p className="text-muted-foreground">{service.details}</p>
+                  </CardContent>
+                </Card>
+              )
+            }) : (
+                <p className="text-muted-foreground col-span-3">Services have not been configured yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* About Us Snippet */}
+      <section id="about" className="py-16 lg:py-24 bg-card">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          <div className="md:w-1/2">
+            <Image
+              src={content.about_image || "https://placehold.co/600x400.png"}
+              alt="Church interior"
+              width={600}
+              height={400}
+              className="rounded-lg shadow-xl w-full h-auto"
+              data-ai-hint="church interior"
+            />
+          </div>
+          <div className="md:w-1/2 text-center md:text-left">
+            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">
+              {content.about_title}
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              {content.about_text}
+            </p>
+            <Button asChild className="mt-6" variant="link" size="lg">
+              <Link href="/contact">Learn More About Us <ArrowRight className="ml-2 h-5 w-5" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+      
+      {/* Featured Sermons */}
+      {latestSermon && (
+        <section className="py-16 lg:py-24 bg-background">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="font-headline text-3xl md:text-4xl font-semibold text-primary">Latest Message</h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Get inspired by our recent sermon on faith and perseverance.
+                </p>
+                <div className="mt-12 max-w-2xl mx-auto">
+                    <Card className="shadow-lg overflow-hidden">
+                        <div className="relative aspect-video">
+                            <Image 
+                              src={latestSermon.thumbnail_url || "https://placehold.co/800x450.png"} 
+                              alt={latestSermon.title} 
+                              fill 
+                              className="object-cover" 
+                              sizes="(max-width: 768px) 100vw, 672px"
+                              data-ai-hint="sermon abstract"
+                            />
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                              <Button variant="ghost" className="text-white h-20 w-20 hover:bg-white/20" onClick={handleWatchClick}>
+                                  <Video className="h-12 w-12"/>
+                                  <span className="sr-only">Play Sermon</span>
+                              </Button>
+                            </div>
+                        </div>
+                        <CardContent className="p-6 text-left">
+                            <CardTitle className="font-headline text-2xl">{latestSermon.title}</CardTitle>
+                            <p className="text-muted-foreground mt-2">Speaker: {latestSermon.speaker}</p>
+                            <Button onClick={handleWatchClick} className="mt-4">
+                                Watch Now <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </section>
+      )}
       <SermonPlayerDialog sermon={latestSermon} open={isPlayerOpen} onOpenChange={setIsPlayerOpen} />
-    </MotionWrapper>
+    </div>
   );
 }

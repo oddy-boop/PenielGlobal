@@ -11,7 +11,6 @@ import Link from "next/link";
 import { useState, useEffect, useMemo, useTransition } from "react";
 import type { ContactContent } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
-import { MotionWrapper } from "@/components/motion-wrapper";
 import { TikTokIcon } from "@/components/icons/tiktok";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -116,102 +115,100 @@ export default function ContactPage() {
   
 
   return (
-    <MotionWrapper>
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            {content.intro}
-          </p>
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Get In Touch</h1>
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          {content.intro}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="space-y-8">
+          <Card>
+            <CardHeader className="flex-row items-center gap-4">
+              <MapPin className="h-8 w-8 text-accent" />
+              <CardTitle className="font-headline">Our Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{content.addressLine1}</p>
+              <p>{content.addressLine2}</p>
+              <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
+                {mapSrc && (
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        loading="lazy"
+                        allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={mapSrc}
+                        className="border-0"
+                    ></iframe>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex-row items-center gap-4">
+              <Phone className="h-8 w-8 text-accent" />
+              <CardTitle className="font-headline">Call Us</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Main Office: {content.phone}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex-row items-center gap-4">
+              <Mail className="h-8 w-8 text-accent" />
+              <CardTitle className="font-headline">Email Us</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>General Inquiries: <a href={`mailto:${content.generalEmail}`} className="hover:underline">{content.generalEmail}</a></p>
+              <p>Prayer Requests: <a href={`mailto:${content.prayerEmail}`} className="hover:underline">{content.prayerEmail}</a></p>
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader className="flex-row items-center gap-4">
+              <Share2 className="h-8 w-8 text-accent" />
+              <CardTitle className="font-headline">Follow Us</CardTitle>
+            </CardHeader>
+            <CardContent className="flex gap-4">
+               {content.socials && content.socials.map(social => {
+                  const Icon = getIcon(social.platform);
+                  return (
+                    <Link key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
+                  )
+               })}
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="space-y-8">
-            <Card>
-              <CardHeader className="flex-row items-center gap-4">
-                <MapPin className="h-8 w-8 text-accent" />
-                <CardTitle className="font-headline">Our Location</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>{content.addressLine1}</p>
-                <p>{content.addressLine2}</p>
-                <div className="mt-4 h-64 bg-muted rounded-lg overflow-hidden">
-                  {mapSrc && (
-                      <iframe
-                          width="100%"
-                          height="100%"
-                          loading="lazy"
-                          allowFullScreen
-                          referrerPolicy="no-referrer-when-downgrade"
-                          src={mapSrc}
-                          className="border-0"
-                      ></iframe>
-                  )}
+        <div>
+          <Card className="p-6 md:p-8">
+            <CardHeader className="p-0 mb-6">
+              <CardTitle className="font-headline text-2xl">Send us a Message</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} required disabled={isPending} />
+                  <Input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isPending}/>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex-row items-center gap-4">
-                <Phone className="h-8 w-8 text-accent" />
-                <CardTitle className="font-headline">Call Us</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Main Office: {content.phone}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex-row items-center gap-4">
-                <Mail className="h-8 w-8 text-accent" />
-                <CardTitle className="font-headline">Email Us</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>General Inquiries: <a href={`mailto:${content.generalEmail}`} className="hover:underline">{content.generalEmail}</a></p>
-                <p>Prayer Requests: <a href={`mailto:${content.prayerEmail}`} className="hover:underline">{content.prayerEmail}</a></p>
-              </CardContent>
-            </Card>
-
-             <Card>
-              <CardHeader className="flex-row items-center gap-4">
-                <Share2 className="h-8 w-8 text-accent" />
-                <CardTitle className="font-headline">Follow Us</CardTitle>
-              </CardHeader>
-              <CardContent className="flex gap-4">
-                 {content.socials && content.socials.map(social => {
-                    const Icon = getIcon(social.platform);
-                    return (
-                      <Link key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Icon size={24} /></Link>
-                    )
-                 })}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div>
-            <Card className="p-6 md:p-8">
-              <CardHeader className="p-0 mb-6">
-                <CardTitle className="font-headline text-2xl">Send us a Message</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} required disabled={isPending} />
-                    <Input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} required disabled={isPending}/>
-                  </div>
-                  <Input placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} required disabled={isPending}/>
-                  <Textarea placeholder="Your Message" rows={6} value={message} onChange={e => setMessage(e.target.value)} required disabled={isPending}/>
-                  <Button type="submit" size="lg" className="w-full" disabled={isPending}>
-                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />}
-                    {isPending ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+                <Input placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} required disabled={isPending}/>
+                <Textarea placeholder="Your Message" rows={6} value={message} onChange={e => setMessage(e.target.value)} required disabled={isPending}/>
+                <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+                  {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Send className="mr-2 h-4 w-4" />}
+                  {isPending ? 'Sending...' : 'Send Message'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </MotionWrapper>
+    </div>
   );
 }
 
