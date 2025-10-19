@@ -9,10 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, ImageIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import type { Event } from "@/lib/types";
+import Image from "next/image";
+import { useState } from "react";
 
 const baseSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -35,12 +38,14 @@ export type EventFormData = z.infer<typeof createEventFormSchema>;
 
 interface EventFormProps {
   onSubmit: (data: EventFormData) => void;
-  defaultValues?: Partial<Omit<EventFormData, 'image'>>;
+  defaultValues?: Partial<Event>;
   isSaving: boolean;
   isEditing?: boolean;
 }
 
 export function EventForm({ onSubmit, defaultValues, isSaving, isEditing = false }: EventFormProps) {
+  const [previewImage, setPreviewImage] = useState<string | null>(defaultValues?.image_url || null);
+  
   const form = useForm<EventFormData>({
     resolver: zodResolver(isEditing ? editEventFormSchema : createEventFormSchema),
     defaultValues: {
@@ -53,6 +58,16 @@ export function EventForm({ onSubmit, defaultValues, isSaving, isEditing = false
   });
 
   const imageRef = form.register("image");
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    } else {
+      setPreviewImage(defaultValues?.image_url || null);
+    }
+    imageRef.onChange(event);
+  };
 
   return (
     <Form {...form}>
@@ -148,6 +163,23 @@ export function EventForm({ onSubmit, defaultValues, isSaving, isEditing = false
             </FormItem>
           )}
         />
+        
+        {isEditing && (
+          <div className="space-y-2">
+            <FormLabel>Current Image</FormLabel>
+            <div className="relative aspect-video w-full rounded-md border bg-muted flex items-center justify-center">
+              {previewImage ? (
+                <Image src={previewImage} alt="Current event image" fill className="object-contain rounded-md" />
+              ) : (
+                <div className="text-muted-foreground flex flex-col items-center gap-2">
+                  <ImageIcon className="h-8 w-8" />
+                  <span>No Image</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <FormField
             control={form.control}
             name="image"
@@ -155,10 +187,10 @@ export function EventForm({ onSubmit, defaultValues, isSaving, isEditing = false
                 <FormItem>
                   <FormLabel>Event Image</FormLabel>
                   <FormControl>
-                    <Input type="file" accept="image/*" {...imageRef} disabled={isSaving} />
+                    <Input type="file" accept="image/*" {...imageRef} onChange={handleImageChange} disabled={isSaving} />
                   </FormControl>
                   <FormDescription>
-                    {isEditing ? "Upload a new image to replace the existing one. Leave blank to keep the current image." : ""}
+                    {isEditing ? "Upload a new image to replace the existing one. Leave blank to keep the current image." : "Select an image for the event."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

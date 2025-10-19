@@ -114,7 +114,8 @@ export default function EventsManagementPage() {
     if (!editingEvent) return;
     try {
         let imageUrl = editingEvent.image_url;
-        if (data.image && data.image[0]) {
+        // If a new image file is uploaded, upload it and get the new URL
+        if (data.image && data.image.length > 0) {
             imageUrl = await uploadFileAndGetUrl(data.image[0], 'events');
         }
 
@@ -124,7 +125,7 @@ export default function EventsManagementPage() {
             date: data.date.toISOString(),
             time: data.time,
             description: data.description,
-            image_url: imageUrl,
+            image_url: imageUrl, // Use new or existing URL
         };
 
         const { error } = await supabase.from("events").update(updatedEventData).eq("id", editingEvent.id);
@@ -179,7 +180,12 @@ export default function EventsManagementPage() {
             <h1 className="text-3xl font-bold tracking-tight">Event Management</h1>
             <p className="text-muted-foreground">Add, edit, or remove events.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {
+              if (!isOpen) {
+                setEditingEvent(null);
+              }
+              setIsDialogOpen(isOpen);
+            }}>
             <DialogTrigger asChild>
                 <Button onClick={handleAddClick}>
                     <PlusCircle className="mr-2 h-4 w-4" />

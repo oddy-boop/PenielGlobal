@@ -1,8 +1,7 @@
 
 import type { Event } from "@/lib/types";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import { Button } from "./ui/button";
 import { Calendar, Clock, MapPin, ImageIcon } from "lucide-react";
 
 interface EventCardProps {
@@ -26,6 +25,7 @@ export function EventCard({ event }: EventCardProps) {
               alt={event.title} 
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, 33vw"
               data-ai-hint="church event"
             />
         ) : (
